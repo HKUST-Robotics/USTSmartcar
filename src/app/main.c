@@ -15,7 +15,6 @@
 #include "common.h"
 #include "include.h"
 
-#include  "accl.h"
 
 /*************************************************************************
 *                             野火嵌入式開發工作室
@@ -36,7 +35,7 @@
 *************************************************************************/
 
 void ALL_PIN_Init();
-volatile u16 clock=0;                            // for locking SI
+volatile unsigned int clock=0;                            // for locking SI
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int smapling_state_flag=0;              // sample flag mode
 
@@ -46,16 +45,16 @@ void interrupts_init(void);
 
 void main()
 {
-    //louis_init();
-    uart_init(UART3, 115200);
-    accl_init();
+    interrupts_init();
+    //uart_init(UART3, 115200);
+    //accl_init();
     
     printf("Everything inited fine");
     
     while(1)
     { 
        
-        accl_print();
+        //accl_print();
         delayms(500);
     }
 }

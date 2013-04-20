@@ -28,7 +28,7 @@
 *  ³Æ    ª`¡G
 *************************************************************************/
 
-extern volatile u16 clock;                 // clock counter
+extern volatile unsigned int clock;                 // clock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int smapling_state_flag;   // Smapling state flag mode
 char Pixel[128];
@@ -98,13 +98,13 @@ void PIT0_IRQHandler(void)
      
         // Print the sampling array
         uart_sendStr(UART3,"Just Sampled Array is: ");
-        uart_sendStr(UART3,"\014");     // New page form feed
+        uart_sendStr(UART3,"\014\n");     // New page form feed
           
         for( i = 0 ; i < 128 ; i++){
            uart_putchar(UART3,Pixel[i]); // Print One pixel One loop
         }
            
-          uart_sendStr(UART3,"\014");     // New page form feed
+          uart_sendStr(UART3,"\n\014");     // New page form feed
       }
      
       clock++;
