@@ -1,0 +1,377 @@
+###############################################################################
+#                                                                             #
+# IAR ELF Linker V6.30.1.53127/W32 for ARM              01/Jun/2012  11:13:15 #
+# Copyright 2007-2011 IAR Systems AB.                                         #
+#                                                                             #
+#    Output file  =  D:\project\build\demo\Debug\Exe\demo1.out                #
+#    Map file     =  D:\project\build\demo\Debug\List\demo1.map               #
+#    Command line =  D:\project\build\demo\Debug\Obj\FTM.o                    #
+#                    D:\project\build\demo\Debug\Obj\LED.o                    #
+#                    D:\project\build\demo\Debug\Obj\alloc.o                  #
+#                    D:\project\build\demo\Debug\Obj\arm_cm4.o                #
+#                    D:\project\build\demo\Debug\Obj\assert.o                 #
+#                    D:\project\build\demo\Debug\Obj\crt0.o                   #
+#                    D:\project\build\demo\Debug\Obj\delay.o                  #
+#                    D:\project\build\demo\Debug\Obj\exti.o                   #
+#                    D:\project\build\demo\Debug\Obj\gpio.o                   #
+#                    D:\project\build\demo\Debug\Obj\io.o                     #
+#                    D:\project\build\demo\Debug\Obj\isr.o                    #
+#                    D:\project\build\demo\Debug\Obj\lptmr.o                  #
+#                    D:\project\build\demo\Debug\Obj\main.o                   #
+#                    D:\project\build\demo\Debug\Obj\mcg.o                    #
+#                    D:\project\build\demo\Debug\Obj\memtest.o                #
+#                    D:\project\build\demo\Debug\Obj\printf.o                 #
+#                    D:\project\build\demo\Debug\Obj\queue.o                  #
+#                    D:\project\build\demo\Debug\Obj\start.o                  #
+#                    D:\project\build\demo\Debug\Obj\startup.o                #
+#                    D:\project\build\demo\Debug\Obj\stdlib.o                 #
+#                    D:\project\build\demo\Debug\Obj\sysinit.o                #
+#                    D:\project\build\demo\Debug\Obj\uart.o                   #
+#                    D:\project\build\demo\Debug\Obj\uif.o                    #
+#                    D:\project\build\demo\Debug\Obj\vectors.o                #
+#                    D:\project\build\demo\Debug\Obj\wdog.o -o                #
+#                    D:\project\build\demo\Debug\Exe\demo1.out --map          #
+#                    D:\project\build\demo\Debug\List\demo1.map --config      #
+#                    "D:\project\build\config files\512KB_Pflash.icf"         #
+#                    --semihosting --entry __iar_program_start                #
+#                    --merge_duplicate_sections --vfe                         #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+CppFlavor       = *
+__SystemLibrary = DLib
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A1":  place at 0x00000000 { ro section .intvec };
+"A2":  place at 0x00000410 { ro section .noinit };
+"P1":  place in [from 0x00000000 to 0x00080000] { ro, block CodeRelocate };
+"P2":  place in [from 0x1fff0410 to 0x20010000] {
+          rw, block CodeRelocateRam, block CSTACK, block HEAP };
+
+  Section              Kind        Address    Size  Object
+  -------              ----        -------    ----  ------
+"A1":                                        0x410
+  .intvec              const    0x00000000   0x410  vectors.o [1]
+                              - 0x00000410   0x410
+
+"A2":                                         0x3c
+  .noinit              ro code  0x00000410    0x3c  crt0.o [1]
+                              - 0x0000044c    0x3c
+
+"P1":                                       0x2388
+  .text                ro code  0x0000044c   0x750  main.o [1]
+  .text                ro code  0x00000b9c    0x2e  I32ToFlt.o [4]
+  .text                ro code  0x00000bca    0x22  zero_init3.o [5]
+  .text                ro code  0x00000bec    0x84  FltAdd.o [4]
+  .text                ro code  0x00000c70    0x1c  FltCmpEq.o [4]
+  .text                ro code  0x00000c8c    0xfc  FltDiv.o [4]
+  .text                ro code  0x00000d88    0xd8  FltMul.o [4]
+  .text                ro code  0x00000e60    0xe6  FltSub.o [4]
+  .text                ro code  0x00000f48    0x4e  FltToDbl.o [4]
+  .text                ro code  0x00000f98   0x1a2  DblMul.o [4]
+  .text                ro code  0x0000113c    0x4c  DblToI32.o [4]
+  .text                ro code  0x00001188    0x24  FltCmpLe.o [4]
+  .text                ro code  0x000011ac   0x214  uart.o [1]
+  .text                ro code  0x000013c0    0xc0  gpio.o [1]
+  .text                ro code  0x00001480   0x3d8  FTM.o [1]
+  .text                ro code  0x00001858    0x6c  exti.o [1]
+  .text                ro code  0x000018c4    0x24  delay.o [1]
+  .text                ro code  0x000018e8    0x10  assert.o [1]
+  .text                ro code  0x000018f8    0xbc  arm_cm4.o [1]
+  .text                ro code  0x000019b4    0xb4  LED.o [1]
+  .text                ro code  0x00001a68   0x55c  printf.o [1]
+  .text                ro code  0x00001fc4    0x20  stdlib.o [1]
+  Veneer               ro code  0x00001fe4     0x8  - Linker created -
+  .text                ro code  0x00001fec   0x314  mcg.o [1]
+  .text                ro code  0x00002300    0xec  isr.o [1]
+  .text                ro code  0x000023ec    0xc0  startup.o [1]
+  .text                ro code  0x000024ac    0xa0  sysinit.o [1]
+  .data_init                    0x0000254c    0x60  <Block>
+    Initializer bytes  ro data  0x0000254c    0x60  <for .data-1>
+  CodeRelocate                  0x000025ac    0x50  <Block>
+    Initializer bytes  ro data  0x000025ac    0x50  <for CodeRelocateRam-1>
+  .rodata              const    0x000025fc    0x38  arm_cm4.o [1]
+  .text                ro code  0x00002634    0x38  wdog.o [1]
+  .rodata              const    0x0000266c    0x30  vectors.o [1]
+  .text                ro code  0x0000269c    0x2c  data_init3.o [5]
+  .rodata              const    0x000026c8    0x24  FTM.o [1]
+  .rodata              const    0x000026ec    0x24  gpio.o [1]
+  .rodata              const    0x00002710    0x24  uart.o [1]
+  .iar.init_table      const    0x00002734    0x10  - Linker created -
+  .text                ro code  0x00002744    0x20  vectors.o [1]
+  .text                ro code  0x00002764    0x16  cmain.o [5]
+  .text                ro code  0x0000277a     0x4  low_level_init.o [3]
+  .text                ro code  0x0000277e     0x4  exit.o [3]
+  .text                ro code  0x00002784     0xa  cexit.o [5]
+  .text                ro code  0x00002790    0x14  exit.o [6]
+  .text                ro code  0x000027a4    0x14  start.o [1]
+  .text                ro code  0x000027b8    0x10  io.o [1]
+  .text                ro code  0x000027c8     0xc  cstartup_M.o [5]
+  .rodata              const    0x000027d4     0x0  bwt_init3c.o [5]
+                              - 0x000027d4  0x2388
+
+"P2", part 1 of 2:                            0xb0
+  .data                         0x1fff0410    0x60  <Block>
+    .data-1                     0x1fff0410    0x60  <Init block>
+      .data            inited   0x1fff0410     0xc  FTM.o [1]
+      .data            inited   0x1fff041c    0x14  gpio.o [1]
+      .data            inited   0x1fff0430    0x14  gpio.o [1]
+      .data            inited   0x1fff0444     0xc  main.o [1]
+      .data            inited   0x1fff0450     0x8  mcg.o [1]
+      .data            inited   0x1fff0458    0x18  uart.o [1]
+  CodeRelocateRam               0x1fff0470    0x50  <Block>
+    CodeRelocateRam-1           0x1fff0470    0x50  <Init block>
+      .textrw          inited   0x1fff0470    0x50  mcg.o [1]
+                              - 0x1fff04c0    0xb0
+
+"P2", part 2 of 2:                          0x64e7
+  .bss                          0x1fff04c0  0x64e7  <Block>
+    .bss               zero     0x1fff04c0  0x61a8  isr.o [1]
+    .bss               zero     0x1fff6668   0x190  main.o [1]
+    .bss               zero     0x1fff67f8    0x64  main.o [1]
+    .bss               zero     0x1fff685c    0x64  main.o [1]
+    .bss               zero     0x1fff68c0    0xc8  main.o [1]
+    .bss               zero     0x1fff6988     0x4  main.o [1]
+    .bss               zero     0x1fff698c     0x4  main.o [1]
+    .bss               zero     0x1fff6990     0x4  sysinit.o [1]
+    .bss               zero     0x1fff6994     0x4  sysinit.o [1]
+    .bss               zero     0x1fff6998     0x4  sysinit.o [1]
+    .bss               zero     0x1fff699c     0x2  isr.o [1]
+    .bss               zero     0x1fff699e     0x2  isr.o [1]
+    .bss               zero     0x1fff69a0     0x2  isr.o [1]
+    .bss               zero     0x1fff69a2     0x2  isr.o [1]
+    .bss               zero     0x1fff69a4     0x1  isr.o [1]
+    .bss               zero     0x1fff69a5     0x1  main.o [1]
+    .bss               zero     0x1fff69a6     0x1  main.o [1]
+                              - 0x1fff69a7  0x64e7
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address     Size
+          -------     ----
+Zero (__iar_zero_init3)
+    1 destination range, total size 0x64e7:
+          0x1fff04c0  0x64e7
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module            ro code  rw code  ro data  rw data
+    ------            -------  -------  -------  -------
+D:\project\build\demo\Debug\Obj: [1]
+    FTM.o                 984                48       12
+    LED.o                 180
+    arm_cm4.o             188                56
+    assert.o               16
+    crt0.o                 60
+    delay.o                36
+    exti.o                108
+    gpio.o                192                76       40
+    io.o                   16
+    isr.o                 236                     25 009
+    main.o              1 872                12      822
+    mcg.o                 788       80       88        8
+    printf.o            1 372
+    start.o                20
+    startup.o             192
+    stdlib.o               32
+    sysinit.o             160                         12
+    uart.o                532                60       24
+    vectors.o              32             1 088
+    wdog.o                 56
+    ----------------------------------------------------
+    Total:              7 072       80    1 428   25 927
+
+command line: [2]
+    ----------------------------------------------------
+    Total:
+
+dl7M_tln.a: [3]
+    exit.o                  4
+    low_level_init.o        4
+    ----------------------------------------------------
+    Total:                  8
+
+m7M_tl.a: [4]
+    DblMul.o              418
+    DblToI32.o             76
+    FltAdd.o              132
+    FltCmpEq.o             28
+    FltCmpLe.o             36
+    FltDiv.o              252
+    FltMul.o              216
+    FltSub.o              230
+    FltToDbl.o             78
+    I32ToFlt.o             46
+    ----------------------------------------------------
+    Total:              1 512
+
+rt7M_tl.a: [5]
+    bwt_init3c.o
+    cexit.o                10
+    cmain.o                22
+    cstartup_M.o           12
+    data_init3.o           44
+    zero_init3.o           34
+    ----------------------------------------------------
+    Total:                122
+
+shb_l.a: [6]
+    exit.o                 20
+    ----------------------------------------------------
+    Total:                 20
+
+    Gaps                   10
+    Linker created          8                16
+--------------------------------------------------------
+    Grand Total:        8 752       80    1 444   25 927
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                      Address    Size  Type      Object
+-----                      -------    ----  ----      ------
+.bss$$Base              0x1fff04c0           --   Gb  - Linker created -
+.bss$$Limit             0x1fff69a7           --   Gb  - Linker created -
+.data$$Base             0x1fff0410           --   Gb  - Linker created -
+.data$$Limit            0x1fff0470           --   Gb  - Linker created -
+.data_init$$Base        0x0000254c           --   Gb  - Linker created -
+.data_init$$Limit       0x000025ac           --   Gb  - Linker created -
+?main                   0x00002765          Code  Gb  cmain.o [5]
+CodeRelocate$$Base      0x000025ac           --   Gb  - Linker created -
+CodeRelocate$$Limit     0x000025fc           --   Gb  - Linker created -
+CodeRelocateRam$$Base   0x1fff0470           --   Gb  - Linker created -
+CodeRelocateRam$$Limit  0x1fff04c0           --   Gb  - Linker created -
+FTM_PWM_Duty            0x00001799    0x76  Code  Gb  FTM.o [1]
+FTM_PWM_init            0x00001481   0x318  Code  Gb  FTM.o [1]
+FTMx                    0x1fff0410     0xc  Data  Gb  FTM.o [1]
+GPIOx                   0x1fff041c    0x14  Data  Gb  gpio.o [1]
+LED_init                0x000019b5    0x34  Code  Gb  LED.o [1]
+PORTX                   0x1fff0430    0x14  Data  Gb  gpio.o [1]
+Region$$Table$$Base     0x00002734           --   Gb  - Linker created -
+Region$$Table$$Limit    0x00002744           --   Gb  - Linker created -
+Reset_Handler           0x00000411          Code  Gb  crt0.o [1]
+UARTx                   0x1fff0458    0x18  Data  Gb  uart.o [1]
+__BOOT_STACK_ADDRESS {Abs}
+                        0x2000fff8           --   Gb  command line/config [2]
+__VECTOR_RAM {Abs}      0x1fff0000           --   Gb  command line/config [2]
+__VECTOR_TABLE {Abs}    0x00000000           --   Gb  command line/config [2]
+__aeabi_cfcmpeq         0x00000c71          Code  Gb  FltCmpEq.o [4]
+__aeabi_cfcmple         0x00001189          Code  Gb  FltCmpLe.o [4]
+__aeabi_d2iz            0x0000113d          Code  Gb  DblToI32.o [4]
+__aeabi_dmul            0x00000f99          Code  Gb  DblMul.o [4]
+__aeabi_f2d             0x00000f49          Code  Gb  FltToDbl.o [4]
+__aeabi_fadd            0x00000bed          Code  Gb  FltAdd.o [4]
+__aeabi_fdiv            0x00000c8d          Code  Gb  FltDiv.o [4]
+__aeabi_fmul            0x00000d89          Code  Gb  FltMul.o [4]
+__aeabi_fsub            0x00000e61          Code  Gb  FltSub.o [4]
+__aeabi_i2f             0x00000b9d          Code  Gb  I32ToFlt.o [4]
+__cmain                 0x00002765          Code  Gb  cmain.o [5]
+__exit                  0x00002791    0x14  Code  Gb  exit.o [6]
+__iar_SB                0x000027d4          Data  Gb  bwt_init3c.o [5]
+__iar_d2uiz             0x00001169          Code  Gb  DblToI32.o [4]
+__iar_data_init3        0x0000269d    0x2c  Code  Gb  data_init3.o [5]
+__iar_fadd              0x00000bfd          Code  Gb  FltAdd.o [4]
+__iar_fsub              0x00000e71          Code  Gb  FltSub.o [4]
+__iar_fsubStart         0x00000e81          Code  Gb  FltSub.o [4]
+__iar_program_start     0x000027c9          Code  Gb  cstartup_M.o [5]
+__iar_ui2f              0x00000bb1          Code  Gb  I32ToFlt.o [4]
+__iar_zero_init3        0x00000bcb    0x22  Code  Gb  zero_init3.o [5]
+__low_level_init        0x0000277b     0x4  Code  Gb  low_level_init.o [3]
+__vector_table          0x00000000   0x410  Data  Gb  vectors.o [1]
+_call_main              0x00002771          Code  Gb  cmain.o [5]
+_exit                   0x00002785          Code  Gb  cexit.o [5]
+_main                   0x00002777          Code  Gb  cmain.o [5]
+assert_failed           0x000018e9    0x10  Code  Gb  assert.o [1]
+base_pt_L               0x0000044d    0x8a  Code  Gb  main.o [1]
+base_pt_R               0x000004d7    0x8a  Code  Gb  main.o [1]
+bus_clk_khz             0x1fff6998     0x4  Data  Gb  sysinit.o [1]
+central_array           0x1fff68c0    0xc8  Data  Gb  main.o [1]
+central_line            0x0000077f    0x7e  Code  Gb  main.o [1]
+check_L                 0x1fff69a5     0x1  Data  Gb  main.o [1]
+check_R                 0x1fff69a6     0x1  Data  Gb  main.o [1]
+common_startup          0x000023ed    0xc0  Code  Gb  startup.o [1]
+core_clk_khz            0x1fff6990     0x4  Data  Gb  sysinit.o [1]
+core_clk_mhz            0x1fff6994     0x4  Data  Gb  sysinit.o [1]
+counter                 0x1fff699c     0x2  Data  Gb  isr.o [1]
+data                    0x1fff04c0  0x61a8  Data  Gb  isr.o [1]
+default_isr             0x00002745    0x20  Code  Gb  vectors.o [1]
+delayms                 0x000018c5    0x1e  Code  Gb  delay.o [1]
+display                 0x0000086f   0x110  Code  Gb  main.o [1]
+dummy                   0x1fff69a0     0x2  Data  Gb  isr.o [1]
+dummy1                  0x1fff69a2     0x2  Data  Gb  isr.o [1]
+edge_L_array            0x1fff67f8    0x64  Data  Gb  main.o [1]
+edge_R_array            0x1fff685c    0x64  Data  Gb  main.o [1]
+enable_irq              0x000018ff    0x94  Code  Gb  arm_cm4.o [1]
+exit                    0x0000277f     0x4  Code  Gb  exit.o [3]
+exti_init               0x00001859    0x6c  Code  Gb  exti.o [1]
+fb_clk_init             0x00002513    0x16  Code  Gb  sysinit.o [1]
+field_IRQHandler        0x00002301    0x26  Code  Gb  isr.o [1]
+ftm2_init               0x000007fd    0x72  Code  Gb  main.o [1]
+gpio_init               0x000013c1    0xb4  Code  Gb  gpio.o [1]
+i                       0x1fff69a4     0x1  Data  Gb  isr.o [1]
+image_shift             0x00000663    0x4a  Code  Gb  main.o [1]
+intercept               0x1fff698c     0x4  Data  Gb  main.o [1]
+led                     0x000019e9    0x1e  Code  Gb  LED.o [1]
+line_IRQHandler         0x00002329    0x9e  Code  Gb  isr.o [1]
+line_count              0x1fff699e     0x2  Data  Gb  isr.o [1]
+main                    0x00000981   0x1c4  Code  Gb  main.o [1]
+mcg_div                 0x1fff0450     0x8  Data  Gb  mcg.o [1]
+out_char                0x000027b9    0x10  Code  Gb  io.o [1]
+pll_init                0x00001fed   0x314  Code  Gb  mcg.o [1]
+printf                  0x00001f9b    0x26  Code  Gb  printf.o [1]
+printk                  0x00001b91   0x40a  Code  Gb  printf.o [1]
+printk_mknumstr         0x00001a9b    0xaa  Code  Lc  printf.o [1]
+printk_pad_space        0x00001b6b    0x26  Code  Lc  printf.o [1]
+printk_pad_zero         0x00001b45    0x26  Code  Lc  printf.o [1]
+printk_putc             0x00001a69    0x32  Code  Lc  printf.o [1]
+set_sys_dividers        0x1fff0471    0x50  Code  Gb  mcg.o [1]
+shift                   0x1fff0444     0xc  Data  Gb  main.o [1]
+shift_data              0x1fff6668   0x190  Data  Gb  main.o [1]
+slope                   0x1fff6988     0x4  Data  Gb  main.o [1]
+slope_intercept         0x000006ad    0xd2  Code  Gb  main.o [1]
+start                   0x000027a5    0x14  Code  Gb  start.o [1]
+strlen                  0x00001fc5    0x20  Code  Gb  stdlib.o [1]
+sysinit                 0x000024ad    0x50  Code  Gb  sysinit.o [1]
+trace_clk_init          0x000024fd    0x16  Code  Gb  sysinit.o [1]
+uart_init               0x000011ad   0x1ba  Code  Gb  uart.o [1]
+uart_putchar            0x00001367    0x1a  Code  Gb  uart.o [1]
+water_lights            0x00001a07    0x5c  Code  Gb  LED.o [1]
+wdog_disable            0x00002635    0x16  Code  Gb  wdog.o [1]
+wdog_unlock             0x0000264d    0x16  Code  Gb  wdog.o [1]
+whole_edge_L            0x00000561    0x80  Code  Gb  main.o [1]
+whole_edge_R            0x000005e1    0x82  Code  Gb  main.o [1]
+write_vtor              0x000018f9     0x6  Code  Gb  arm_cm4.o [1]
+
+
+[1] = D:\project\build\demo\Debug\Obj
+[2] = command line
+[3] = dl7M_tln.a
+[4] = m7M_tl.a
+[5] = rt7M_tl.a
+[6] = shb_l.a
+
+   8 752 bytes of readonly  code memory
+      80 bytes of readwrite code memory
+   1 444 bytes of readonly  data memory
+  25 927 bytes of readwrite data memory
+
+Errors: none
+Warnings: none
