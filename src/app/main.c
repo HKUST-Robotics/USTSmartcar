@@ -35,7 +35,7 @@
 *************************************************************************/
 
 void ALL_PIN_Init();
-volatile unsigned int clock=0;                            // for locking SI
+volatile unsigned int systemclock=0;                            // for locking SI
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int smapling_state_flag=0;              // sample flag mode
 
