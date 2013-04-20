@@ -14,6 +14,8 @@
 
 #include "common.h"
 #include "include.h"
+#include <math.h>
+#include "i2c.h"
 
 /*************************************************************************
 *                             ³¥¤õ´O¤J¦¡¶}µo¤u§@«Ç
@@ -38,10 +40,118 @@ volatile u16 clock=0;                            // for locking SI
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int smapling_state_flag=0;              // sample flag mode
 
+void louis_init(void);
+float acclx,accly,acclz,accl_totalforce;
+u16 u16x,u16y,u16z;
+double accl_tilt;
+double number;
+
+u8 accl_xx[2];
+u8 accl_yy[2];
+u8 accl_zz[2];
+
+u8 todis[];
+
+float accl_gra_cov(u8 axis[]);
+void accl_update(void);
+double accl_tiltangle(void);
+void accl_init(void);
+
+void accl_init(void){
+    I2C_init(I2C0);
+    I2C_WriteAddr(I2C0, 0x1c, 0x0f, 0x10);
+    I2C_WriteAddr(I2C0, 0x1c, 0x0e, 0x00);
+    I2C_WriteAddr(I2C0, 0x1c, 0x2a, 0x01); 
+}
+
+float accl_gra_cov(u8 axis[])//?™ªª=…O«?»
+{
+  u16 V1;
+  float vv;
+  int sign;
+  if(axis[0] > 0x7F)
+  {
+    sign=-1;
+    V1   = (int)axis[0];	
+    axis[1]= axis[1]>>2;
+    V1   = V1<<6 | axis[1];
+    V1   = (~V1 + 1)&0X3FFF;
+    //V1= (~(V.mword>>2) + 1);
+  }
+  else
+  {
+    sign=1;
+    V1   = (int)axis[0];	
+    axis[1]= axis[1]>>2;
+    V1   = V1<<6 | axis[1];
+    //V1=(V.mword>>2)&0X3FFF;
+  }
+  vv=sign*(((float)V1)*0.0219726562);
+  return vv;
+}
+
+u16 accl_u16_conv(u8 array[]){
+  u16 magic=array[0];
+  magic |= array[1]<<8;
+  return magic;
+}
+
+void accl_update(void){
+        accl_xx[0]   =   I2C_ReadAddr(I2C0, 0x1c, 0x01);  
+        delayms(0);//i dont know why this works, but dont remove
+        accl_xx[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x02);
+        delayms(0);
+        accl_yy[0]   =   I2C_ReadAddr(I2C0, 0x1c, 0x03); 
+        delayms(0);
+        accl_yy[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x04);
+        delayms(0);
+        accl_zz[0]   =   I2C_ReadAddr(I2C0, 0x1c, 0x05); 
+        delayms(0);
+        accl_zz[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x06);
+        
+        
+        acclx=accl_gra_cov(accl_xx);
+        accly=accl_gra_cov(accl_yy);
+        acclz=accl_gra_cov(accl_zz);
+        
+        accl_totalforce=sqrt((acclx*acclx)+(accly*accly)+(acclz*acclz));
+        accl_tilt=accl_tiltangle();
+        u16x=accl_u16_conv(accl_xx);
+        printf("\n\nTHIS IS THE u16!===>%d",u16x);
+}
+
+double accl_tiltangle(void){
+  return 57.295779513*atan(accl_gra_cov(accl_yy)/accl_gra_cov(accl_xx));
+}
+
+void accl_printdata(void){
+        sprintf(todis,"\r\n\r\nAccelerometer data\r\nacclx: %f\r\naccly: %f\r\nacclz: %f\r\nTotal force:%f\r\n=============>accl_tiltangle:%f ",acclx,accly,acclz,accl_totalforce,accl_tilt);                
+        uart_sendStr (UART3, (u8*)todis); 
+}
+
 void main()
 {
+    //louis_init();
+    uart_init(UART3, 115200);
     
-    DisableInterrupts;                                //¸T¤îÁ`¤¤Â_
+    accl_init();
+    
+    while(1)
+    { 
+       
+        accl_update();
+        
+        //updates float values acclx,accly, and acclz
+        //and calculates accl_tilt of the car
+        accl_printdata();
+        //prints all accelerometer data to bluetooth
+        
+        delayms(500);
+    }
+}
+
+void louis_init(void){
+      DisableInterrupts;                                //¸T¤îÁ`¤¤Â_
     ALL_PIN_Init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
     //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
@@ -50,13 +160,7 @@ void main()
     // Maximum clock is 8us cycle by using PIT
     
     EnableInterrupts;			              //¶}Á`¤¤Â_
-  
-    while(1)
-    { 
-     
-    }
 }
-
 
 void ALL_PIN_Init(){
   

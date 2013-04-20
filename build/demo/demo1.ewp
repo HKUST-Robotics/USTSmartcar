@@ -2505,7 +2505,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>C:\Users\LouisMo\Desktop\LED Turn by clock with CLK edge and CCD try project\build\config files\256KB_Pflash.icf</state>
+          <state>$PROJ_DIR$\..\config files\256KB_Pflash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -2878,6 +2878,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\src\drivers\gpio\gpio_cfg.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c_cfg.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\src\drivers\LED\LED.C</name>
