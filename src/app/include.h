@@ -7,6 +7,8 @@
  * Include 用戶自定義的頭文件
  */
 
+
+#include  <math.h>
 #include  "gpio.h"       //IO口操作
 #include  "LED.H"       //流水燈
 #include  "exti.h"       //EXTI外部GPIO中斷
@@ -15,6 +17,9 @@
 #include  "adc.h"
 #include  "FTM.h"
 #include  "pit.h"
+#include  "i2c.h"
+#include  "accl.h"
+
 
 
 #endif  //__INCLUDE_H__

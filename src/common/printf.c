@@ -3,7 +3,7 @@
  * Purpose:     The standard C library routine printf(), but without
  *              all the baggage.
  */
-//edited
+
 #include "common.h"
 #include <stdarg.h>
 
