@@ -1,10 +1,13 @@
-/*mma8451 accelerometer library
-for hkust smartcar team 2013
+/*******************************************
 
 accl.c
 
-authored by John Ching
-*/
+A library for the mma8451 accelerometer
+
+Authored by John Ching
+for HKUST SmartCar team 2013
+
+*******************************************/
 
 #include "accl.h"
 #include "include.h"

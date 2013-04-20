@@ -15,7 +15,7 @@
 
 #include "common.h"
 #include "include.h"
-
+#include "linearccd.h"
 
 /*************************************************************************
 *                             野火嵌入式開發工作室
@@ -34,6 +34,12 @@ extern volatile int smapling_state_flag;   // Smapling state flag mode
 char Pixel[128];
 char str[1];
 int i;
+
+void testfunct(char array[]){
+          for( i = 0 ; i < 128 ; i++){
+           uart_putchar(UART3,array[i]);//print One pixel One loop
+        }
+}
 
 void PIT0_IRQHandler(void)
 {
@@ -100,9 +106,10 @@ void PIT0_IRQHandler(void)
         uart_sendStr(UART3,"Just Sampled Array is: ");
         uart_sendStr(UART3,"\014\n");     // New page form feed
           
-        for( i = 0 ; i < 128 ; i++){
-           uart_putchar(UART3,Pixel[i]); // Print One pixel One loop
-        }
+        testfunct(Pixel);
+
+        
+        
            
           uart_sendStr(UART3,"\n\014");     // New page form feed
       }
