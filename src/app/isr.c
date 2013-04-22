@@ -32,7 +32,7 @@ extern volatile unsigned int systemclock;                 // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int smapling_state_flag;   // Smapling state flag mode
 char Pixel[128];
-char str[1];
+
 int i;
 
 void testfunct(char array[]){
@@ -64,21 +64,7 @@ void PIT0_IRQHandler(void)
       //uart_putchar(UART3,SI_state_flag);
       
       
-      //if(SI_state_flag == 0 ){        // Replace this with, if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
-      
-      if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
-           uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
-           uart_sendStr(UART3,"\014");  // New page form feed same as uart_sendStr(UART3,"\n\f");
-           SI_state_flag = 1;           // SI Flag on
-           smapling_state_flag = 1;     // sampling Flag on
-           systemclock = 0;                   // systemclock count from begin,lock the SI status not duplicate
-           gpio_set(PORTD, 0, 0);       // LED D2 ON, 0 means on, notify the switch is on
-           gpio_set(PORTD, 1, 0);       // LED D3 ON, 0 means on, notify the SI is in locking mode
-           gpio_set(PORTC, 19, 1);      // SI rising edge
-       }
-        else{                          // if SW2 not press
-           gpio_set(PORTD, 0, 1);         // LED D2 OFF, 1 means off, means keyboard is not pressed
-       }
+
       
       if(gpio_get(PORTA, 11) == 0) {  // if CCD receive black, the pixle respect to that systemclock is 1
         Pixel[systemclock] = '1';
