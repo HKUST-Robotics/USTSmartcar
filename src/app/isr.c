@@ -32,7 +32,7 @@ extern volatile unsigned int systemclock;                 // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int smapling_state_flag;   // Smapling state flag mode
 char Pixel[128];
-
+//char str[1];
 int i;
 
 void testfunct(char array[]){
@@ -44,7 +44,7 @@ void testfunct(char array[]){
 void PIT0_IRQHandler(void)
 {
     
-      gpio_turn(PORTD, 3);        // LED On or Off
+      //gpio_turn(PORTD, 3);        // LED On or Off
       gpio_turn(PORTB, 18);       // systemclock Rising and Failing edge
       
       /* Using SW3 to generate 0 or 1
@@ -55,7 +55,6 @@ void PIT0_IRQHandler(void)
       }
       */
 
-      
       //uart_putchar(UART3,Pixel[systemclock]); // Print the Pixel[] array, 1 or 0 each print
       //uart_putchar(UART3,(u8)systemclock); // Print the systemclock value
       
@@ -63,7 +62,7 @@ void PIT0_IRQHandler(void)
       //uart_sendStr(UART3, "SI_state_flag now is");
       //uart_putchar(UART3,SI_state_flag);
       
-      
+     
 
       
       if(gpio_get(PORTA, 11) == 0) {  // if CCD receive black, the pixle respect to that systemclock is 1

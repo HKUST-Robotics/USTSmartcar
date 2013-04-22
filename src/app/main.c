@@ -56,11 +56,11 @@ void main()
        
         //accl_print();
         delayms(500);
+      
+        trigger_si(); // trigger SI
         
         
-      
-      
-     trigger_si();
+        
         
     }
 }
@@ -81,9 +81,9 @@ void interrupts_init(void){
 
 void trigger_si(void){
   
-        //if(SI_state_flag == 0 ){        // Replace this with, if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
+       if(SI_state_flag == 0 ){        // Replace this with, if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
   
-       if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
+       //if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
            uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
            uart_sendStr(UART3,"\014");  // New page form feed same as uart_sendStr(UART3,"\n\f");
            SI_state_flag = 1;           // SI Flag on
