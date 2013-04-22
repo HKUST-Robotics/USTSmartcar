@@ -61,7 +61,6 @@ void PIT0_IRQHandler(void)
       // For testing SI Flag
       //uart_sendStr(UART3, "SI_state_flag now is");
       //uart_putchar(UART3,SI_state_flag);
-      
      
 
       
