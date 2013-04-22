@@ -64,7 +64,7 @@ void PIT0_IRQHandler(void)
       //uart_putchar(UART3,SI_state_flag);
       
       
-      //&& SI_state_flag == 0 ){ 
+      //if(SI_state_flag == 0 ){        // Replace this with, if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
       
       if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
            uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
@@ -107,11 +107,7 @@ void PIT0_IRQHandler(void)
         uart_sendStr(UART3,"\014\n");     // New page form feed
           
         testfunct(Pixel);
-
-        
-        
-           
-          uart_sendStr(UART3,"\n\014");     // New page form feed
+        uart_sendStr(UART3,"\n\014");     // New page form feed
       }
      
       systemclock++;

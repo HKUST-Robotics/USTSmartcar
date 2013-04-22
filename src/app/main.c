@@ -35,7 +35,7 @@
 *************************************************************************/
 
 void ALL_PIN_Init();
-volatile unsigned int systemclock=0;                            // for locking SI
+volatile unsigned int systemclock=0;             // for locking SI
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int smapling_state_flag=0;              // sample flag mode
 
@@ -68,13 +68,15 @@ void interrupts_init(void){
     
     // Maximum clock is 8us cycle by using PIT
     
+    //pit_init(PIT0,10);  // 小陽 Suggest: Try this to get faster clock
+    
     EnableInterrupts;			              //開總中斷
 }
 
 void ALL_PIN_Init(){
   
-    gpio_init(PORTB, 3, GPI, 1); //PTB3 = SW2
-    gpio_init(PORTB, 4, GPI, 1); //PTB3 = SW3
+    //gpio_init(PORTB, 3, GPI, 1); //PTB3 = SW2
+    //gpio_init(PORTB, 4, GPI, 1); //PTB3 = SW3
     
     gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
     gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
@@ -84,9 +86,6 @@ void ALL_PIN_Init(){
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-    
-    //gpio_init(PORTC, 17, GPO, 1); //PTC17 UART BlueTooth TX
-    //gpio_init(PORTC, 16, GPI, 1); //PTC17 UART BlueTooth RX
   
     uart_init(UART3, 115200); // BlueTooth UART init
 }
