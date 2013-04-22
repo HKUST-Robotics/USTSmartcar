@@ -30,7 +30,7 @@
 
 extern volatile unsigned int systemclock;                 // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
-extern volatile int smapling_state_flag;   // Smapling state flag mode
+extern volatile int sampling_state_flag;   // Smapling state flag mode
 char Pixel[128];
 //char str[1];
 int i;
@@ -78,11 +78,11 @@ void PIT0_IRQHandler(void)
       }
       
       
-      if(systemclock == 128 && smapling_state_flag == 1){ // condition for locking SI to end
+      if(systemclock == 128 && sampling_state_flag == 1){ // condition for locking SI to end
         
         systemclock = 0;
         SI_state_flag = 0;          // SI Flag off
-        smapling_state_flag = 0;    // Sampling flag off
+        sampling_state_flag = 0;    // Sampling flag off
         gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
         uart_sendStr(UART3,"*.*.*.* SI locking mode end *.*.*.*");
         uart_sendStr(UART3,"\014"); // New page form feed
