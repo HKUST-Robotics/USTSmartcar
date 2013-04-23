@@ -11,45 +11,66 @@ volatile unsigned int systemclock=0;             // systemclock
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int sampling_state_flag=0;              // Sample flag mode
 char str[1];
-
+char mode=0;
 
 void interrupts_init(void);
 void trigger_si(void);
 u8 todis[];//for sprintf usage
 
 void main()
-{
-    //interrupts_init();
-    uart_init(UART3, 115200);
-    accl_init();
-    printf("\nEverything Initialized alright\n");
-
-    
-    while(1)
-    { 
-
-        accl_print();
-        //trigger_si(); // trigger SI to sampling
-
-      
-      
-        delayms(500);
-    }
+{   
+   uart_init(UART3, 115200);
+   mode = uart_getchar(UART3);
+   delayms(500); 
+  
+       switch (mode){
+       case '1':
+         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
+         
+        //interrupts_init();
+        //uart_init(UART3, 115200); // Alreday init before switch into mode
+        accl_init();
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+            accl_print();
+            //trigger_si(); // trigger SI to sample
+            delayms(500);
+        }
+       break;
+       case '2':
+        uart_sendStr(UART3,"The mode now is 2: Linear CCD");
+        interrupts_init();
+        //uart_init(UART3, 115200);
+        //accl_init();
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+            //accl_print();
+            trigger_si(); // trigger SI to sample
+            //delayms(500);
+        }  
+        break;
+     
+   }
 }
+
 
 void interrupts_init(void){
     
-    DisableInterrupts;                                //禁止總中斷
+    DisableInterrupts;                                //Disable Interrupts
     ALL_PIN_Init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
     //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
-    pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
+    //pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
     
     // Maximum clock is 8us cycle by using PIT
     
-    //pit_init(PIT0,10);  // 小陽 Suggest: Try this to get faster clock
+    pit_init(PIT0,10);   // Faster Clock, Xus period, 50% duty cycle
     
-    EnableInterrupts;			              //開總中斷
+    EnableInterrupts;			              //Enable Interrupts
 }
 
 void trigger_si(void){
@@ -85,5 +106,5 @@ void ALL_PIN_Init(){
     gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
   
-    uart_init(UART3, 115200); // BlueTooth UART init
+    //uart_init(UART3, 115200); // BlueTooth UART init
 }

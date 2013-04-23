@@ -125,6 +125,7 @@ float gyro_dtheta(void){
   return ((-1)*gyro_scaledval);
 }
 
+/*
 
 void angl_calculate(void){
   float fDeltaValue;
@@ -135,3 +136,5 @@ void angl_calculate(void){
   
   g_fCarAngle = g_fGyroscopeAngleIntegral;
   fDeltaValue = (g_fGravityAngle - g_fCarAngle) / GRAVITY_ADJUST_TIME_CONSTANT;
+}
+*/
