@@ -12,14 +12,6 @@ volatile int SI_state_flag=0;                    // SI flag mode
 volatile int sampling_state_flag=0;              // Sample flag mode
 char str[1];
 
-int gyro_raw;
-float gyro_scaledval;
-
-float gyro_dtheta(void){
-  float gyro_scaledval;
-  gyro_scaledval=((ad_once(ADC1,10,ADC_16bit)-27904)/13.105);
-  return gyro_scaledval;
-}
 
 void interrupts_init(void);
 void trigger_si(void);
@@ -29,18 +21,16 @@ void main()
 {
     //interrupts_init();
     uart_init(UART3, 115200);
-    //accl_init();
-    adc_init  (ADC1,10);//testing gyroscope input
+    accl_init();
     printf("\nEverything Initialized alright\n");
     
     while(1)
     { 
         
-        //accl_print();
+        accl_print();
         //trigger_si(); // trigger SI to sampling
 
-      sprintf(todis,"\nOffset and scaled value: %f",gyro_dtheta());
-      uart_sendStr(UART3, (u8*)todis);
+      
       
         delayms(500);
     }

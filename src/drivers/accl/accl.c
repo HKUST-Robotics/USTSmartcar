@@ -23,6 +23,9 @@ void accl_init(void){
     I2C_WriteAddr(I2C0, 0x1c, 0x0f, 0x10);  //cutoff frequency setting
     I2C_WriteAddr(I2C0, 0x1c, 0x0e, 0x00);  //set range to 2G
     I2C_WriteAddr(I2C0, 0x1c, 0x2a, 0x01);  //activate mma8451
+    
+    
+    adc_init  (ADC1,10);//Init for gyro ADC
 }
 
 
@@ -91,15 +94,26 @@ double    accl_tilt(void){
 
 void      accl_print(void){
   accl_update();
-  sprintf(accl_todis,"\nx = %f",accl_x16);
-  uart_sendStr (UART3, (u8*)accl_todis);
-  sprintf(accl_todis,"\ny = %f",accl_y16);
-  uart_sendStr (UART3, (u8*)accl_todis);
-  sprintf(accl_todis,"\nz = %f",accl_z16);
-  uart_sendStr (UART3, (u8*)accl_todis); 
   
+  //This prints out the XYZ Reading from the accelerometer
+  
+//  sprintf(accl_todis,"\nx = %f",accl_x16);
+//  uart_sendStr (UART3, (u8*)accl_todis);
+//  sprintf(accl_todis,"\ny = %f",accl_y16);
+//  uart_sendStr (UART3, (u8*)accl_todis);
+//  sprintf(accl_todis,"\nz = %f",accl_z16);
+//  uart_sendStr (UART3, (u8*)accl_todis); 
+  
+  printf("\n\nAccelerometer and Gyro data\n====================");
+  sprintf(accl_todis,"\naccl_tilt()   = %f",accl_tilt());
+  uart_sendStr (UART3, (u8*)accl_todis); 
+  sprintf(accl_todis,"\ngyro_dtheta() = %f",gyro_dtheta());
+      uart_sendStr(UART3, (u8*)accl_todis);
+  
+}
 
-  sprintf(accl_todis,"\ntilt = %f",accl_tilt());
-  uart_sendStr (UART3, (u8*)accl_todis); 
-  
+float gyro_dtheta(void){
+  float gyro_scaledval;
+  gyro_scaledval=((ad_once(ADC1,10,ADC_16bit)-28040)/13.305);
+  return ((-1)*gyro_scaledval);
 }

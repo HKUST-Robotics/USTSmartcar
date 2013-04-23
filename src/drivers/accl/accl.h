@@ -20,6 +20,7 @@ double    accl_tilt(void);//usually use this for getting the tilt
 void      accl_update(void);
 float accl_convert(u8 axis[]);
 void      accl_print(void);
+float gyro_dtheta(void);
 
 
 /*************************************************************
