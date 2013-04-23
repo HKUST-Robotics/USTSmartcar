@@ -23,10 +23,11 @@ void main()
     uart_init(UART3, 115200);
     accl_init();
     printf("\nEverything Initialized alright\n");
+
     
     while(1)
     { 
-        
+
         accl_print();
         //trigger_si(); // trigger SI to sampling
 

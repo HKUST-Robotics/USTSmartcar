@@ -22,6 +22,8 @@ float accl_convert(u8 axis[]);
 void      accl_print(void);
 float gyro_dtheta(void);
 
+float angl_calculate(void);
+
 
 /*************************************************************
 usage:

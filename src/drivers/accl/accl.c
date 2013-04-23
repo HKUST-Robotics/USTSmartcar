@@ -13,6 +13,11 @@ for HKUST SmartCar team 2013
 #include "include.h"
 #include <math.h>
 
+#define GRAVITY_ADJUST_TIME_CONSTANT 
+
+float g_fcarAngle;  //global variables for the balencing control algorithm
+float g_fGyroscopeAngleIntegral;  //
+
 u8 accl_buffer[2];
 char accl_todis[];
 
@@ -55,11 +60,13 @@ void accl_update(void){
     accl_buffer[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x04);
     delayms(0);
     accl_y16=accl_convert(accl_buffer);
-    accl_buffer[0]   =   I2C_ReadAddr(I2C0, 0x1c, 0x05);
-    delayms(0);
-    accl_buffer[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x06);
-    delayms(0);
-    accl_z16=accl_convert(accl_buffer);
+//    accl_buffer[0]   =   I2C_ReadAddr(I2C0, 0x1c, 0x05);
+//    delayms(0);
+//    accl_buffer[1]   =   I2C_ReadAddr(I2C0, 0x1c, 0x06);
+//    delayms(0);
+//    accl_z16=accl_convert(accl_buffer);
+    
+    //z axis values are not read to save time
 }
 
 float accl_convert(u8 axis[]){
@@ -117,3 +124,14 @@ float gyro_dtheta(void){
   gyro_scaledval=((ad_once(ADC1,10,ADC_16bit)-28040)/13.305);
   return ((-1)*gyro_scaledval);
 }
+
+
+void angl_calculate(void){
+  float fDeltaValue;
+  
+  gyro_dtheta();
+  accl_update();
+  accl_tilt();
+  
+  g_fCarAngle = g_fGyroscopeAngleIntegral;
+  fDeltaValue = (g_fGravityAngle - g_fCarAngle) / GRAVITY_ADJUST_TIME_CONSTANT;
