@@ -1,110 +1,202 @@
-#include "common.h"
+/* ************************************************************************
+ * HKUST Smartcar 2013 Sensor Group
+ * Pin Test
+ *
+ * ------ README ------
+ * Use PTE11 (pin 14) as a testing pin
+ * *************************************************************************/
+
 #include "include.h"
 
-/*************************************************************************
-HKUST Smartcar 2013 Sensor Group
-*************************************************************************/
-
-
-void ALL_PIN_Init();
 volatile unsigned int systemclock=0;             // systemclock
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int sampling_state_flag=0;              // Sample flag mode
-char str[1];
-char mode=0;
 
-void interrupts_init(void);
-void trigger_si(void);
-u8 todis[];//for sprintf usage
+void pin_test();
+void pintest(PORTx, u8);
+void pintest_adc(ADCn, ADC_Ch, u16);
+u16 vcc_gnd(u16, u16, u16);
 
-void main()
-{   
-   uart_init(UART3, 115200);
-   mode = uart_getchar(UART3);
-   delayms(500); 
-  
-       switch (mode){
-       case '1':
-         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
-         
-        //interrupts_init();
-        //uart_init(UART3, 115200); // Alreday init before switch into mode
-        accl_init();
-        printf("\nEverything Initialized alright\n");
-        
-        while(1)
-        { 
-            accl_print();
-            //trigger_si(); // trigger SI to sample
-            delayms(500);
-        }
-       break;
-       case '2':
-        uart_sendStr(UART3,"The mode now is 2: Linear CCD");
-        interrupts_init();
-        //uart_init(UART3, 115200);
-        //accl_init();
-        printf("\nEverything Initialized alright\n");
-        
-        while(1)
-        { 
-            //accl_print();
-            trigger_si(); // trigger SI to sample
-            //delayms(500);
-        }  
-        break;
-     
-   }
+void main(void) {
+	u8 portAno, portBno, portCno, portDno, portEno;
+	u16 pinNo = 1;
+
+	uart_init(UART3, 115200);
+	delayms(1000);
+	gpio_init(PORTE, 11, GPO, 1);
+
+	printf("           HKUST Smart Car(2013)\n");
+	printf("         Pin Test for Light Sensor\n");
+	printf("------------- Pin Test Starts -------------\n");
+
+	for (portEno = 0; pinNo < 50; portEno++, pinNo++) {
+		switch(portEno) {
+		case 4: // Skip pin 5 & 6
+			pinNo = vcc_gnd(5, 6, pinNo);
+			break;
+		case 11:
+			printf("Testing Pin 14: This is the testing pin -- Skipped\n");
+			++portEno;
+			++pinNo;
+			break;
+		case 13:
+			pinNo = vcc_gnd(16, 17, pinNo);
+			printf("Testing Pin 18: GND -- Skipped\n"); //		Skip pin 18
+			printf("Testing Pin 19: USB0R_DP -- Skipped\n"); //	Skip pin 19
+			printf("Testing Pin 20: USB0R_DM -- Skipped\n"); //	Skip pin 20
+			printf("Testing Pin 21: Unused -- Skipped\n"); //	Skip pin 21
+			printf("Testing Pin 22: Unused -- Skipped\n"); //	Skip pin 22
+			pinNo += 5;
+
+			gpio_init(PORTE, 11, GPO, 0);
+			pintest_adc(ADC0, DAD1, pinNo++); // pin 23
+			pintest_adc(ADC0, AD20, pinNo++); // pin 24
+			pintest_adc(ADC1, DAD1, pinNo++); // pin 25
+			pintest_adc(ADC1, AD20, pinNo++); // pin 26
+			pintest_adc(ADC0, DAD0, pinNo++); // pin 27
+			pintest_adc(ADC0, AD19, pinNo++); // pin 28
+			pintest_adc(ADC0, DAD3, pinNo++); // pin 29
+			pintest_adc(ADC1, AD19, pinNo++); // pin 30
+			printf("Testing Pin 31: A3V3 -- Skipped\n"); //		Skip pin 31
+			++pinNo;
+			pintest_adc(ADC0, AD29, pinNo++); // pin 32
+			pintest_adc(ADC0, AD30, pinNo++); // pin 33
+			printf("Testing Pin 34: GND -- Skipped\n"); //		Skip pin 34
+			++pinNo;
+			pintest_adc(ADC1, AD16, pinNo++); // pin 35
+			pintest_adc(ADC0, AD16, pinNo++); // pin 36
+			pintest_adc(ADC1, AD18, pinNo++); // pin 37
+			pintest_adc(ADC0, AD23, pinNo++); // pin 38
+			pintest_adc(ADC1, AD23, pinNo++); // pin 39
+			gpio_init(PORTE, 11, GPO, 1);
+
+			printf("Testing Pin 40: Unused -- Skipped\n"); //	Skip pin 40
+			printf("Testing Pin 41: Unused -- Skipped\n"); //	Skip pin 41
+			printf("Testing Pin 42: VBAT -- Skipped\n"); //		Skip pin 42
+			pinNo += 3;
+			pinNo = vcc_gnd(43, 44, pinNo);
+			portEno = 24;
+		}
+
+		gpio_init(PORTE, portEno, GPI, 0);
+		printf("Testing Pin %u: ", pinNo);
+		pintest(PORTE, portEno);
+	}
+
+	for (portAno = 0; pinNo < 81; portAno++, pinNo++) {
+		switch(portAno) {
+		case 6:
+			pinNo = vcc_gnd(56, 57, pinNo);
+			break;
+		case 18:
+			pinNo = vcc_gnd(70, 71, pinNo);
+			break;
+		case 20:
+			printf("Testing Pin 74: Reset -- Skipped\n"); //	Skip pin 74
+			++pinNo;
+			portAno = 24;
+		}
+
+		gpio_init(PORTA, portAno, GPI, 0);
+		printf("Testing Pin %u: ", pinNo);
+		pintest(PORTA, portAno);
+	}
+
+	for (portBno = 0; pinNo < 103; portBno++, pinNo++) {
+		if (portBno == 12) {
+			pinNo = vcc_gnd(94, 93, pinNo);
+			portBno = 16;
+		}
+
+		gpio_init(PORTB, portBno, GPI, 0);
+		printf("Testing Pin %u: ", pinNo);
+		pintest(PORTB, portBno);
+	}
+
+	for (portCno = 0; pinNo < 127; portCno++, pinNo++) {
+		switch(portCno) {
+		case 4:
+			pinNo = vcc_gnd(108, 107, pinNo);
+			break;
+		case 16:
+			pinNo = vcc_gnd(122, 121, pinNo);
+		}
+
+		gpio_init(PORTC, portCno, GPI, 0);
+		printf("Testing Pin %u: ", pinNo);
+		pintest(PORTC, portCno);
+	}
+
+	for (portDno = 0; pinNo < 145; portDno++, pinNo++) {
+		if (portDno == 7)
+			pinNo = vcc_gnd(135, 134, pinNo);
+
+		gpio_init(PORTD, portDno, GPI, 0);
+		printf("Testing Pin %u: ", pinNo);
+		pintest(PORTD, portDno);
+	}
+
+	if (pinNo == 145)
+		printf("------------ Pin Test Finished ------------\n");
+	else
+		printf("Pin Test doesn't finish!!\n");
+
+	return ;
 }
 
+void pintest(PORTx portX, u8 no) {
+	u32 i;
+	u8 isWork = 0;
 
-void interrupts_init(void){
-    
-    DisableInterrupts;                                //Disable Interrupts
-    ALL_PIN_Init();
-    //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
-    //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
-    //pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
-    
-    // Maximum clock is 8us cycle by using PIT
-    
-    pit_init(PIT0,10);   // Faster Clock, Xus period, 50% duty cycle
-    
-    EnableInterrupts;			              //Enable Interrupts
+	for (i = 0; 1; i++) {
+		if (isWork == 1)
+			break;
+
+		if (i == 1000000) {
+			printf(". ");
+			i = 0;
+		}
+
+		isWork = gpio_get(portX, no);
+	}
+
+	if (isWork == 1)
+		printf("-- Successful\n");
+	else
+		printf("-- Failed\n");
+
+	return ;
 }
 
-void trigger_si(void){
-  
-       if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
-  
-       //if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
-           uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
-           uart_sendStr(UART3,"\014");     // New page form feed same as uart_sendStr(UART3,"\n\f");
-           SI_state_flag = 1;              // SI Flag on
-           sampling_state_flag = 1;        // sampling Flag on
-           systemclock = 0;                // systemclock count from begin,lock the SI status not duplicate
-           //gpio_set(PORTD, 0, 0);        // LED D2 ON, 0 means on, notify the switch is on
-           //gpio_set(PORTD, 1, 0);        // LED D3 ON, 0 means on, notify the SI is in locking mode
-           gpio_set(PORTC, 19, 1);         // SI rising edge
-       }
-       // else{                             // if not trigger
-       //    gpio_set(PORTD, 0, 1);         // LED D2 OFF, 1 means off, means not trigger
-       //}
+void pintest_adc(ADCn n, ADC_Ch ch, u16 no) {
+	u16 data;
+	u32 i;
+	u8 isWork = 0;
+
+	printf("Testing Pin %u: ", no);
+	for (i = 0; 1; i++) {
+		data = ad_once(n, ch, ADC_8bit);
+		if (data < 10) {
+			isWork = 1;
+			break;
+		}
+
+		if (i == 1000000) {
+			printf(". ");
+			i = 0;
+		}
+	}
+
+	if (isWork == 1)
+		printf("-- Successful\n");
+	else
+		printf("-- Failed\n");
+
+	return ;
 }
 
-void ALL_PIN_Init(){
-  
-    //gpio_init(PORTB, 3, GPI, 1); //PTB3 = SW2
-    //gpio_init(PORTB, 4, GPI, 1); //PTB3 = SW3
-    
-    gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
-    gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
-    gpio_init(PORTD, 2, GPO, 1); //PTD2, D4 LED
-    gpio_init(PORTD, 3, GPO, 1); //PTD3, D5 LED
-        
-    gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
-    gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
-    gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-  
-    //uart_init(UART3, 115200); // BlueTooth UART init
+u16 vcc_gnd(u16 vcc, u16 gnd, u16 no) {
+	printf("Testing Pin %u: VCC_33V -- Skipped\n", vcc);
+	printf("Testing Pin %u: GND -- Skipped\n", gnd);
+	return no + 2;
 }
