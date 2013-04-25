@@ -13,7 +13,7 @@ volatile int SI_state_flag=0;                    // SI flag mode
 volatile int sampling_state_flag=0;              // Sample flag mode
 
 void pin_test();
-void pintest(PORTx, u8);
+void pintest(PORTx, u16);
 void pintest_adc(ADCn, ADC_Ch, u16);
 u16 vcc_gnd(u16, u16, u16);
 
@@ -144,7 +144,7 @@ void main(void) {
 	return ;
 }
 
-void pintest(PORTx portX, u8 no) {
+void pintest(PORTx portX, u16 no) {
 	u32 i;
 	u8 isWork = 0;
 

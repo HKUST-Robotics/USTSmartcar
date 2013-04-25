@@ -59,8 +59,8 @@
       <file>$PROJ_DIR$\..\..\src\cpu\sysinit.h</file>
       <file>$PROJ_DIR$\..\..\src\cpu\vectors.c</file>
       <file>$PROJ_DIR$\..\..\src\cpu\vectors.h</file>
-      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
       <file>$PROJ_DIR$\Debug\Obj\uif.pbi</file>
+      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
       <file>$PROJ_DIR$\Debug\Obj\fuzzy.pbi</file>
       <file>$PROJ_DIR$\..\..\src\drivers\lptmr.h</file>
       <file>$PROJ_DIR$\..\..\src\drivers\wdog.h</file>
@@ -636,7 +636,7 @@
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 54</file>
+          <file> 53</file>
         </tool>
       </outputs>
       <inputs>
@@ -781,7 +781,7 @@
       <inputs>
         <tool>
           <name>ILINK</name>
-          <file> 66 98 88 122 76 93 135 78 111 97 109 149 72 86 104 136 132 62 145 148 151 106 115 114 139 146 123 60 53 113</file>
+          <file> 66 98 88 122 76 93 135 78 111 97 109 149 72 86 104 136 132 62 145 148 151 106 115 114 139 146 123 60 54 113</file>
         </tool>
       </inputs>
     </file>
@@ -790,7 +790,7 @@
       <inputs>
         <tool>
           <name>BILINK</name>
-          <file> 99 69 147 128 117 143 142 70 55 64 152 119 105 108 84 116 121 140 77 59 81 144 90 54 120 150</file>
+          <file> 99 69 147 128 117 143 142 70 55 64 152 119 105 108 84 116 121 140 77 59 81 144 90 53 120 150</file>
         </tool>
       </inputs>
     </file>
@@ -904,9 +904,9 @@
       <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
       <file>$PROJ_DIR$\..\..\src\cpu\headers\MK60DZ10.h</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Flash\Obj\FTM.o</file>
       <file>$PROJ_DIR$\Flash\Obj\gpio.pbi</file>
       <file>$PROJ_DIR$\Flash\Obj\isr.pbi</file>
-      <file>$PROJ_DIR$\Flash\Obj\FTM.o</file>
       <file>$PROJ_DIR$\Flash\Obj\isr.o</file>
       <file>$PROJ_DIR$\Flash\Obj\start.pbi</file>
       <file>$PROJ_DIR$\Flash\Obj\sysinit.pbi</file>
@@ -1011,7 +1011,7 @@
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 103</file>
+          <file> 104</file>
         </tool>
       </outputs>
       <inputs>
@@ -1191,7 +1191,7 @@
       <outputs>
         <tool>
           <name>ICCARM</name>
-          <file> 104</file>
+          <file> 102</file>
         </tool>
         <tool>
           <name>BICOMP</name>
@@ -1241,7 +1241,7 @@
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 102</file>
+          <file> 103</file>
         </tool>
       </outputs>
       <inputs>
@@ -1683,7 +1683,7 @@
       <inputs>
         <tool>
           <name>BILINK</name>
-          <file> 149 145 131 118 163 146 162 115 135 122 138 102 112 136 103 128 123 132 127 143 155 142 106 148 125 107 160 154 152 117</file>
+          <file> 149 145 131 118 163 146 162 115 135 122 138 103 112 136 104 128 123 132 127 143 155 142 106 148 125 107 160 154 152 117</file>
         </tool>
       </inputs>
     </file>
@@ -1698,7 +1698,7 @@
       <inputs>
         <tool>
           <name>ILINK</name>
-          <file> 166 104 150 137 111 113 139 120 147 153 126 114 129 130 144 164 105 133 141 158 108 165 124 116 161 119 110 121 159 156 157 134 67 63 92</file>
+          <file> 166 102 150 137 111 113 139 120 147 153 126 114 129 130 144 164 105 133 141 158 108 165 124 116 161 119 110 121 159 156 157 134 67 63 92</file>
         </tool>
       </inputs>
     </file>
@@ -1797,9 +1797,9 @@
       <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
       <file>$PROJ_DIR$\..\..\src\cpu\headers\MK60DZ10.h</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
-      <file>$PROJ_DIR$\Release\Obj\LED.pbi</file>
-      <file>$PROJ_DIR$\Release\Obj\delay.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\memtest.o</file>
+      <file>$PROJ_DIR$\Release\Obj\delay.pbi</file>
+      <file>$PROJ_DIR$\Release\Obj\LED.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\start.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\demo1.pbd</file>
       <file>$PROJ_DIR$\Release\Obj\memtest.pbi</file>
@@ -1984,7 +1984,7 @@
       <outputs>
         <tool>
           <name>ICCARM</name>
-          <file> 93</file>
+          <file> 91</file>
         </tool>
         <tool>
           <name>BICOMP</name>
@@ -2116,7 +2116,7 @@
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 91</file>
+          <file> 93</file>
         </tool>
       </outputs>
       <inputs>
@@ -2456,7 +2456,7 @@
       <inputs>
         <tool>
           <name>BILINK</name>
-          <file> 135 91 142 104 116 92 114 99 122 107 112 105 131 96 132 128 94 97 145 143 110 102 117 108</file>
+          <file> 135 93 142 104 116 92 114 99 122 107 112 105 131 96 132 128 94 97 145 143 110 102 117 108</file>
         </tool>
       </inputs>
     </file>
@@ -2475,7 +2475,7 @@
       <inputs>
         <tool>
           <name>ILINK</name>
-          <file> 58 120 140 129 118 100 126 113 109 130 138 146 119 147 141 93 139 134 144 101 137 125 127 106 115 136 54 50 81</file>
+          <file> 58 120 140 129 118 100 126 113 109 130 138 146 119 147 141 91 139 134 144 101 137 125 127 106 115 136 54 50 81</file>
         </tool>
       </inputs>
     </file>
