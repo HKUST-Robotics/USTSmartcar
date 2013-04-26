@@ -1522,10 +1522,6 @@
       <name>$PROJ_DIR$\..\..\src\app\main.c</name>
       <outputs>
         <tool>
-          <name>ICCARM</name>
-          <file> 109</file>
-        </tool>
-        <tool>
           <name>BICOMP</name>
           <file> 71</file>
         </tool>

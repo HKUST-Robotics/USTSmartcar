@@ -16,8 +16,7 @@ char mode=0;
 int i;
 
 void interrupts_init(void);
-void sampling(void);
-void tuning_CCD(void);
+void sampling(char mode);
 u8 todis[];//for sprintf usage
 
 void testfunct(char []);
@@ -57,7 +56,7 @@ void main()
           while(1)
           { 
               //accl_print();
-              sampling(); // sampling
+              sampling(2); // sampling
               //delayms(500);
           }  
         break;
@@ -72,7 +71,7 @@ void main()
           while(1)
           { 
               //accl_print();
-              tuning_CCD(); // Tuning CCD
+              sampling(3); // Tuning CCD
               //delayms(500);
           }  
         break;  
@@ -93,8 +92,8 @@ void interrupts_init(void){
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
     pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
     //pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
-    
     // Maximum clock is 8us cycle by using PIT_init_ms
+    
     //pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     
     EnableInterrupts;			              //Enable Interrupts
@@ -121,56 +120,66 @@ void SI_failing_edge_condition(int local_clock){
 }
 
 
-void CCD_finish_one_sampling(){
+void CCD_finish_one_sampling(int mode){
+    if (mode == 2){
+        if(systemclock % 129 == 128 && sampling_state_flag == 1){ // condition for locking SI to end
+          
+          //systemclock = 0;          // No need this after change if into systemclock % 129 == 128
+          SI_state_flag = 0;          // SI Flag off
+          sampling_state_flag = 0;    // Sampling flag off
+          gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
+          uart_sendStr(UART3,"*.*.*.* SI locking mode end *.*.*.*");
+          uart_sendStr(UART3,"\014"); // New page form feed
        
-      if(systemclock % 129 == 128 && sampling_state_flag == 1){ // condition for locking SI to end
-        
-        //systemclock = 0;          // No need this after change if into systemclock % 129 == 128
-        SI_state_flag = 0;          // SI Flag off
-        sampling_state_flag = 0;    // Sampling flag off
-        gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
-        uart_sendStr(UART3,"*.*.*.* SI locking mode end *.*.*.*");
-        uart_sendStr(UART3,"\014"); // New page form feed
-     
-        // Print the sampling array
-        uart_sendStr(UART3,"Just Sampled Array is: ");
-        testfunct(Pixel);
-        uart_sendStr(UART3,"\n\014");     // New page form feed
-      }
+          // Print the sampling array
+          uart_sendStr(UART3,"Just Sampled Array is: ");
+          testfunct(Pixel);
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+        }
+    } else if(mode == 3){
+      
+       if(systemclock % 129 == 128 && sampling_state_flag == 1){ // condition for locking SI to end
+          
+          SI_state_flag = 0;          // SI Flag off
+          sampling_state_flag = 0;    // Sampling flag off
+          gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
+       
+          // Print the sampling array
+          uart_sendStr(UART3,"Just Sampled Array is: ");
+          testfunct(Pixel);
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+       }
+    }
 }
 
-void trigger_SI(int local_clock){
-  
-       if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
-  
-       //if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
-           uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
-           uart_sendStr(UART3,"\014");     // New page form feed same as uart_sendStr(UART3,"\n\f");
-           SI_state_flag = 1;              // SI Flag on
-           sampling_state_flag = 1;        // sampling Flag on
-           //systemclock = 0;                // systemclock count from begin,lock the SI status not duplicate
-           local_clock = 0;
-           //gpio_set(PORTD, 0, 0);        // LED D2 ON, 0 means on, notify the switch is on
-           //gpio_set(PORTD, 1, 0);        // LED D3 ON, 0 means on, notify the SI is in locking mode
-           gpio_set(PORTC, 19, 1);         // SI rising edge
-       }
-}
-       
-void tuning_CCD(void){
-  
-       if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
-           SI_state_flag = 1;              // SI Flag on
-           sampling_state_flag = 1;        // sampling Flag on
-           systemclock = 0;                // systemclock count from begin,lock the SI status not duplicate
-           gpio_set(PORTC, 19, 1);         // SI rising edge
-       }
+void trigger_SI(int local_clock, int mode){
+      if(mode == 2){
+           if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
+      
+           //if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
+               uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
+               uart_sendStr(UART3,"\014");     // New page form feed same as uart_sendStr(UART3,"\n\f");
+               SI_state_flag = 1;              // SI Flag on
+               sampling_state_flag = 1;        // sampling Flag on
+               //systemclock = 0;                // systemclock count from begin,lock the SI status not duplicate
+               local_clock = 0;
+               gpio_set(PORTC, 19, 1);         // SI rising edge
+           }
+      }else if (mode == 3){
+           if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
+               SI_state_flag = 1;              // SI Flag on
+               sampling_state_flag = 1;        // sampling Flag on
+               local_clock = 0;
+               gpio_set(PORTC, 19, 1);         // SI rising edge
+           }
+     }
 }
 
-void sampling(void){
+void sampling(char mode){
    
        int local_clock = 0;
        
-       trigger_SI(local_clock);
+       trigger_SI(local_clock,mode);
        
        local_clock++;
        
@@ -178,7 +187,7 @@ void sampling(void){
        
        SI_failing_edge_condition(local_clock);
        
-       CCD_finish_one_sampling();
+       CCD_finish_one_sampling(mode);
 }
 
 void ALL_PIN_Init(){
