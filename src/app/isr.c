@@ -31,16 +31,16 @@
 extern volatile unsigned int systemclock;                 // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int sampling_state_flag;   // Smapling state flag mode
-char Pixel[128];
+//char Pixel[128];
 //char str[1];
-int i;
-
+//int i;
+/*
 void testfunct(char array[]){
           for( i = 0 ; i < 128 ; i++){
            uart_putchar(UART3,array[i]);//print One pixel One loop
         }
 }
-
+*/
 void PIT0_IRQHandler(void)
 {
     
@@ -61,9 +61,7 @@ void PIT0_IRQHandler(void)
       // For testing SI Flag
       //uart_sendStr(UART3, "SI_state_flag now is");
       //uart_putchar(UART3,SI_state_flag);
-     
-
-      
+     /*
       if(gpio_get(PORTA, 11) == 0) {  // if CCD receive black, the pixle respect to that systemclock is 1
         Pixel[systemclock] = '1';
       }else {                        // if CCD receive white, the pixle respect to that systemclock is 0
@@ -75,7 +73,6 @@ void PIT0_IRQHandler(void)
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
         uart_sendStr(UART3,"\014");  // New page form feed
       }
-      
       
       if(systemclock == 128 && sampling_state_flag == 1){ // condition for locking SI to end
         
@@ -93,7 +90,7 @@ void PIT0_IRQHandler(void)
         testfunct(Pixel);
         uart_sendStr(UART3,"\n\014");     // New page form feed
       }
-     
+     */
       systemclock++;
       PIT_Flag_Clear(PIT0);       //清中斷標志位
 }
