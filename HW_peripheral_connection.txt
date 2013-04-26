@@ -1,0 +1,24 @@
+Peripheral connection table for HKUST Smart car team 2013
+
+Hardware        Port name       Program name    Physical location
+---------------+---------------+---------------+-----------------
+Accl_IIC_3v3                    Back_side_R14
+Accl_IIC_GND                    SW5_upper_leg
+Accl_IIC_SCL    PTB2            I2C0_SCL        SW5_lower_leg
+Accl_IIC_SDA    PTB3            I2C0_SDA        SW2_upper_leg
+
+Gyro_analog_z   PTB4            ADC1,AD10       SW3_upper_leg
+
+lccd_5v
+lccd_GND    //louis help fill in
+lccd_data
+lccd_clock
+lccd_etc
+
+encoder_left    PTA8            FTM1,CH0        JP6
+encoder_right   PTA9            FTM1,CH1        JP7
+
+motor_left      Pw-PTD7 Di-PTD6                 JP2
+motor_right     Pw-PTD5 Di-PTD4                 JP3
+
+Bluetooth                       UART3           Header4(top of board, flat)
