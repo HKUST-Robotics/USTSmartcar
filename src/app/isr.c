@@ -5,6 +5,8 @@
 extern volatile unsigned int systemclock;   // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int sampling_state_flag;   // Smapling state flag mode
+extern volatile u32 g_u32encoder_lf=0;
+extern volatile u32 g_u32encoder_rt=0;
 
 void PIT0_IRQHandler(void)
 {
@@ -27,9 +29,62 @@ void PIT0_IRQHandler(void)
       //uart_putchar(UART3,SI_state_flag);
       
       systemclock++;
-      PIT_Flag_Clear(PIT0);       //�M���_�ЧӦ�
+      PIT_Flag_Clear(PIT0);       //≤M§§¬_º–ß”¶Ï
 }
 
+void PIT1_IRQHandler(void)
+{
+    DisableInterrupts;
+    printf("\n\fg_u32encoder_lf:%d",g_u32encoder_lf);
+    printf("\n\fg_u32encoder_rt:%d",g_u32encoder_rt);
+    
+    g_u32encoder_lf=0;
+    g_u32encoder_rt=0;
+    
+    PIT_Flag_Clear(PIT1);
+    EnableInterrupts;
+}
 
+void FTM1_IRQHandler()
+{
+    //this triggers on encoder pulse's rising edge
+    /*connection config:
+     
+     Hardware        Port name       Program name    Physical location
+     ---------------+---------------+---------------+-----------------
+     encoder_left    PTA8            FTM1,CH0        JP6
+     encoder_right   PTA9            FTM1,CH1        JP7
+     */
+    
+    u8 s=FTM1_STATUS;
+    u8 CHn;
+    
+    FTM1_STATUS=0x00;               //clear the register
+    
+    CHn=0;
+    if( s & (1<<CHn) )
+    {
+        FTM_IRQ_DIS(FTM1,CHn);      //prevents input capture interrupt
+ 
+        
+        g_u32encoder_lf++;                             //计数+1
+        
+        //try not to use disableinterrupt; here, do it in main.c
+        FTM_IRQ_EN(FTM1,CHn);  //matches with FTM_IRQ_DIS(FTM1,CHn); 
 
+    }
+    
+    /* 这里添加 n=1 的模版，根据模版来添加 */
+    CHn=1;
+    if( s & (1<<CHn) )
+    {
+        FTM_IRQ_DIS(FTM1,CHn);      //prevents input capture interrupt
+        
+        
+        g_u32encoder_rt++;                             //计数+1
+        
+        FTM_IRQ_EN(FTM1,CHn);  //开启输入捕捉中断
+    }
+    
+}
 

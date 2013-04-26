@@ -15,17 +15,22 @@ char str[1];
 char mode=0;
 int i;
 
+//these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
+volatile u32 g_u32encoder_lf=0;
+volatile u32 g_u32encoder_rt=0;
+
+
 void interrupts_init(void);
 void sampling(char mode);
 u8 todis[];//for sprintf usage
 
-void testfunct(char []);
+void CCD_print(char []);
 
 void main()
 {   
    uart_init(UART3, 115200); // For our flashed bluetooth
    //uart_init(UART3, 9600); // For un-flash bluetooth
-   
+    printf("Please select mode:\n\f1:Accelerometer&gyro\n\f2:LinearCCD\n\f3:Tuning CCD\n\f4:Encoder testing\n\f");
    mode = uart_getchar(UART3);
    delayms(500); 
   
@@ -74,12 +79,27 @@ void main()
               sampling(3); // Tuning CCD
               //delayms(500);
           }  
-        break;  
+        break;
+               
+       case '4':
+       uart_sendStr(UART3,"The mode now is 4: encoder test");
+               
+       FTM_Input_init(FTM1,CH0,Rising);             //inits left encoder interrupt capture
+       FTM_Input_init(FTM1,CH1,Rising);             //inits right encoder interrupt capture
+               
+       pit_init_ms(PIT0,500);                      //periodic interrupt every second or so
+
+        
+       printf("\nEverything Initialized alright\n");
+       
+       while(1)
+       {}  
+       break;
         
    }
 }
 
-void testfunct(char array[]){
+void CCD_print(char array[]){
           for( i = 0 ; i < 128 ; i++){
            uart_putchar(UART3,array[i]); //print One pixel One loop
         }
@@ -133,7 +153,7 @@ void CCD_finish_one_sampling(int mode){
        
           // Print the sampling array
           uart_sendStr(UART3,"Just Sampled Array is: ");
-          testfunct(Pixel);
+          CCD_print(Pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
         }
     } else if(mode == 3){
@@ -146,7 +166,7 @@ void CCD_finish_one_sampling(int mode){
        
           // Print the sampling array
           uart_sendStr(UART3,"Just Sampled Array is: ");
-          testfunct(Pixel);
+          CCD_print(Pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
        }
     }
@@ -191,9 +211,6 @@ void sampling(char mode){
 }
 
 void ALL_PIN_Init(){
-  
-    //gpio_init(PORTB, 3, GPI, 1); //PTB3 = SW2
-    //gpio_init(PORTB, 4, GPI, 1); //PTB3 = SW3
     
     gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
     gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED

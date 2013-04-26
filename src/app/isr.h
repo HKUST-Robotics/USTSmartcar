@@ -1,16 +1,16 @@
-/******************** (C) COPYRIGHT 2011 ³¥¤õ´O¤J¦¡¶}µo¤u§@«Ç ********************
- * ¤å¥ó¦W       ¡Gisr.h
- * ´y­z         ¡G­«·s§»©w¸q¤¤Â_¸¹¡A­«¬M®g¤¤Â_¦V¶qªí¸Ìªº¤¤Â_¨ç¼Æ¦a§}¡A
- *                ¨Ï¨ä«ü¦V§Ú­Ì©Ò©w¸qªº¤¤Â_ªA°È¨ç¼Æ¡CÁn©ú¤¤Â_ªA°È¨ç¼Æ
- *                Äµ§i¡G¥u¯à¦b"vectors.c"¥]§t¡A¦Ó¥B¥²¶·¦b"vectors.h"¥]§tªº«á­±¡I¡I¡I
+/******************** (C) COPYRIGHT 2011 â‰¥â€¢Â§Ä±Â¥OÂ§JÂ¶Â°âˆ‚}ÂµoÂ§uÃŸ@Â´Â« ********************
+ * Â§Ã‚â€¢Ã›Â¶W       Â°Gisr.h
+ * Â¥yâ‰ z         Â°Gâ‰ Â´âˆ‘sÃŸÂªÂ©wâˆqÂ§Â§Â¬_âˆÏ€Â°Aâ‰ Â´Â¨MÃ†gÂ§Â§Â¬_Â¶Vâˆ‚qâ„¢ÃŒâˆÃƒâ„¢âˆ«Â§Â§Â¬_Â®ÃÂºâˆ†Â¶aÃŸ}Â°A
+ *                Â®Å“Â®â€°Â´Â¸Â¶VÃŸâ„â‰ ÃƒÂ©â€œÂ©wâˆqâ„¢âˆ«Â§Â§Â¬_â„¢AâˆÂ»Â®ÃÂºâˆ†Â°CÂ¡nÂ©Ë™Â§Â§Â¬_â„¢AâˆÂ»Â®ÃÂºâˆ†
+ *                Æ’ÂµÃŸiÂ°Gâ€¢uÃ˜â€¡Â¶b"vectors.c"â€¢]ÃŸtÂ°AÂ¶â€â€¢Bâ€¢â‰¤âˆ‚âˆ‘Â¶b"vectors.h"â€¢]ÃŸtâ„¢âˆ«Â´Â·â‰ Â±Â°IÂ°IÂ°I
  *          
- * ¹êÅç¥­¥x     ¡G³¥¤õkinetis¶}µoªO
- * ®wª©¥»       ¡G
- * ´O¤J¨t²Î     ¡G
+ * Ï€Ãâ‰ˆÃâ€¢â‰ â€¢x     Â°Gâ‰¥â€¢Â§Ä±kinetisâˆ‚}Âµoâ„¢O
+ * Ã†wâ„¢Â©â€¢Âª       Â°G
+ * Â¥OÂ§JÂ®tâ‰¤Å’     Â°G
  *
- * §@ªÌ         ¡G³¥¤õ´O¤J¦¡¶}µo¤u§@«Ç 
- * ²^Ä_©±       ¡Ghttp://firestm32.taobao.com
- * §Ş³N¤ä«ù½×¾Â ¡Ghttp://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008   
+ * ÃŸ@â„¢Ãƒ         Â°Gâ‰¥â€¢Â§Ä±Â¥OÂ§JÂ¶Â°âˆ‚}ÂµoÂ§uÃŸ@Â´Â« 
+ * â‰¤^Æ’_Â©Â±       Â°Ghttp://firestm32.taobao.com
+ * ÃŸï¬â‰¥NÂ§â€°Â´Ë˜Î©â—ŠÃ¦Â¬ Â°Ghttp://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008   
 **********************************************************************************/	
 
 
@@ -20,18 +20,27 @@
 
 #include  "include.h"  
 
-/*                          ­«·s©w¸q¤¤Â_¦V¶qªí
- *  ¥ı¨ú®øÀq»{ªº¤¤Â_¦V¶q¤¸¯À§»©w¸q       #undef  VECTOR_xxx
- *  ¦b­«·s©w¸q¨ì¦Û¤v½s¼gªº¤¤Â_¨ç¼Æ       #define VECTOR_xxx    xxx_IRQHandler
- *  ¨Ò¦p¡G
+/*                          â‰ Â´âˆ‘sÂ©wâˆqÂ§Â§Â¬_Â¶Vâˆ‚qâ„¢ÃŒ
+ *  â€¢ËÂ®Ë™Ã†Â¯Â¿qÂª{â„¢âˆ«Â§Â§Â¬_Â¶Vâˆ‚qÂ§âˆÃ˜Â¿ÃŸÂªÂ©wâˆq       #undef  VECTOR_xxx
+ *  Â¶bâ‰ Â´âˆ‘sÂ©wâˆqÂ®ÃÂ¶â‚¬Â§vÎ©sÂºgâ„¢âˆ«Â§Â§Â¬_Â®ÃÂºâˆ†       #define VECTOR_xxx    xxx_IRQHandler
+ *  Â®â€œÂ¶pÂ°G
  *       #undef  VECTOR_003
- *       #define VECTOR_003    HardFault_Handler    ­«·s©w¸qµw¥ó¤W³X¤¤Â_ªA°È¨ç¼Æ
+ *       #define VECTOR_003    HardFault_Handler    â‰ Â´âˆ‘sÂ©wâˆqÂµwâ€¢Ã›Â§Wâ‰¥XÂ§Â§Â¬_â„¢AâˆÂ»Â®ÃÂºâˆ†
  */
 
 #undef  VECTOR_084
-#define VECTOR_084    PIT0_IRQHandler     //­«·s©w¸q84¸¹¤¤Â_¬°PIT0_IRQHandler¤¤Â_
+#define VECTOR_084    PIT0_IRQHandler     //â‰ Â´âˆ‘sÂ©wâˆq84âˆÏ€Â§Â§Â¬_Â¨âˆPIT0_IRQHandlerÂ§Â§Â¬_
 
-extern void PIT0_IRQHandler();            //PIT0 ©w®É¤¤Â_ªA°È¨ç¼Æ
+#undef  VECTOR_085
+#define VECTOR_085    PIT1_IRQHandler     //john's testing encoder interrupt handler
+
+#undef  VECTOR_079
+#define VECTOR_079    FTM1_IRQHandler     //FTM1 input capture for getting encoder count
+
+
+extern void PIT0_IRQHandler();            //PIT0 Â©wÃ†â€¦Â§Â§Â¬_â„¢AâˆÂ»Â®ÃÂºâˆ†
+extern void PIT1_IRQHandler();
+extern void FTM1_IRQHandler();
 
 #endif  //__ISR_H
 
