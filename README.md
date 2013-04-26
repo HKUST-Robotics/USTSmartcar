@@ -14,12 +14,12 @@ This library attempts to follow the following conventions:
 - have it live inside of a library eventually ( i.e `accl.c`, `accl.h`)
 
 2.Prefix all functions with library name:
--i.e. `accl_tilt();`
+- i.e. `accl_tilt();`
 
 3.for global variables, affix g_ to the front of the variable, and label the type with f,u8,ch etc.
--i.e. `g_u8ar_ccd_pixel` would mean it is a global variable with type u8 array called pixel, related to the ccd library,
--this allows code to be self documenting and easier to read
+- i.e. `g_u8ar_ccd_pixel` would mean it is a global variable with type u8 array called pixel, related to the ccd library,
+- this allows code to be self documenting and easier to read
 
 4.With the exception of special deployment scenarios, (i.e. pintest), refrain from defining functions inside of main.c, 
--increase readability. 
--try to place them in their own .h & .c files
+- increase readability. 
+- try to place them in their own .h & .c files
