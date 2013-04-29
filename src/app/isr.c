@@ -2,11 +2,15 @@
 #include "include.h"
 #include "linearccd.h"
 
-extern volatile unsigned int systemclock;   // systemclock counter
+extern volatile u32 g_u32_systemclock;   // systemclock counter
 extern volatile int SI_state_flag;         // SI flag mode
 extern volatile int sampling_state_flag;   // Smapling state flag mode
-extern volatile u32 g_u32encoder_lf=0;
-extern volatile u32 g_u32encoder_rt=0;
+
+//extern volatile u32 g_u32encoder_lf=0; // IAR warning : duplicate definitions
+//extern volatile u32 g_u32encoder_rt=0; // IAR warning : duplicate definitions
+
+extern volatile u32 g_u32encoder_lf;
+extern volatile u32 g_u32encoder_rt;
 
 void PIT0_IRQHandler(void)
 {
@@ -28,8 +32,8 @@ void PIT0_IRQHandler(void)
       //uart_sendStr(UART3, "SI_state_flag now is");
       //uart_putchar(UART3,SI_state_flag);
       
-      systemclock++;
-      PIT_Flag_Clear(PIT0);       //≤M§§¬_º–ß”¶Ï
+      g_u32_systemclock++;
+      PIT_Flag_Clear(PIT0);       //?�M§§¬_º?�ß”¶�?}
 }
 
 void PIT1_IRQHandler(void)
@@ -74,7 +78,7 @@ void FTM1_IRQHandler()
 
     }
     
-    /* 这里添加 n=1 的模版，根据模版来添加 */
+    /* 这�?添�? n=1 ?�模?��??�据模�??�添??*/
     CHn=1;
     if( s & (1<<CHn) )
     {
@@ -83,8 +87,8 @@ void FTM1_IRQHandler()
         
         g_u32encoder_rt++;                             //计数+1
         
-        FTM_IRQ_EN(FTM1,CHn);  //开启输入捕捉中断
-    }
+        FTM_IRQ_EN(FTM1,CHn);  //开?��??��??�中??    }
     
+    }
 }
 

@@ -5,12 +5,11 @@
 HKUST Smartcar 2013 Sensor Group
 *************************************************************************/
 
-
 void ALL_PIN_Init();
-volatile unsigned int systemclock=0;             // systemclock
-volatile int SI_state_flag=0;                    // SI flag mode
-volatile int sampling_state_flag=0;              // Sample flag mode
-char Pixel[128];
+volatile u32 g_u32_systemclock=0;                      // g_u32_systemclock
+volatile int g_int_SI_state_flag=0;                    // SI flag mode
+volatile int g_int_sampling_state_flag=0;              // Sample flag mode
+char g_char_ar_ccd_pixel[128];
 char str[1];
 char mode=0;
 int i;
@@ -21,10 +20,10 @@ volatile u32 g_u32encoder_rt=0;
 
 
 void interrupts_init(void);
-void sampling(char mode);
+void ccd_sampling(char mode);
 u8 todis[];//for sprintf usage
 
-void CCD_print(char []);
+void ccd_print(char []);
 
 void main()
 {   
@@ -61,7 +60,7 @@ void main()
           while(1)
           { 
               //accl_print();
-              sampling(2); // sampling
+              ccd_sampling(2); // sampling
               //delayms(500);
           }  
         break;
@@ -76,7 +75,7 @@ void main()
           while(1)
           { 
               //accl_print();
-              sampling(3); // Tuning CCD
+              ccd_sampling(3); // Tuning CCD
               //delayms(500);
           }  
         break;
@@ -99,7 +98,7 @@ void main()
    }
 }
 
-void CCD_print(char array[]){
+void ccd_print(char array[]){
           for( i = 0 ; i < 128 ; i++){
            uart_putchar(UART3,array[i]); //print One pixel One loop
         }
@@ -119,19 +118,19 @@ void interrupts_init(void){
     EnableInterrupts;			              //Enable Interrupts
 }
 
-void CCD_detect_track(){
+void ccd_detect_track(){
  
-      if(gpio_get(PORTA, 11) == 0) {  // if CCD receive black, the pixle respect to that systemclock is 1
-        Pixel[systemclock] = '1';
-      }else {                        // if CCD receive white, the pixle respect to that systemclock is 0
-        Pixel[systemclock] = '0';
+      if(gpio_get(PORTA, 11) == 0) {  // if CCD receive black, the pixle respect to that g_u32_systemclock is 1
+        g_char_ar_ccd_pixel[g_u32_systemclock] = '1';
+      }else {                        // if CCD receive white, the pixle respect to that g_u32_systemclock is 0
+        g_char_ar_ccd_pixel[g_u32_systemclock] = '0';
       } 
 }
 
-void SI_failing_edge_condition(int local_clock){
+void ccd_SI_failing_edge_condition(int local_clock){
   
-      //if(systemclock %21 == 20  &&  SI_state_flag == 1){     // condition for SI failing edge to end 
-      if(local_clock == 20  &&  SI_state_flag == 1){     // condition for SI failing edge to end 
+      //if(g_u32_systemclock %21 == 20  &&  G_int_SI_state_flag == 1){     // condition for SI failing edge to end 
+      if(local_clock == 20  &&  g_int_SI_state_flag == 1){     // condition for SI failing edge to end 
     
         gpio_set(PORTC, 19, 0); // SI faling edge
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
@@ -139,75 +138,78 @@ void SI_failing_edge_condition(int local_clock){
       }
 }
 
-
-void CCD_finish_one_sampling(int mode){
+void ccd_finish_one_sampling(int mode){
+  
     if (mode == 2){
-        if(systemclock % 129 == 128 && sampling_state_flag == 1){ // condition for locking SI to end
+        if(g_u32_systemclock % 129 == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           
-          //systemclock = 0;          // No need this after change if into systemclock % 129 == 128
-          SI_state_flag = 0;          // SI Flag off
-          sampling_state_flag = 0;    // Sampling flag off
+          //g_u32_systemclock = 0;          // No need this after change if into g_u32_systemclock % 129 == 128
+          g_int_SI_state_flag = 0;          // SI Flag off
+          g_int_sampling_state_flag = 0;    // Sampling flag off
           gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
           uart_sendStr(UART3,"*.*.*.* SI locking mode end *.*.*.*");
           uart_sendStr(UART3,"\014"); // New page form feed
        
           // Print the sampling array
           uart_sendStr(UART3,"Just Sampled Array is: ");
-          CCD_print(Pixel);
+          ccd_print(g_char_ar_ccd_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
         }
     } else if(mode == 3){
       
-       if(systemclock % 129 == 128 && sampling_state_flag == 1){ // condition for locking SI to end
+       if(g_u32_systemclock % 129 == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           
-          SI_state_flag = 0;          // SI Flag off
-          sampling_state_flag = 0;    // Sampling flag off
+          g_int_SI_state_flag = 0;          // SI Flag off
+          g_int_sampling_state_flag = 0;    // Sampling flag off
           gpio_set(PORTD, 1, 1);      // LED D3 ON, 1 means off, notify the SI is unlock
        
           // Print the sampling array
           uart_sendStr(UART3,"Just Sampled Array is: ");
-          CCD_print(Pixel);
+          ccd_print(g_char_ar_ccd_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
        }
     }
 }
 
-void trigger_SI(int local_clock, int mode){
+//void trigger_SI(int local_clock, int mode){
+
+void ccd_trigger_SI(int mode){
       if(mode == 2){
-           if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
+           if(g_int_SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
       
            //if(uart_pendstr(UART3,str) == 1){ // Using Bluetooth to trigger , when any key in PC keyboard is pressed
                uart_sendStr(UART3,"*.*.*.* SI Trigger, rising edge generated *.*.*.*");
                uart_sendStr(UART3,"\014");     // New page form feed same as uart_sendStr(UART3,"\n\f");
-               SI_state_flag = 1;              // SI Flag on
-               sampling_state_flag = 1;        // sampling Flag on
-               //systemclock = 0;                // systemclock count from begin,lock the SI status not duplicate
-               local_clock = 0;
+               g_int_SI_state_flag = 1;              // SI Flag on
+               g_int_sampling_state_flag = 1;        // sampling Flag on
+               //g_u32_systemclock = 0;                // g_u32_systemclock count from begin,lock the SI status not duplicate
+               //local_clock = 0;
                gpio_set(PORTC, 19, 1);         // SI rising edge
            }
       }else if (mode == 3){
-           if(SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
-               SI_state_flag = 1;              // SI Flag on
-               sampling_state_flag = 1;        // sampling Flag on
-               local_clock = 0;
+           if(g_int_SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
+               g_int_SI_state_flag = 1;              // SI Flag on
+               g_int_sampling_state_flag = 1;        // sampling Flag on
+               //local_clock = 0;
                gpio_set(PORTC, 19, 1);         // SI rising edge
            }
      }
 }
 
-void sampling(char mode){
+void ccd_sampling(char mode){
    
        int local_clock = 0;
        
-       trigger_SI(local_clock,mode);
+       //trigger_SI(local_clock,mode);
+       ccd_trigger_SI(mode);
        
        local_clock++;
        
-       CCD_detect_track(); 
+       ccd_detect_track(); 
        
-       SI_failing_edge_condition(local_clock);
+       ccd_SI_failing_edge_condition(local_clock);
        
-       CCD_finish_one_sampling(mode);
+       ccd_finish_one_sampling(mode);
 }
 
 void ALL_PIN_Init(){
