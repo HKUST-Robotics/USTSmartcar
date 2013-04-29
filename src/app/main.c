@@ -6,21 +6,24 @@ HKUST Smartcar 2013 Sensor Group
 *************************************************************************/
 
 void ALL_PIN_Init();
-volatile u32 g_u32_systemclock=0;                      // g_u32_systemclock
-volatile int g_int_SI_state_flag=0;                    // SI flag mode
-volatile int g_int_sampling_state_flag=0;              // Sample flag mode
-char g_char_ar_ccd_pixel[128];
-char str[1];
-char mode=0;
+volatile u32 g_u32_systemclock=0;                      // systemclock
+volatile int g_int_SI_state_flag=0;                    // SI flag
+volatile int g_int_sampling_state_flag=0;              // sampling state flag
+char g_char_ar_ccd_pixel[128];                         // 1-line pixel array
+char g_char_mode=0;                                    // program mode
+
+/*************************************************************************
+Global Varaible
+*************************************************************************/
+
 int i;
 
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
 volatile u32 g_u32encoder_lf=0;
 volatile u32 g_u32encoder_rt=0;
 
-
 void interrupts_init(void);
-void ccd_sampling(char mode);
+void ccd_sampling(char g_char_mode);
 u8 todis[];//for sprintf usage
 
 void ccd_print(char []);
@@ -29,11 +32,12 @@ void main()
 {   
    uart_init(UART3, 115200); // For our flashed bluetooth
    //uart_init(UART3, 9600); // For un-flash bluetooth
-    printf("Please select mode:\n\f1:Accelerometer&gyro\n\f2:LinearCCD\n\f3:Tuning CCD\n\f4:Encoder testing\n\f");
-   mode = uart_getchar(UART3);
+   
+   printf("Please select mode:\n\f1:Accelerometer&gyro\n\f2:LinearCCD\n\f3:Tuning CCD\n\f4:Encoder testing\n\f");
+   g_char_mode = uart_getchar(UART3);
    delayms(500); 
   
-       switch (mode){
+       switch (g_char_mode){
        case '1':
           uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
            
@@ -45,7 +49,7 @@ void main()
           while(1)
           { 
               accl_print();
-              //trigger_si(); // trigger SI to sample
+              //ccd_sampling(3); // sampling
               delayms(500);
           }
        break;
@@ -53,32 +57,24 @@ void main()
        case '2':
           uart_sendStr(UART3,"The mode now is 2: Linear CCD");
           interrupts_init();
-          //uart_init(UART3, 115200);
-          //accl_init();
           printf("\nEverything Initialized alright\n");
           
           while(1)
           { 
-              //accl_print();
-              ccd_sampling(2); // sampling
-              //delayms(500);
+              ccd_sampling(2); // sampling, with more notice message
           }  
-        break;
+       break;
         
         case '3':
           uart_sendStr(UART3,"The mode now is 3: Tuning CCD");
           interrupts_init();
-          //uart_init(UART3, 115200);
-          //accl_init();
           printf("\nEverything Initialized alright\n");
           
           while(1)
           { 
-              //accl_print();
-              ccd_sampling(3); // Tuning CCD
-              //delayms(500);
+              ccd_sampling(3); // Tuning CCD, with less notice message
           }  
-        break;
+       break;
                
        case '4':
        uart_sendStr(UART3,"The mode now is 4: encoder test");
@@ -87,8 +83,7 @@ void main()
        FTM_Input_init(FTM1,CH1,Rising);             //inits right encoder interrupt capture
                
        pit_init_ms(PIT0,500);                      //periodic interrupt every second or so
-
-        
+       
        printf("\nEverything Initialized alright\n");
        
        while(1)
@@ -111,7 +106,10 @@ void interrupts_init(void){
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
     pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
     //pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
-    // Maximum clock is 8us cycle by using PIT_init_ms
+ 
+/*************************************************************************
+Maximum clock is 8us cycle by using PIT_init_ms
+*************************************************************************/
     
     //pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     
@@ -127,10 +125,10 @@ void ccd_detect_track(){
       } 
 }
 
-void ccd_SI_failing_edge_condition(int local_clock){
+void ccd_SI_failing_edge_condition(int ccd_int_local_clock){
   
       //if(g_u32_systemclock %21 == 20  &&  G_int_SI_state_flag == 1){     // condition for SI failing edge to end 
-      if(local_clock == 20  &&  g_int_SI_state_flag == 1){     // condition for SI failing edge to end 
+      if(ccd_int_local_clock == 20  &&  g_int_SI_state_flag == 1){     // condition for SI failing edge to end 
     
         gpio_set(PORTC, 19, 0); // SI faling edge
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
@@ -138,9 +136,9 @@ void ccd_SI_failing_edge_condition(int local_clock){
       }
 }
 
-void ccd_finish_one_sampling(int mode){
+void ccd_finish_one_sampling(int g_char_mode){
   
-    if (mode == 2){
+    if (g_char_mode == 2){
         if(g_u32_systemclock % 129 == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           
           //g_u32_systemclock = 0;          // No need this after change if into g_u32_systemclock % 129 == 128
@@ -155,7 +153,7 @@ void ccd_finish_one_sampling(int mode){
           ccd_print(g_char_ar_ccd_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
         }
-    } else if(mode == 3){
+    } else if(g_char_mode == 3){
       
        if(g_u32_systemclock % 129 == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           
@@ -174,6 +172,9 @@ void ccd_finish_one_sampling(int mode){
 //void trigger_SI(int local_clock, int mode){
 
 void ccd_trigger_SI(int mode){
+  
+      //char str[1]; 
+    
       if(mode == 2){
            if(g_int_SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
       
@@ -183,31 +184,31 @@ void ccd_trigger_SI(int mode){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
                //g_u32_systemclock = 0;                // g_u32_systemclock count from begin,lock the SI status not duplicate
-               //local_clock = 0;
+               //ccd_int_local_clock= 0;
                gpio_set(PORTC, 19, 1);         // SI rising edge
            }
       }else if (mode == 3){
            if(g_int_SI_state_flag == 0 ){            // Use this instaed of , if(uart_pendstr(UART3,str) == 1) , can Auto sampling repeatedly
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
-               //local_clock = 0;
+               //ccd_int_local_clock = 0;
                gpio_set(PORTC, 19, 1);         // SI rising edge
            }
-     }
+      }
 }
 
 void ccd_sampling(char mode){
    
-       int local_clock = 0;
+       int ccd_int_local_clock = 0;
        
        //trigger_SI(local_clock,mode);
        ccd_trigger_SI(mode);
        
-       local_clock++;
+       ccd_int_local_clock++;
        
        ccd_detect_track(); 
        
-       ccd_SI_failing_edge_condition(local_clock);
+       ccd_SI_failing_edge_condition(ccd_int_local_clock);
        
        ccd_finish_one_sampling(mode);
 }
