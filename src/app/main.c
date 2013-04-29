@@ -5,7 +5,6 @@
 HKUST Smartcar 2013 Sensor Group
 *************************************************************************/
 
-void ALL_PIN_Init();
 volatile u32 g_u32_systemclock=0;                      // systemclock
 volatile int g_int_SI_state_flag=0;                    // SI flag
 volatile int g_int_sampling_state_flag=0;              // sampling state flag
@@ -16,8 +15,6 @@ char g_char_mode=0;                                    // program mode
 Global Varaible
 *************************************************************************/
 
-int i;
-
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
 volatile u32 g_u32encoder_lf=0;
 volatile u32 g_u32encoder_rt=0;
@@ -26,7 +23,20 @@ void interrupts_init(void);
 void ccd_sampling(char g_char_mode);
 u8 todis[];//for sprintf usage
 
+/*************************************************************************
+Global Varaible
+*************************************************************************/
+                                              
+u8 todis[];                                           //for sprintf usage
+
+void ALL_PIN_Init();
+void interrupts_init(void);
+void ccd_sampling(char g_char_mode);
 void ccd_print(char []);
+
+/*************************************************************************
+Function header
+*************************************************************************/
 
 void main()
 {   
@@ -94,9 +104,12 @@ void main()
 }
 
 void ccd_print(char array[]){
-          for( i = 0 ; i < 128 ; i++){
+      
+      int i;  
+      
+      for( i = 0 ; i < 128 ; i++){
            uart_putchar(UART3,array[i]); //print One pixel One loop
-        }
+      }
 }
 
 void interrupts_init(void){
