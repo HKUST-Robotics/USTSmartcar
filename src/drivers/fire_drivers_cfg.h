@@ -1,17 +1,3 @@
-/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
- * 文件名       ：fire_drivers_cfg.h
- * 描述         ：K60复用管家配置
- * 备注         ：野火耗了很久时间整理出来，希望尊重野火的劳动成功，注明野火原创！！
- *
- * 实验平台     ：野火kinetis开发板
- * 库版本       ：
- * 嵌入系统     ：
- *
- * 作者         ：野火嵌入式开发工作室
- * 淘宝店       ：http://firestm32.taobao.com
- * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
-**********************************************************************************/	
-
 #ifndef _FIRE_DRIVERS_CFG_H_
 #define _FIRE_DRIVERS_CFG_H_
 
@@ -30,8 +16,8 @@
 #define UART2_RX    PTD2        //PTD2
 #define UART2_TX    PTD3        //PTD3
 
-#define UART3_RX    PTC16       //PTB10、PTC16、PTE5
-#define UART3_TX    PTC17       //PTB11、PTC17、PTE4
+#define UART3_RX    PTE5       //PTB10 = old board、PTC16、PTE5 = new board
+#define UART3_TX    PTE4       //PTB11 = old board、PTC17、PTE4 = new board
 
 #define UART4_RX    PTE25       //PTC14、PTE25
 #define UART4_TX    PTE24       //PTC15、PTE24
@@ -81,8 +67,8 @@
 /**********************************  I2C   ***************************************/
 
 //      模块通道    端口          可选范围              建议
-#define I2C0_SCL    PTB2        // PTB0、PTB2、PTD8
-#define I2C0_SDA    PTB3        // PTB1、PTB3、PTD9
+#define I2C0_SCL    PTD8        // PTB0、PTB2、PTD8
+#define I2C0_SDA    PTD9        // PTB1、PTB3、PTD9
 
 #define I2C1_SCL    PTC10       // PTE1、PTC10
 #define I2C1_SDA    PTC11       // PTE0、PTC11

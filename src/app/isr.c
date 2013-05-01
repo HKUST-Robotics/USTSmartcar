@@ -15,7 +15,7 @@ extern volatile u32 g_u32encoder_rt;
 void PIT0_IRQHandler(void)
 {
     
-      gpio_turn(PORTB, 18);       // systemclock Rising and Failing edge
+      gpio_turn(PORTB, 22);       // systemclock Rising and Failing edge
       
       /* Using SW3 to generate 0 or 1
       if(gpio_get(PORTB, 4) == 0) {  // if SW3 is press, the pixle respect to that systemclock is 1
