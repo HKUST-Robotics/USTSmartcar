@@ -86,10 +86,10 @@ void main()
           uart_sendStr(UART3,"The mode now is 4: encoder test");
                
           DisableInterrupts;
-          FTM_Input_init(FTM1,CH0,Rising);             //inits left encoder interrupt capture
-          FTM_Input_init(FTM1,CH1,Rising);             //inits right encoder interrupt capture
+          exti_init(PORTC,18,rising_down);             //inits left encoder interrupt capture
+          exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
                
-          pit_init_ms(PIT0,500);                       //periodic interrupt every second or so
+          pit_init_ms(PIT1,500);                       //periodic interrupt every second or so
        
           EnableInterrupts;
           printf("\nEverything Initialized alright\n");

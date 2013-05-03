@@ -10,6 +10,8 @@ extern volatile u32 g_u32_systemclock;   // systemclock counter
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
 
+u8 system_mode=0;
+
 void PIT0_IRQHandler(void)
 {
     
@@ -50,13 +52,7 @@ void PIT1_IRQHandler(void)
 void FTM1_IRQHandler()
 {
     //this triggers on encoder pulse's rising edge
-    /*connection config:
-     
-     Hardware        Port name       Program name    Physical location
-     ---------------+---------------+---------------+-----------------
-     encoder_left    PTA8            FTM1,CH0        JP6
-     encoder_right   PTA9            FTM1,CH1        JP7
-     */
+
     
     u8 s=FTM1_STATUS;
     u8 CHn;
@@ -90,3 +86,63 @@ void FTM1_IRQHandler()
     }
 }
 
+void encoder_counter(void){
+  /*connection config:
+     
+     Hardware        Port name       Program name    Physical location
+     ---------------+---------------+---------------+-----------------
+     encoder_left    PTC18            FTM1,CH0        servo1
+     encoder_right   PTC19            FTM1,CH1        servo2
+     */
+ 
+    u8  n=0;
+    n=18;
+    if(PORTC_ISFR & (1<<n)) 
+    {
+        PORTC_ISFR  |= (1<<n);
+        g_u32encoder_lf++;
+        
+    } 
+    
+    n=19;
+    if(PORTC_ISFR & (1<<n))
+    {
+        PORTC_ISFR  |= (1<<n);
+        g_u32encoder_rt++;
+    } 
+  
+}
+
+void pit3_system_loop(void){
+  switch (system_mode){
+    case '0':
+      //get gyro values
+      
+      system_mode=1;//go to next state on next cycle
+    break;
+    case 1:
+      //get ccd values
+      
+      system_mode=2;
+    break;
+    case 2:
+      //calculate balance command
+      
+      system_mode=3;
+    break;
+    case 3:
+      //calculate turning command
+      
+      system_mode=4;
+    break;
+    case 4:
+      //excute motor pwm with PID
+      g_u32encoder_lf;
+      g_u32encoder_rt;
+      
+      system_mode=0;
+    break;
+      
+      
+  }
+}
