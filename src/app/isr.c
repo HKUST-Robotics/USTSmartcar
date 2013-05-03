@@ -3,8 +3,6 @@
 #include "linearccd.h"
 
 extern volatile u32 g_u32_systemclock;   // systemclock counter
-extern volatile int SI_state_flag;         // SI flag mode
-extern volatile int sampling_state_flag;   // Smapling state flag mode
 
 //extern volatile u32 g_u32encoder_lf=0; // IAR warning : duplicate definitions
 //extern volatile u32 g_u32encoder_rt=0; // IAR warning : duplicate definitions

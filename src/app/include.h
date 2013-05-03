@@ -19,6 +19,7 @@
 #include  "pit.h"
 #include  "i2c.h"
 #include  "accl.h"
+#include  "linearccd.h"
 
 
 
