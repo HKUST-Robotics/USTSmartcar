@@ -10,6 +10,9 @@ extern volatile u32 g_u32_systemclock;   // systemclock counter
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
 
+extern volatile u32 g_u32encoder_lflast;
+extern volatile u32 g_u32encoder_rtlast;
+
 u8 system_mode=0;
 
 void PIT0_IRQHandler(void)
@@ -100,6 +103,7 @@ void encoder_counter(void){
     if(PORTC_ISFR & (1<<n)) 
     {
         PORTC_ISFR  |= (1<<n);
+        
         g_u32encoder_lf++;
         
     } 
@@ -114,6 +118,11 @@ void encoder_counter(void){
 }
 
 void pit3_system_loop(void){
+  //main system control loop, runs every 1ms, each case runs every 5 ms
+  
+  int motor_command_left,motor_command_right;
+  int motor_command_balance;
+  
   switch (system_mode){
     case '0':
       //get gyro values
@@ -122,23 +131,36 @@ void pit3_system_loop(void){
     break;
     case 1:
       //get ccd values
+      //i.e. sample(2);
       
       system_mode=2;
     break;
     case 2:
-      //calculate balance command
+      //calculate balance command with input angle
+      //in the end edit motor_command_balance to desired value
       
       system_mode=3;
     break;
     case 3:
-      //calculate turning command
+      //calculate turning command from ccd
+      //in the end set motor_command_left and motor_command_right to desired values;
       
       system_mode=4;
     break;
     case 4:
       //excute motor pwm with PID
-      g_u32encoder_lf;
-      g_u32encoder_rt;
+      
+      //error_left=u32encoder_lf - set;
+      //ditto right
+      
+      
+      //d value = 
+      
+      
+      
+      //saves current encoder count to last count
+      g_u32encoder_lflast=g_u32encoder_lf;
+      g_u32encoder_rtlast=g_u32encoder_rt;
       
       system_mode=0;
     break;

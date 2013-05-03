@@ -1,13 +1,15 @@
 /*************************************************************************
-HKUST Smartcar 2013 Sensor Group
+   
+  main.c
+  HKUST Smartcar 2013 Sensor Group
 
-Authoured by:
-John Ching
-Louis Mo
-Yumi Chan
+  Authoured by:
+  John Ching
+  Louis Mo
+  Yumi Chan
 
-Hardware By:
-Zyan Shao
+  Hardware By:
+  Zyan Shao
 *************************************************************************/
 #include "common.h"
 #include "include.h"
@@ -22,6 +24,9 @@ volatile u32 g_u32_systemclock=0;   // systemclock counter
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
 volatile u32 g_u32encoder_lf=0;
 volatile u32 g_u32encoder_rt=0;
+
+volatile u32 g_u32encoder_lflast=0;
+volatile u32 g_u32encoder_rtlast=0;
 
 u8 todis[];//for sprintf usage
 
@@ -38,66 +43,79 @@ void main()
    uart_init(UART3, 115200); // For our flashed bluetooth
    //uart_init(UART3, 9600); // For un-flash bluetooth
    
-   printf("Please select mode:\n\f1:Accelerometer&gyro\n\f2:LinearCCD\n\f3:Tuning CCD\n\f4:Encoder testing\n\f");
+   printf("\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
+   while(1){
+   printf("========================================================\n\f");
+   
+   printf("Please select mode:\n\f---------------------------\n\f");
+   printf("1:Accelerometer&gyro\n\f");
+   printf("2:LinearCCD\n\f");
+   printf("3:Tuning CCD\n\f");
+   printf("4:Encoder testing\n\f");
+   printf("5:Actual system loop test\n\f");
+   
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
   
-       switch (g_char_mode){
-       case '1':
-          uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
-           
-          //interrupts_init();
-          //uart_init(UART3, 115200); // Alreday init before switch into mode
-          accl_init();
-          printf("\nEverything Initialized alright\n");
-          
-          while(1)
-          { 
-              accl_print();
-              //ccd_sampling(3); // sampling
-              delayms(500);
-          }
-       break;
-       
-       case '2':
-          uart_sendStr(UART3,"The mode now is 2: Linear CCD");
-          interrupts_init();
-          printf("\nEverything Initialized alright\n");
-          
-          while(1)
-          { 
-              ccd_sampling(2); // sampling, with more notice message
-          }  
-       break;
+     switch (g_char_mode){
+     case '1':
+        uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
+         
+        //interrupts_init();
+        //uart_init(UART3, 115200); // Alreday init before switch into mode
+        accl_init();
+        printf("\nEverything Initialized alright\n");
         
-        case '3':
-          uart_sendStr(UART3,"The mode now is 3: Tuning CCD");
-          interrupts_init();
-          printf("\nEverything Initialized alright\n");
-          
-          while(1)
-          { 
-              ccd_sampling(3); // Tuning CCD, with less notice message
-          }  
-        break;
-               
-        case '4':
-          //temporary case for debuggine encoder libraries, move to encoder.h later
-          uart_sendStr(UART3,"The mode now is 4: encoder test");
-               
-          DisableInterrupts;
-          exti_init(PORTC,18,rising_down);             //inits left encoder interrupt capture
-          exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
-               
-          pit_init_ms(PIT1,500);                       //periodic interrupt every second or so
-       
-          EnableInterrupts;
-          printf("\nEverything Initialized alright\n");
-       
-          while(1){}
-            
-        break;
+        while(1)
+        { 
+            accl_print();
+            //ccd_sampling(3); // sampling
+            delayms(500);
+        }
+     break;
+     
+     case '2':
+        uart_sendStr(UART3,"The mode now is 2: Linear CCD");
+        interrupts_init();
+        printf("\nEverything Initialized alright\n");
         
+        while(1)
+        { 
+            ccd_sampling(2); // sampling, with more notice message
+        }  
+     break;
+      
+      case '3':
+        uart_sendStr(UART3,"The mode now is 3: Tuning CCD");
+        interrupts_init();
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+            ccd_sampling(3); // Tuning CCD, with less notice message
+        }  
+      break;
+             
+      case '4':
+        //temporary case for debuggine encoder libraries, move to encoder.h later
+        uart_sendStr(UART3,"The mode now is 4: encoder test");
+             
+        DisableInterrupts;
+        exti_init(PORTC,18,rising_down);             //inits left encoder interrupt capture
+        exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
+             
+        pit_init_ms(PIT1,500);                       //periodic interrupt every second or so
+     
+        EnableInterrupts;
+        printf("\nEverything Initialized alright\n");
+     
+        while(1){}
+          
+      break;
+      default :
+        printf("\n\fYou entered:%c, Please enter a number from 1-5 to select a mode\n\f",g_char_mode);
+        
+    }
    }
 }
 
