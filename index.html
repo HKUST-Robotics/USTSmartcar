@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="HKUST Smart Car Library : Sentinel is the best" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>HKUST Smart Car Library</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/HKUST/USTSmartcar">View on GitHub</a>
+
+          <h1 id="project_title">HKUST Smart Car Library</h1>
+          <h2 id="project_tagline">Sentinel is the best</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/HKUST/USTSmartcar/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/HKUST/USTSmartcar/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>USTSmartcar</h1>
+
+<p>This is a library developed by the HKUST Robotics team for the SmartCar Competition. 
+Compiles in the IAR IDE for the Freescale k60 MCU on a custom made development board.</p>
+
+<p>Gyroscope, Accelerometer, encoders and Linear CCD libraries are also written for input.</p>
+
+<h2>Conventions</h2>
+
+<p>This library attempts to follow the following conventions:</p>
+
+<p>1.If your function is part of a Hardware Ability:</p>
+
+<ul>
+<li>have it live inside of a library eventually ( i.e <code>accl.c</code>, <code>accl.h</code>)</li>
+</ul><p>2.Prefix all functions with library name:</p>
+
+<ul>
+<li>i.e. <code>accl_tilt();</code>
+</li>
+</ul><p>3.for global variables, affix g_ to the front of the variable, and label the type with f,u8,ch etc.</p>
+
+<ul>
+<li>i.e. <code>g_u8ar_ccd_pixel</code> would mean it is a global variable with type u8 array called pixel, related to the ccd library,</li>
+<li>this allows code to be self documenting and easier to read</li>
+</ul><p>4.With the exception of special deployment scenarios, (i.e. pintest), refrain from defining functions inside of main.c, </p>
+
+<ul>
+<li>increase readability. </li>
+<li>try to place them in their own .h &amp; .c files</li>
+</ul><h3>Authors and Contributors</h3>
+
+<p>Library built and maintained by <a href="https://github.com/jcching" class="user-mention">@jcching</a>, <a href="https://github.com/LouisMo" class="user-mention">@LouisMo</a>, <a href="https://github.com/city25" class="user-mention">@city25</a></p>
+
+<h3>Support or Contact</h3>
+
+<p>Having trouble with this library? No support from us, but we tried commenting the code thoroughly</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">HKUST Smart Car Library maintained by <a href="https://github.com/HKUST">HKUST</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
