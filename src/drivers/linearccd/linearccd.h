@@ -11,15 +11,11 @@ Edited & compiled by John Ching
 
 
 void ccd_print(char array[]); //function prints out length128 array to bluetooth
-void covert_character_to_integer(int input_int, char output_char[]);
 void ccd_sampling(char mode);
 
 //Internal use:
 
-void ccd_sample_filtering();
-// CCD sample filtering algorithm
-
-void ccd_hard_code_benchmark();
+void hard_code_benchmark();
 // hard code two benchmark arrays for sample filtering use
 
 void ccd_save_previous_sampling();
