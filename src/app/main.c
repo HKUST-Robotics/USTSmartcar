@@ -60,9 +60,7 @@ void main()
      switch (g_char_mode){
      case '1':
         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
-         
-        //interrupts_init();
-        //uart_init(UART3, 115200); // Alreday init before switch into mode
+        
         accl_init();
         printf("\nEverything Initialized alright\n");
         
@@ -112,6 +110,19 @@ void main()
         while(1){}
           
       break;
+      
+        case '5':
+        uart_sendStr(UART3,"The mode now is 5: CCD Sample Filtering");
+        interrupts_init();
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+            ccd_sampling(5); // Tuning CCD, with less notice message
+        }  
+      break;
+      
+      
       default :
         printf("\n\fYou entered:%c, Please enter a number from 1-5 to select a mode\n\f",g_char_mode);
         
@@ -149,7 +160,6 @@ void ALL_PIN_Init(){
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-
 
  /*************************************************************************  
   New Main Board

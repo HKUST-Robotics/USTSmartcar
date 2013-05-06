@@ -1293,6 +1293,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 19 13 165 45 35 109 44 123 115 163 47 36 41 37 17 22 28 30 34 9 167 121</file>
+        </tool>
+        <tool>
           <name>ICCARM</name>
           <file> 19 13 165 45 35 109 44 123 115 163 164 47 36 41 37 17 22 28 30 34 9 167 121</file>
         </tool>

@@ -15,6 +15,12 @@ void ccd_sampling(char mode);
 
 //Internal use:
 
+void hard_code_benchmark();
+// hard code two benchmark arrays for sample filtering use
+
+void ccd_save_previous_sampling();
+// records previous smapling
+
 void ccd_detect_track(); 
 //reads from AV pin: 0=white 1=black
 
