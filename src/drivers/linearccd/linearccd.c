@@ -18,10 +18,9 @@ int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
 
 char g_char_ar_ccd_pixel[128];                // 1-line pixel array
-char g_char_ar_ccd_perious_pixel[128];        // previous pixel array
+char g_char_ar_ccd_previous_pixel[128];        // previous pixel array
 char g_char_ar_ccd_benchmark_one[128];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
-
 
 u32 g_u32_meaningless_counter;
 
@@ -60,12 +59,66 @@ void hard_code_benchmark(){
   
 }
 
+void convert_char_to_readable_integer(int intput_int, char output_char[]){
+  
+  if(intput_int >= 0 && intput_int <10){
+    
+    output_char[0] = intput_int + '0';
+    
+  } else if (intput_int >= 10 && intput_int <100){
+    
+    output_char[0] = (intput_int%10) + '0';
+    output_char[1] = (intput_int/10)%10 + '0';
+    
+  } else if (intput_int >= 100 && intput_int <129){
+    
+    output_char[0] = (intput_int%10) + '0';
+    output_char[1] = (intput_int/10)%10 + '0';
+    output_char[2] = (intput_int/100)%10 + '0';
+  }
+  
+}
+
+void ccd_sample_filtering(){
+  
+  // Compare currect sample with previos sample
+  
+  int ccd_same_pixel_count = 0;
+  char ccd_similar_count_digit[3];
+  int x;
+  
+  for( x = 0 ; x < 128 ; x++){
+          if ( g_char_ar_ccd_previous_pixel[x] == g_char_ar_ccd_pixel[x]){
+          ccd_same_pixel_count++;
+          }
+  }
+      
+  convert_char_to_readable_integer(ccd_same_pixel_count,ccd_similar_count_digit);
+   
+  
+  for( x = 0 ; x < 3 ; x++){
+  uart_putchar(UART3,ccd_similar_count_digit[x]);
+  }
+  
+  uart_sendStr(UART3," number of current pixels are same as pervious sample");
+  uart_sendStr(UART3,"\n\014");     // New page form feed
+  
+  
+  // if two sample devates a lot, filter it
+  
+  // use the benchmark
+  
+  
+  
+}
+
+
 void ccd_save_previous_sampling(){
   
       int k;
      
       for( k = 0 ; k < 128 ; k++){
-        g_char_ar_ccd_perious_pixel[g_u8_ccd_sample_clock] = g_char_ar_ccd_pixel[g_u8_ccd_sample_clock]; 
+        g_char_ar_ccd_previous_pixel[g_u8_ccd_sample_clock] = g_char_ar_ccd_pixel[g_u8_ccd_sample_clock]; 
       }
       // copy previous array, before next sampling
 }
@@ -148,12 +201,14 @@ void ccd_finish_one_sampling(char mode){
           uart_sendStr(UART3,"\n\014");     // New page form feed
           
           uart_sendStr(UART3,"Previous Sampling is: ");
-          ccd_print(g_char_ar_ccd_perious_pixel);
+          ccd_print(g_char_ar_ccd_previous_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
           
           uart_sendStr(UART3,"Just Sampled Array is: ");
           ccd_print(g_char_ar_ccd_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          ccd_sample_filtering();
           
        }
     }
