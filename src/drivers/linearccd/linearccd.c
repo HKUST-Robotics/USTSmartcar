@@ -12,7 +12,6 @@ Edited by John Ching
 #include  "include.h"
 #include  "linearccd.h"
 
-
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
 char g_char_ar_ccd_pixel[128];                         // 1-line pixel array

@@ -119,7 +119,6 @@ void main()
    }
 }
 
-
 void interrupts_init(void){
     
     DisableInterrupts;                                //Disable Interrupts
@@ -139,9 +138,9 @@ Maximum clock is 8us cycle by using PIT_init_ms
 
 void ALL_PIN_Init(){
 
-/************************************************************************* 
+ /*************************************************************************  
   Old Main Board
-  
+ *************************************************************************/
     gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
     gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
     gpio_init(PORTD, 2, GPO, 1); //PTD2, D4 LED
@@ -150,7 +149,10 @@ void ALL_PIN_Init(){
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-*************************************************************************/
+
+
+ /*************************************************************************  
+  New Main Board
   
      gpio_init(PORTE, 24, GPO, 0); //PTE24, D2 LED
      gpio_init(PORTE, 25, GPO, 0); //PTE25, D3 LED
@@ -160,6 +162,7 @@ void ALL_PIN_Init(){
      gpio_init(PORTB, 22, GPO, 1);  //PTB22 , Clock / CLK
      gpio_init(PORTB, 18, GPO, 1);  //PTB18 , SI
      gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO
+  *************************************************************************/
  
     //uart_init(UART3, 115200); // BlueTooth UART init
 }
