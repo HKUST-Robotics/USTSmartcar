@@ -118,7 +118,7 @@ void main()
         
         while(1)
         { 
-            ccd_sampling(5); // Tuning CCD, with less notice message
+            ccd_sampling(5); // CCD Sampling with filter algorithm
         }  
       break;
       

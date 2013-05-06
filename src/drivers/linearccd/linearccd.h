@@ -16,7 +16,7 @@ void ccd_sampling(char mode);
 
 //Internal use:
 
-void hard_code_benchmark();
+void ccd_hard_code_benchmark();
 // hard code two benchmark arrays for sample filtering use
 
 void ccd_save_previous_sampling();
@@ -28,9 +28,10 @@ void ccd_detect_track();
 void ccd_trigger_SI(char mode);
 //mode: 2=Prints debug messages to bluetooth
 //      3=No notice messages
+//      5=CCD Sampling with filter algorithm
 
 
-void ccd_SI_failing_edge_condition();
+void ccd_SI_failing_edge_condition(char mode);
 //Starts falling edge events if conditions are met.
 
 
