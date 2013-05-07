@@ -4,14 +4,14 @@
 
 extern volatile u32 g_u32_systemclock;   // systemclock counter
 
-//extern volatile u32 g_u32encoder_lf=0; // IAR warning : duplicate definitions
-//extern volatile u32 g_u32encoder_rt=0; // IAR warning : duplicate definitions
-
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
 
 extern volatile u32 g_u32encoder_lflast;
 extern volatile u32 g_u32encoder_rtlast;
+
+int motor_command_left,motor_command_right;
+int motor_command_balance;
 
 u8 system_mode=0;
 
@@ -54,8 +54,14 @@ void PIT1_IRQHandler(void)
 
 void FTM1_IRQHandler()
 {
-    //this triggers on encoder pulse's rising edge
-
+    //this triggers on encoder pulse's rising edge, for use on newer mainboard with ftm encoder captures
+    /*
+    On new board
+    Hardware        Port name       Program name    Physical location
+    ---------------+---------------+---------------+-----------------
+    encoder_left    PTA8            FTM1,CH0        encoder0
+    encoder_right   PTA9            FTM1,CH1        encoder1
+     */
     
     u8 s=FTM1_STATUS;
     u8 CHn;
@@ -66,25 +72,24 @@ void FTM1_IRQHandler()
     if( s & (1<<CHn) )
     {
         FTM_IRQ_DIS(FTM1,CHn);      //prevents input capture interrupt
- 
         
-        g_u32encoder_lf++;                             //è®¡æ•°+1
+        g_u32encoder_lf++; 
         
         //try not to use disableinterrupt; here, do it in main.c
         FTM_IRQ_EN(FTM1,CHn);  //matches with FTM_IRQ_DIS(FTM1,CHn); 
 
     }
     
-    /* è¿™é?æ·»å? n=1 ?„æ¨¡?ˆï??¹æ®æ¨¡ç??¥æ·»??*/
+    
     CHn=1;
     if( s & (1<<CHn) )
     {
         FTM_IRQ_DIS(FTM1,CHn);      //prevents input capture interrupt
         
         
-        g_u32encoder_rt++;                             //è®¡æ•°+1
+        g_u32encoder_rt++;
         
-        FTM_IRQ_EN(FTM1,CHn);  //å¼€?¯è??¥æ??‰ä¸­??    }
+        FTM_IRQ_EN(FTM1,CHn);
     
     }
 }
@@ -94,8 +99,10 @@ void encoder_counter(void){
      
      Hardware        Port name       Program name    Physical location
      ---------------+---------------+---------------+-----------------
-     encoder_left    PTC18            FTM1,CH0        servo1
-     encoder_right   PTC19            FTM1,CH1        servo2
+     encoder_left    PTC18            exti ptc        servo1
+     encoder_right   PTC19            exti ptc        servo2
+   
+
      */
  
     u8  n=0;
@@ -113,15 +120,14 @@ void encoder_counter(void){
     {
         PORTC_ISFR  |= (1<<n);
         g_u32encoder_rt++;
-    } 
+    }
   
 }
 
 void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
-  
-  int motor_command_left,motor_command_right;
-  int motor_command_balance;
+    /*  int motor_command_left,motor_command_right;
+     int motor_command_balance; are available for passing commands*/
   
   switch (system_mode){
     case '0':

@@ -14,7 +14,6 @@
 #include "common.h"
 #include "include.h"
 
-
 /*************************************************************************
 Global Varaible
 *************************************************************************/
@@ -30,13 +29,11 @@ volatile u32 g_u32encoder_rtlast=0;
 
 u8 todis[];//for sprintf usage
 
-
 /*************************************************************************
 Function header
 *************************************************************************/
 void ALL_PIN_Init();
 void interrupts_init(void);
-
 
 void main()
 {   
@@ -52,7 +49,7 @@ void main()
    printf("2:LinearCCD\n\f");
    printf("3:Tuning CCD\n\f");
    printf("4:Encoder testing\n\f");
-   printf("5:Actual system loop test\n\f");
+   printf("5:CCDSample Filter Algorithm\n\f");
    
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
@@ -101,6 +98,7 @@ void main()
         DisableInterrupts;
         exti_init(PORTC,18,rising_down);             //inits left encoder interrupt capture
         exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
+             //FTM_Input_init(FTM1,CH0,Rising); for new board
              
         pit_init_ms(PIT1,500);                       //periodic interrupt every second or so
      
