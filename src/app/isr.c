@@ -10,6 +10,13 @@ extern volatile u32 g_u32encoder_rt;
 extern volatile u32 g_u32encoder_lflast;
 extern volatile u32 g_u32encoder_rtlast;
 
+//for the motor command loop
+
+/******************************************
+ Variables for control PIT
+ ******************************************/
+
+float accl_omega;
 int motor_command_left,motor_command_right;
 int motor_command_balance;
 
@@ -128,22 +135,30 @@ void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
     /*  int motor_command_left,motor_command_right;
      int motor_command_balance; are available for passing commands*/
+#define BALANCEKP 1
+#define BALANCEKI 1
   
   switch (system_mode){
     case '0':
       //get gyro values
-      
+          accl_update();
+          //accl_tilt16 now contains angle at float value
+          
+          
+          
       system_mode=1;//go to next state on next cycle
     break;
     case 1:
       //get ccd values
       //i.e. sample(2);
+          //louis fill this in! ~johnc
       
       system_mode=2;
     break;
     case 2:
       //calculate balance command with input angle
       //in the end edit motor_command_balance to desired value
+          motor_command_balance=(-1*BALANCEKP*accl_tilt16)+(-1*BALANCEKI*accl_omega);
       
       system_mode=3;
     break;
@@ -154,6 +169,8 @@ void pit3_system_loop(void){
       system_mode=4;
     break;
     case 4:
+        //left command = motor_balance_command + motor_command_left;
+        //right command = motor_balance_command + motor_command_right
       //excute motor pwm with PID
       
       //error_left=u32encoder_lf - set;
