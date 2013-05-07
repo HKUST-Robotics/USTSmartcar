@@ -144,28 +144,30 @@ void ccd_save_previous_sampling(){
 
 void ccd_detect_track(){
      
-       
+    /* Random Sampling Cod
     if(g_u32_meaningless_counter % 5 == 1 || g_u32_meaningless_counter % 7 == 1){
           g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';  }
     else{
           g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '0';
     }    
-        
-      /* Actual Sampling Code by using CCD
-      if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1
+    */ 
+    
+  
+     //Actual Sampling Code by using CCD
+      if(gpio_get(PORTA, 11) == 1) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1 (new board)
+      //if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1 (new board)
         g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';
       }else {                         // if CCD receive white, the pixel respect to that g_u32_systemclock is 0
         g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '0';
       }
-      */
-      
+       
 }
 
 void ccd_SI_failing_edge_condition(char mode){
   
    //if(g_u32_systemclock %21 == 20  &&  G_int_SI_state_flag == 1){     // condition for SI failing edge to end 
   if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && mode == 2){     // condition for SI failing edge to end 
-        gpio_set(PORTB, 18, 0); // SI faling edge
+        gpio_set(PORTB, 19, 0); // SI faling edge
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
         uart_sendStr(UART3,"\014");  // New page form feed
       }
@@ -265,14 +267,14 @@ void ccd_trigger_SI(char mode){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on        
                g_u16_ccd_sample_clock = 0;    
-               gpio_set(PORTB, 18, 1);         // SI rising edge
+               gpio_set(PORTB, 19, 1);         // SI rising edge
            }
       }else if (mode == 3){
            if(g_int_SI_state_flag == 0 ){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
                g_u16_ccd_sample_clock = 0;
-               gpio_set(PORTB, 18, 1);         // SI rising edge
+               gpio_set(PORTB, 19, 1);         // SI rising edge
            }
       }
       else if (mode == 5){
@@ -280,13 +282,14 @@ void ccd_trigger_SI(char mode){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
                g_u16_ccd_sample_clock = 0;
-               gpio_set(PORTB, 18, 1);         // SI rising edge
+               gpio_set(PORTB, 19, 1);         // SI rising edge
            }
       }
 }
 
 void ccd_sampling(char mode){
       
+       gpio_turn(PORTB, 18);       // Clock Rising and Failing edge
    
        ccd_hard_code_benchmark();
   
