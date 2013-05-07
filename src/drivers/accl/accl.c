@@ -21,7 +21,6 @@ float g_fGyroscopeAngleIntegral;  //
 u8 accl_buffer[2];
 char accl_todis[];
 
-float accl_x16, accl_y16, accl_z16, accl_tilt16;
     
 void accl_init(void){
     I2C_init(I2C0);

@@ -11,6 +11,9 @@ for HKUST SmartCar team 2013
 
 #include "include.h"
 
+
+float accl_x16, accl_y16, accl_z16, accl_tilt16;
+
 void      accl_init(void);
 float accl_getx(void);
 float accl_gety(void);

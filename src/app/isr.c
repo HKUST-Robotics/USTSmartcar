@@ -143,6 +143,7 @@ void pit3_system_loop(void){
       //get gyro values
           accl_update();
           //accl_tilt16 now contains angle at float value
+          //write code to put omega into accl_omega
           
           
           
