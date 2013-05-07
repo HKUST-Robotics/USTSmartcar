@@ -154,14 +154,16 @@ void ALL_PIN_Init(){
  /*************************************************************************  
   Old Main Board
  *************************************************************************/
-    gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
-    gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
-    gpio_init(PORTD, 2, GPO, 1); //PTD2, D4 LED
-    gpio_init(PORTD, 3, GPO, 1); //PTD3, D5 LED
+    //gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
+    //gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
+    //gpio_init(PORTD, 2, GPO, 1); //PTD2, D4 LED
+    //gpio_init(PORTD, 3, GPO, 1); //PTD3, D5 LED
         
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTC, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
+    
+    gpio_init(PORTA, 8, GPO, 1);   //PTA8  , Trigger Oscilloscope
 
  /*************************************************************************  
   New Main Board

@@ -18,18 +18,18 @@ int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
 
 char g_char_ar_ccd_pixel[128];                // 1-line pixel array
-char g_char_ar_ccd_previous_pixel[128];        // previous pixel array
+char g_char_ar_ccd_previous_pixel[128];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[128];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
 
-u32 g_u32_meaningless_counter;
+u32 g_u32_meaningless_counter = 0;
 
 void ccd_print(char array[]){
       
       int i;  
       
       for( i = 0 ; i < 128 ; i++){
-           uart_putchar(UART3,array[i]); //print One pixel One loop
+           uart_putchar(UART3,array[i]);      //print One pixel One loop
       }
 }
 
@@ -37,21 +37,21 @@ void convert_char_to_readable_integer(int input_int, char output_char[]){
   
   if(input_int >= 0 && input_int < 10){
     
-    output_char[0] = input_int + '0';
-    output_char[1] = '0';
-    output_char[2] = '0'; 
+    output_char[0] = input_int + '0';             // ones 
+    output_char[1] = '0';                         // tens
+    output_char[2] = '0';                         // hundreds
     
   } else if (input_int >= 10 && input_int < 100){
     
-    output_char[0] = (input_int%10) + '0';
-    output_char[1] = (input_int/10)%10 + '0';
-    output_char[2] = '0'; 
+    output_char[0] = (input_int%10) + '0';        // ones
+    output_char[1] = (input_int/10)%10 + '0';     // tens
+    output_char[2] = '0';                         // hundreds
     
   } else if (input_int >= 100 && input_int < 1000){
     
-    output_char[0] = (input_int%10) + '0';
-    output_char[1] = (input_int/10)%10 + '0';
-    output_char[2] = (input_int/100)%10 + '0';
+    output_char[0] = (input_int%10) + '0';        // ones
+    output_char[1] = (input_int/10)%10 + '0';     // tens
+    output_char[2] = (input_int/100)%10 + '0';    // hundreds
   }
   
 }
@@ -82,13 +82,15 @@ void ccd_hard_code_benchmark(){
 
 void ccd_sample_filtering(){
   
-  // Compare currect sample with previos sample
+  // compare currect sample with previos sample
   
   int ccd_same_pixel_count = 0;
   char ccd_similar_count_digit[3];
   int x;
   int y;
   
+  // eveulate the similarity between previous sample and currenct sample
+  // by int value 0 to 127, higher is better
   for( x = 0 ; x < 128 ; x++){
           if ( g_char_ar_ccd_previous_pixel[x] == g_char_ar_ccd_pixel[x]){
           ccd_same_pixel_count++;
@@ -97,7 +99,6 @@ void ccd_sample_filtering(){
       
   convert_char_to_readable_integer(ccd_same_pixel_count,ccd_similar_count_digit);
    
-  
   for( x = 2 ; x >= 0 ; x--){
   uart_putchar(UART3,ccd_similar_count_digit[x]);
   }
@@ -112,17 +113,21 @@ void ccd_sample_filtering(){
      g_char_ar_ccd_pixel[y] = g_char_ar_ccd_previous_pixel[y]; 
      } 
      
-  uart_sendStr(UART3,"** The current sample has been filtered and replaced by previous sample **");
-  uart_sendStr(UART3,"\n\014");     // New page form feed   
-     
+      uart_sendStr(UART3,"\t\t\t\t");    
+      uart_sendStr(UART3,"**************************************************************************");   
+      uart_sendStr(UART3,"\n\014");     // New page form feed   
+      
+      uart_sendStr(UART3,"\t\t\t\t");    
+      uart_sendStr(UART3,"** The current sample has been filtered and replaced by previous sample **");
+      uart_sendStr(UART3,"\n\014");     // New page form feed   
+      
+      uart_sendStr(UART3,"\t\t\t\t");    
+      uart_sendStr(UART3,"**************************************************************************");   
+      uart_sendStr(UART3,"\n\014");     // New page form feed   
+  
   }
- 
   
-  
-  
-  // if two sample devates a lot, filter it
-  
-  // use the benchmark
+  // instead of using previous sample, use the benchmark sample
   
   
   
@@ -139,12 +144,12 @@ void ccd_save_previous_sampling(){
 
 void ccd_detect_track(){
      
-        if(g_u32_meaningless_counter % 5 == 1 || g_u32_meaningless_counter % 7 == 1){
+       
+    if(g_u32_meaningless_counter % 5 == 1 || g_u32_meaningless_counter % 7 == 1){
           g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';  }
-        else{
+    else{
           g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '0';
-        }
-        
+    }    
         
       /* Actual Sampling Code by using CCD
       if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1
@@ -154,7 +159,6 @@ void ccd_detect_track(){
       }
       */
       
- 
 }
 
 void ccd_SI_failing_edge_condition(char mode){
@@ -183,6 +187,12 @@ void ccd_finish_one_sampling(char mode){
           uart_sendStr(UART3,"Just Sampled Array is: ");
           ccd_print(g_char_ar_ccd_pixel);
           uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
+          uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          
         }
     } else if(mode == 3){ // Contiune Sampling
       
@@ -193,6 +203,10 @@ void ccd_finish_one_sampling(char mode){
           // Print the sampling array
           uart_sendStr(UART3,"Just Sampled Array is: ");
           ccd_print(g_char_ar_ccd_pixel);
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
+          uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
           uart_sendStr(UART3,"\n\014");     // New page form feed
        }
     }
@@ -229,6 +243,10 @@ void ccd_finish_one_sampling(char mode){
           for( p = 0 ; p < 150 ; p++){
              uart_putchar(UART3,'='); 
           }
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
+          uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
           uart_sendStr(UART3,"\n\014");     // New page form feed
           
        }
@@ -268,7 +286,8 @@ void ccd_trigger_SI(char mode){
 }
 
 void ccd_sampling(char mode){
-       
+      
+   
        ccd_hard_code_benchmark();
   
        ccd_trigger_SI(mode);
@@ -284,4 +303,9 @@ void ccd_sampling(char mode){
        ccd_finish_one_sampling(mode);
        
        g_u32_meaningless_counter++;
+       /*
+      if(g_u32_meaningless_counter > 10000){
+        g_u32_meaningless_counter = 0;
+      }
+       */
 }

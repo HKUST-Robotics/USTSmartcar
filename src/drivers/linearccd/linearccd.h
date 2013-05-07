@@ -9,9 +9,8 @@ Edited & compiled by John Ching
 
 *******************************************/
 
-
-void ccd_print(char array[]); //function prints out length128 array to bluetooth
-void convert_char_to_readable_integer(int intput_int, char output_char[]);
+void ccd_print(char array[]); // function prints out length128 array to bluetooth
+void convert_char_to_readable_integer(int intput_int, char output_char[]); // convert character into readable integer
 void ccd_sampling(char mode);
 
 //Internal use:
@@ -29,7 +28,6 @@ void ccd_trigger_SI(char mode);
 //mode: 2=Prints debug messages to bluetooth
 //      3=No notice messages
 //      5=CCD Sampling with filter algorithm
-
 
 void ccd_SI_failing_edge_condition(char mode);
 //Starts falling edge events if conditions are met.
