@@ -135,8 +135,10 @@ void interrupts_init(void){
     DisableInterrupts;                                //Disable Interrupts
     ALL_PIN_Init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
-    pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
-    //pit_init_ms(PIT0,0.01);                           // Clock, 20us period, 50% duty cycle
+    //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
+    //pit_init_ms(PIT0,0.01);                         // Clock, 20us period, 50% duty cycle
+    
+    pit_init_ms(PIT0,100);                           // Clock, 20ms period, 50% duty cycle
  
 /*************************************************************************
 Maximum clock is 8us cycle by using PIT_init_ms
