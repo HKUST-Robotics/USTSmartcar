@@ -32,8 +32,10 @@ u8 todis[];//for sprintf usage
 /*************************************************************************
 Function header
 *************************************************************************/
-void ALL_PIN_Init();
+void ALL_PIN_Init(void);
 void interrupts_init(void);
+//move this into motor.h later
+void motor_init(void);
 
 void main()
 {   
@@ -50,6 +52,7 @@ void main()
    printf("3:Tuning CCD\n\f");
    printf("4:Encoder testing\n\f");
    printf("5:CCDSample Filter Algorithm\n\f");
+   printf("6:System loop test\n\f");
    
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
@@ -100,7 +103,7 @@ void main()
         exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
              //FTM_Input_init(FTM1,CH0,Rising); for new board
              
-        pit_init_ms(PIT1,500);                       //periodic interrupt every second or so
+        pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
      
         EnableInterrupts;
         printf("\nEverything Initialized alright\n");
@@ -119,6 +122,24 @@ void main()
             ccd_sampling(5); // CCD Sampling with filter algorithm
         }  
       break;
+      case '6':
+        uart_sendStr(UART3,"The mode now is 6: System Loop test");
+        
+        accl_init();
+        interrupts_init();
+        motor_init();
+        
+        pit_init_ms(PIT3,1); //system loop is 1ms, check isr.c for implementation
+        
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+          //just a loop for system to run
+          
+        }  
+      break;
+      
       
       
       default :
@@ -178,4 +199,20 @@ void ALL_PIN_Init(){
   *************************************************************************/
  
     //uart_init(UART3, 115200); // BlueTooth UART init
+}
+
+void motor_init(void){
+     /*connection config:
+     
+     Hardware        DIR             PWM             Physical location
+     ---------------+---------------+---------------+-----------------
+     Motor Left      PTD6            ftm0ch7        Motor0
+     Motor Right     PTD4            ftm0ch5        Motor1
+
+     */
+  gpio_init(PORTD,6,GPO,0);
+  gpio_init(PORTD,4,GPO,0);
+  
+  FTM_PWM_init(FTM0,CH7,8000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH5,8000,0);//motor takes 0-1000 pwm values for duty
 }

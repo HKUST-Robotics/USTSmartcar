@@ -2,6 +2,9 @@
 #include "include.h"
 #include "linearccd.h"
 
+#define BALANCEKP 1.0
+#define BALANCEKI 1.0
+
 extern volatile u32 g_u32_systemclock;   // systemclock counter
 
 extern volatile u32 g_u32encoder_lf;
@@ -18,7 +21,10 @@ extern volatile u32 g_u32encoder_rtlast;
 
 float accl_omega;
 int motor_command_left,motor_command_right;
+int motor_turn_left,motor_turn_right;
 int motor_command_balance;
+
+extern volatile float accl_tilt16;
 
 u8 system_mode=0;
 
@@ -133,17 +139,14 @@ void encoder_counter(void){
 
 void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
-    /*  int motor_command_left,motor_command_right;
-     int motor_command_balance; are available for passing commands*/
-#define BALANCEKP 1
-#define BALANCEKI 1
+
   
   switch (system_mode){
-    case '0':
+    case 0:
       //get gyro values
           accl_update();
           //accl_tilt16 now contains angle at float value
-          //write code to put omega into accl_omega
+          //write code to put omega into accl_omega ~johnc
           
           
           
@@ -159,7 +162,8 @@ void pit3_system_loop(void){
     case 2:
       //calculate balance command with input angle
       //in the end edit motor_command_balance to desired value
-      //motor_command_balance=(-1*BALANCEKP*accl_tilt16)+(-1*BALANCEKI*accl_omega);
+      motor_command_balance=(-1.0*BALANCEKP*accl_tilt16)+(-1.0*BALANCEKI*accl_omega);
+      
       
       system_mode=3;
     break;
@@ -170,23 +174,45 @@ void pit3_system_loop(void){
       system_mode=4;
     break;
     case 4:
-        //left command = motor_balance_command + motor_command_left;
-        //right command = motor_balance_command + motor_command_right
-      //excute motor pwm with PID
+     /*
+     Hardware        DIR             PWM             Physical location
+     ---------------+---------------+---------------+-----------------
+     Motor Left      PTD6            ftm0ch7        Motor0
+     Motor Right     PTD4            ftm0ch5        Motor1
+
+     */
+//super position for balance + turn
+        motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
+        motor_command_right = motor_command_balance;// + motor_turn_right;
+
+        //excute motor pwm with PID
+
       
-      //error_left=u32encoder_lf - set;
-      //ditto right
+      //current dummy motor response, Yumi please implement PID ~johnc
+        
+        //set dir pins on both
+        if(motor_command_left>0){
+          gpio_set(PORTD,6,1);
+        }else{
+          gpio_set(PORTD,6,0);
+        }
+        
+        if(motor_command_right>0){
+          gpio_set(PORTD,4,1);
+        }else{
+          gpio_set(PORTD,4,0);
+        }
+        
+      FTM_PWM_Duty(FTM0,CH7,motor_command_left);//left duty
       
-      
-      //d value = 
-      
+      FTM_PWM_Duty(FTM0,CH5,motor_command_right);//right duty
       
       
       //saves current encoder count to last count
-      g_u32encoder_lflast=g_u32encoder_lf;
-      g_u32encoder_rtlast=g_u32encoder_rt;
+      //g_u32encoder_lflast=g_u32encoder_lf;
+      //g_u32encoder_rtlast=g_u32encoder_rt;
       
-      system_mode=0;
+      system_mode=0;//back to the top of pit
     break;
       
       

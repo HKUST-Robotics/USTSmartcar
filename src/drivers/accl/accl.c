@@ -18,6 +18,8 @@ for HKUST SmartCar team 2013
 float g_fcarAngle;  //global variables for the balencing control algorithm
 float g_fGyroscopeAngleIntegral;  //
 
+float accl_x16, accl_y16, accl_z16;
+volatile float accl_tilt16;
 u8 accl_buffer[2];
 char accl_todis[];
 
