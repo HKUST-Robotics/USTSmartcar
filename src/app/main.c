@@ -13,6 +13,7 @@
 *************************************************************************/
 #include "common.h"
 #include "include.h"
+#include "stdlib.h"
 
 /*************************************************************************
 Global Varaible
@@ -27,6 +28,8 @@ volatile u32 g_u32encoder_rt=0;
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
 
+u8 motor_test=0;
+
 u8 todis[];//for sprintf usage
 
 /*************************************************************************
@@ -36,6 +39,16 @@ void ALL_PIN_Init(void);
 void interrupts_init(void);
 //move this into motor.h later
 void motor_init(void);
+
+
+int my_atoi(char *p) {
+ int k = 0;
+ while (*p) {
+ k = (k<<3)+(k<<1)+(*p)-'0';
+ p++;
+ }
+ return k;
+}
 
 void main()
 {   
@@ -52,7 +65,7 @@ void main()
    printf("3:Tuning CCD\n\f");
    printf("4:Encoder testing\n\f");
    printf("5:CCDSample Filter Algorithm\n\f");
-   printf("6:System loop test\n\f");
+   printf("6:Motor control test\n\f");
    
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
@@ -123,19 +136,20 @@ void main()
         }  
       break;
       case '6':
-        uart_sendStr(UART3,"The mode now is 6: System Loop test");
-        
-        accl_init();
-        interrupts_init();
+        uart_sendStr(UART3,"The mode now is 6: Motor Control test");
         motor_init();
-        
-        pit_init_ms(PIT3,1); //system loop is 1ms, check isr.c for implementation
-        
         printf("\nEverything Initialized alright\n");
         
         while(1)
         { 
-          //just a loop for system to run
+          printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
+          motor_test=100*(uart_getchar(UART3)-48);
+          
+          
+         
+          FTM_PWM_Duty(FTM0,CH7,motor_test);
+      
+          FTM_PWM_Duty(FTM0,CH5,motor_test);
           
         }  
       break;
@@ -143,7 +157,7 @@ void main()
       
       
       default :
-        printf("\n\fYou entered:%c, Please enter a number from 1-5 to select a mode\n\f",g_char_mode);
+        printf("\n\fYou entered:%c, Please enter a number from 1-6 to select a mode\n\f",g_char_mode);
         
     }
    }

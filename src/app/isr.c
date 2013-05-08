@@ -162,6 +162,7 @@ void pit3_system_loop(void){
     case 2:
       //calculate balance command with input angle
       //in the end edit motor_command_balance to desired value
+      //rounds the code down to an int
       motor_command_balance=(-1.0*BALANCEKP*accl_tilt16)+(-1.0*BALANCEKI*accl_omega);
       
       
