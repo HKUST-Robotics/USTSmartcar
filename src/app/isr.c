@@ -3,7 +3,7 @@
 #include "linearccd.h"
 
 #define BALANCEKP 1.0
-#define BALANCEKI 1.0
+#define BALANCEKI 0
 
 extern volatile u32 g_u32_systemclock;   // systemclock counter
 
@@ -175,11 +175,12 @@ void pit3_system_loop(void){
       system_mode=4;
     break;
     case 4:
-     /*
+     /*connection config:
+     
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
-     Motor Left      PTD6            ftm0ch7        Motor0
-     Motor Right     PTD4            ftm0ch5        Motor1
+     Motor Left      PTD7            ftm0ch6        Motor0
+     Motor Right     PTE11           ftm0ch5        Motor1
 
      */
 //super position for balance + turn
@@ -192,19 +193,19 @@ void pit3_system_loop(void){
       //current dummy motor response, Yumi please implement PID ~johnc
         
         //set dir pins on both
-        if(motor_command_left>0){
-          gpio_set(PORTD,6,1);
-        }else{
-          gpio_set(PORTD,6,0);
-        }
+          if (motor_command_left>0){
+            gpio_set(PORTD,7,1);
+          }else{
+            gpio_set(PORTD,7,0);
+          }
+          
+          if(motor_command_right>0){
+            gpio_set(PORTE,11,0);
+          }else{
+            gpio_set(PORTE,11,1);
+          }
         
-        if(motor_command_right>0){
-          gpio_set(PORTD,4,1);
-        }else{
-          gpio_set(PORTD,4,0);
-        }
-        
-      FTM_PWM_Duty(FTM0,CH7,motor_command_left);//left duty
+      FTM_PWM_Duty(FTM0,CH6,motor_command_left);//left duty
       
       FTM_PWM_Duty(FTM0,CH5,motor_command_right);//right duty
       

@@ -28,7 +28,7 @@ volatile u32 g_u32encoder_rt=0;
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
 
-u8 motor_test=0;
+u16 motor_test=0;
 
 u8 todis[];//for sprintf usage
 
@@ -40,15 +40,7 @@ void interrupts_init(void);
 //move this into motor.h later
 void motor_init(void);
 
-
-int my_atoi(char *p) {
- int k = 0;
- while (*p) {
- k = (k<<3)+(k<<1)+(*p)-'0';
- p++;
- }
- return k;
-}
+  
 
 void main()
 {   
@@ -66,6 +58,7 @@ void main()
    printf("4:Encoder testing\n\f");
    printf("5:CCDSample Filter Algorithm\n\f");
    printf("6:Motor control test\n\f");
+   printf("7:SystemLoop Test\n\f");
    
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
@@ -142,14 +135,24 @@ void main()
         
         while(1)
         { 
-          printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
-          motor_test=100*(uart_getchar(UART3)-48);
+          //printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
+          //motor_test=100*(uart_getchar(UART3)-48);
           
-          
+          printf("\n\f Input direction : 0 or 1");
+          motor_test = uart_getchar(UART3)-48;
          
-          FTM_PWM_Duty(FTM0,CH7,motor_test);
-      
-          FTM_PWM_Duty(FTM0,CH5,motor_test);
+          FTM_PWM_Duty(FTM0,CH6,200);
+          
+          
+          FTM_PWM_Duty(FTM0,CH5,200);
+          
+          if (motor_test){
+            gpio_init(PORTD,7,GPO,1);
+            gpio_init(PORTE,11,GPO,0);//this is DIR
+          }else{
+            gpio_init(PORTD,7,GPO,0);
+            gpio_init(PORTE,11,GPO,1);//this is DIR
+          }
           
         }  
       break;
@@ -220,13 +223,13 @@ void motor_init(void){
      
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
-     Motor Left      PTD6            ftm0ch7        Motor0
-     Motor Right     PTD4            ftm0ch5        Motor1
+     Motor Left      PTD7            ftm0ch6        Motor0
+     Motor Right     PTE11           ftm0ch5        Motor1
 
      */
-  gpio_init(PORTD,6,GPO,0);
-  gpio_init(PORTD,4,GPO,0);
+  gpio_init(PORTD,7,GPO,1);
+  gpio_init(PORTE,11,GPO,0);//this is DIR
   
-  FTM_PWM_init(FTM0,CH7,8000,0);//motor takes 0-1000 pwm values for duty
-  FTM_PWM_init(FTM0,CH5,8000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH6,10000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH5,10000,0);//motor takes 0-1000 pwm values for duty
 }
