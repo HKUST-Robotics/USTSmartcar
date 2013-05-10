@@ -144,7 +144,7 @@ void ccd_save_previous_sampling(){
 
 void ccd_detect_track(){
      
-    /* Random Sampling Cod
+    /* Random Sampling Code
     if(g_u32_meaningless_counter % 5 == 1 || g_u32_meaningless_counter % 7 == 1){
           g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';  }
     else{
@@ -154,10 +154,10 @@ void ccd_detect_track(){
     
   
      //Actual Sampling Code by using CCD
-      if(gpio_get(PORTA, 11) == 1) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1 (new board)
-      //if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u32_systemclock is 1 (new board)
+      if(gpio_get(PORTA, 11) == 1) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (old board)
+      //if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (new board)
         g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';
-      }else {                         // if CCD receive white, the pixel respect to that g_u32_systemclock is 0
+      }else {                         // if CCD receive white, the pixel respect to that g_u16_ccd_sample_clock is 0
         g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '0';
       }
        
@@ -165,12 +165,14 @@ void ccd_detect_track(){
 
 void ccd_SI_failing_edge_condition(char mode){
   
-   //if(g_u32_systemclock %21 == 20  &&  G_int_SI_state_flag == 1){     // condition for SI failing edge to end 
   if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && mode == 2){     // condition for SI failing edge to end 
         gpio_set(PORTB, 19, 0); // SI faling edge
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
         uart_sendStr(UART3,"\014");  // New page form feed
-      }
+   }
+  else if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && (mode == 3 || mode == 5 )){     // condition for SI failing edge to end 
+        gpio_set(PORTB, 19, 0); // SI faling edge
+  }
 }
 
 void ccd_finish_one_sampling(char mode){
@@ -178,7 +180,6 @@ void ccd_finish_one_sampling(char mode){
     int p;
   
     if (mode == 2){ // Debug mode
-        //if(g_u32_systemclock % 129 == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end
           g_int_SI_state_flag = 0;          // SI Flag off
           g_int_sampling_state_flag = 0;    // Sampling flag off
@@ -192,9 +193,7 @@ void ccd_finish_one_sampling(char mode){
           
           gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
           uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
-          uart_sendStr(UART3,"\n\014");     // New page form feed
-          
-          
+          uart_sendStr(UART3,"\n\014");     // New page form feed 
         }
     } else if(mode == 3){ // Contiune Sampling
       
@@ -295,7 +294,7 @@ void ccd_sampling(char mode){
   
        ccd_trigger_SI(mode);
        
-       ccd_save_previous_sampling();
+       //ccd_save_previous_sampling();
        
        ccd_detect_track(); 
        
@@ -305,7 +304,7 @@ void ccd_sampling(char mode){
        
        ccd_finish_one_sampling(mode);
        
-       g_u32_meaningless_counter++;
+       //g_u32_meaningless_counter++;
        /*
       if(g_u32_meaningless_counter > 10000){
         g_u32_meaningless_counter = 0;
