@@ -64,17 +64,20 @@ void main()
    delayms(500); 
   
      switch (g_char_mode){
-     case '1':
+      case '1':
         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
         
-        accl_init();
+        //accl_init();
+        adc_init(ADC1,AD6b);
+        adc_init(ADC1,AD7b);
         printf("\nEverything Initialized alright\n");
         
         while(1)
         { 
-            accl_print();
-            //ccd_sampling(3); // sampling
-            delayms(500);
+          //printf("\n\f====================================");
+          printf("\n\f%d",ad_once(ADC1,AD6b,ADC_16bit));
+          //printf("\n\ftheta is: %d",ad_once(ADC1,AD7b,ADC_16bit));
+            delayms(100);
         }
      break;
      
@@ -105,8 +108,8 @@ void main()
         uart_sendStr(UART3,"The mode now is 4: encoder test");
              
         DisableInterrupts;
-        exti_init(PORTC,18,rising_down);             //inits left encoder interrupt capture
-        exti_init(PORTC,19,rising_down);            //inits right encoder interrupt capture
+        exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
+        exti_init(PORTC,19,rising_up);            //inits right encoder interrupt capture
              //FTM_Input_init(FTM1,CH0,Rising); for new board
              
         pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
