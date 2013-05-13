@@ -13,6 +13,7 @@ Edited by John Ching
 #include  "linearccd.h"
 
 u16 g_u16_ccd_sample_clock=0;
+u16 g_u16_ccd_long_SI_counter=0;
 
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
@@ -170,8 +171,12 @@ void ccd_SI_failing_edge_condition(char mode){
         uart_sendStr(UART3,"*.*.*.* SI failing edge happened *.*.*.*");
         uart_sendStr(UART3,"\014");  // New page form feed
    }
-  else if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && (mode == 3 || mode == 5 )){     // condition for SI failing edge to end 
+  else if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && (mode == 3 || mode == 5)){     // condition for SI failing edge to end 
         gpio_set(PORTB, 19, 0); // SI faling edge
+  }
+  else if(g_u16_ccd_sample_clock == 20 &&  g_int_SI_state_flag == 1 && mode == 8){                                                                                  // condition for Longer SI failing edge to end
+        gpio_set(PORTB, 19, 0); // SI faling edge
+        g_u16_ccd_long_SI_counter = 0;
   }
 }
 
@@ -251,6 +256,21 @@ void ccd_finish_one_sampling(char mode){
           uart_sendStr(UART3,"\n\014");     // New page form feed
           
        }
+    }else if(mode == 8){ // Contiune Sampling
+      
+         if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){ // condition for locking SI to end 
+          g_int_SI_state_flag = 0;          // SI Flag off
+          g_int_sampling_state_flag = 0;    // Sampling flag off
+       
+          // Print the sampling array
+          uart_sendStr(UART3,"Just Sampled Array is: ");
+          ccd_print(g_char_ar_ccd_pixel);
+          uart_sendStr(UART3,"\n\014");     // New page form feed
+          
+          gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
+          //uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
+          //uart_sendStr(UART3,"\n\014");     // New page form feed
+       }
     }
 }
 
@@ -284,16 +304,32 @@ void ccd_trigger_SI(char mode){
                gpio_set(PORTB, 19, 1);         // SI rising edge
            }
       }
+      else if (mode == 8){
+           if(g_int_SI_state_flag == 0 ){
+               g_int_SI_state_flag = 1;              // SI Flag on
+               g_int_sampling_state_flag = 1;        // sampling Flag on
+               g_u16_ccd_sample_clock = 0;
+               gpio_set(PORTB, 19, 1);         // SI rising edge
+           }
+      }
 }
 
 void ccd_sampling(char mode){
       
        gpio_turn(PORTB, 18);       // Clock Rising and Failing edge
+       
+       g_u16_ccd_long_SI_counter++;
    
        ccd_hard_code_benchmark();
-  
-       ccd_trigger_SI(mode);
-       
+        
+          
+       if(mode == 3 || mode == 5){
+          ccd_trigger_SI(mode);
+       }else if(mode == 8 && g_u16_ccd_long_SI_counter == 750){ // when clock = 200us , 50ms/200us = 500 , 100ms/200us = 1000
+          ccd_trigger_SI(mode);
+       }
+          
+          
        //ccd_save_previous_sampling();
        
        ccd_detect_track(); 

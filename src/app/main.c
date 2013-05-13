@@ -59,7 +59,8 @@ void main()
    printf("5:CCDSample Filter Algorithm\n\f");
    printf("6:Motor control test\n\f");
    printf("7:SystemLoop Test\n\f");
-   
+   printf("8: Longer SI Sampling\n\f");
+  
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
   
@@ -157,6 +158,17 @@ void main()
             gpio_init(PORTE,11,GPO,1);//this is DIR
           }
           
+        }  
+      break;
+      
+        case '8':
+        uart_sendStr(UART3,"The mode now is 8: Longer SI Sampling");
+        interrupts_init();
+        printf("\nEverything Initialized alright\n");
+        
+        while(1)
+        { 
+            ccd_sampling(8); // Longer SI CCD Sampling
         }  
       break;
       
