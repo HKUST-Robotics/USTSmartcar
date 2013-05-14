@@ -179,7 +179,7 @@ void main()
           
         }  
       break;
-<<<<<<< HEAD
+
       case '7':
         printf("\n\f The Mode is now 7: SystemLoop Test");
         
@@ -193,7 +193,8 @@ void main()
         while(1){
           //system loop runs
         }
-=======
+      
+     break;
       
         case '8':
         uart_sendStr(UART3,"The mode now is 8: Longer SI Sampling");
@@ -205,9 +206,7 @@ void main()
             ccd_sampling(8); // Longer SI CCD Sampling
         }  
       break;
-      
-      
->>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
+     
       
       default :
         printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
@@ -228,8 +227,8 @@ void interrupts_init(void){
 Maximum clock is 8us cycle by using PIT_init_ms
 *************************************************************************/
     
-    //pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
-    pit_init(PIT0,100);
+    pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
+    //pit_init(PIT0,100);
     
     EnableInterrupts;			              //Enable Interrupts
 }
