@@ -1,4 +1,4 @@
-/******************** (C) COPYRIGHT 2011 ≥•§ı¥O§J¶°∂}µo§uß@´« ********************
+/******************** (C) COPYRIGHT 2011 ?�•§ı¥O§J¶°?�}µo§u?@´« ********************
   isr.h
    HKUST Smartcar 2013 - Zyan,John,Louis,Yumi
 **********************************************************************************/	
@@ -11,7 +11,7 @@
 #include  "include.h"
 
 #undef  VECTOR_084
-#define VECTOR_084    PIT0_IRQHandler     //≠´∑s©w∏q84∏π§§¬_¨∞PIT0_IRQHandler§§¬_
+#define VECTOR_084    PIT0_IRQHandler     //PIT0_IRQHandler
 
 #undef  VECTOR_085
 #define VECTOR_085    PIT1_IRQHandler     //john's testing encoder interrupt handler
@@ -29,7 +29,7 @@
 
 
 
-extern void PIT0_IRQHandler();            //PIT0 ©wÆ…§§¬_™A∞»®Áº∆
+extern void PIT0_IRQHandler();            //PIT0 ©w??�§§¬_?�A?�»®Áº�?
 extern void PIT1_IRQHandler();
 extern void FTM1_IRQHandler();
 extern void encoder_counter();

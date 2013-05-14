@@ -62,9 +62,11 @@ void main()
    printf("5:CCDSample Filter Algorithm\n\f");
    printf("6:Motor control test\n\f");
    printf("7:SystemLoop Test\n\f");
-   printf("8: Longer SI Sampling\n\f");
+   printf("8:Longer SI Sampling\n\f");
    
-   //g_char_mode = '7';//uart_getchar(UART3); 
+   //g_char_mode = '7';
+   //uart_getchar(UART3); 
+   
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
 

@@ -52,7 +52,7 @@ void PIT0_IRQHandler(void)
       //uart_putchar(UART3,SI_state_flag);
       
       g_u32_systemclock++;
-      PIT_Flag_Clear(PIT0);       //?�M§§¬_º?�ß”¶�?}
+      PIT_Flag_Clear(PIT0);       //?????_????????}
 }
 
 void PIT1_IRQHandler(void)
@@ -250,6 +250,6 @@ void pit3_system_loop(void){
 
       
   }
-      PIT_Flag_Clear(PIT3);
-    EnableInterrupts;
+      //PIT_Flag_Clear(PIT3);
+    //EnableInterrupts;
 }
