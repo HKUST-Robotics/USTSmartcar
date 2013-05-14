@@ -28,6 +28,9 @@ volatile u32 g_u32encoder_rt=0;
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
 
+
+volatile int motor_deadzone_left,motor_deadzone_right;
+
 u16 motor_test=0;
 
 u8 todis[];//for sprintf usage
@@ -59,10 +62,15 @@ void main()
    printf("5:CCDSample Filter Algorithm\n\f");
    printf("6:Motor control test\n\f");
    printf("7:SystemLoop Test\n\f");
+<<<<<<< HEAD
+   
+   g_char_mode = '7';//uart_getchar(UART3); 
+=======
    printf("8: Longer SI Sampling\n\f");
   
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
+>>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
   
      switch (g_char_mode){
       case '1':
@@ -70,15 +78,25 @@ void main()
         
         //accl_init();
         adc_init(ADC1,AD6b);
+<<<<<<< HEAD
+        adc_init(ADC0,AD15);
+=======
         adc_init(ADC1,AD7b);
+>>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
         printf("\nEverything Initialized alright\n");
         
         while(1)
         { 
           //printf("\n\f====================================");
+<<<<<<< HEAD
+          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-29300);//theta
+          printf("\n%d",ad_once(ADC0,AD15,ADC_16bit)-33850);//omega
+            delayms(50);
+=======
           printf("\n\f%d",ad_once(ADC1,AD6b,ADC_16bit));
           //printf("\n\ftheta is: %d",ad_once(ADC1,AD7b,ADC_16bit));
             delayms(100);
+>>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
         }
      break;
      
@@ -136,6 +154,7 @@ void main()
         uart_sendStr(UART3,"The mode now is 6: Motor Control test");
         motor_init();
         printf("\nEverything Initialized alright\n");
+        delayms(3000);
         
         while(1)
         { 
@@ -160,6 +179,21 @@ void main()
           
         }  
       break;
+<<<<<<< HEAD
+      case '7':
+        printf("\n\f The Mode is now 7: SystemLoop Test");
+        
+        adc_init(ADC1,AD6b);
+        adc_init(ADC0,AD15);
+        pit_init_ms(PIT3,1);
+        motor_init();
+        delayms(4000);
+        
+        printf("\nEverything inited alright");
+        while(1){
+          //system loop runs
+        }
+=======
       
         case '8':
         uart_sendStr(UART3,"The mode now is 8: Longer SI Sampling");
@@ -173,9 +207,10 @@ void main()
       break;
       
       
+>>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
       
       default :
-        printf("\n\fYou entered:%c, Please enter a number from 1-6 to select a mode\n\f",g_char_mode);
+        printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
         
     }
    }
@@ -233,6 +268,9 @@ void ALL_PIN_Init(){
 }
 
 void motor_init(void){
+  
+  motor_deadzone_left=100;
+  motor_deadzone_right=100;
      /*connection config:
      
      Hardware        DIR             PWM             Physical location
@@ -246,4 +284,25 @@ void motor_init(void){
   
   FTM_PWM_init(FTM0,CH6,10000,0);//motor takes 0-1000 pwm values for duty
   FTM_PWM_init(FTM0,CH5,10000,0);//motor takes 0-1000 pwm values for duty
+  
+  DisableInterrupts;
+  exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
+  exti_init(PORTC,19,rising_up);            //inits right encoder interrupt capture
+  
+  EnableInterrupts;
+  
+//  while(g_u32encoder_lf<5&&motor_deadzone_left<200){
+//    motor_deadzone_left++;
+//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_left);
+//    delayms(100);
+//  }
+//  while(g_u32encoder_rt<5&&motor_deadzone_right<200){
+//    motor_deadzone_right++;
+//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_right);
+//    delayms(100);
+//  }
+    
+  
+    
+  
 }

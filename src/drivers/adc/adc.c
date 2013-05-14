@@ -218,7 +218,7 @@ void adc_start(ADCn adcn,ADC_Ch ch,ADC_nbit bit)
                                  | ADLSMP_LONG
                                  | ADC_CFG1_MODE(bit)
                                  | ADC_CFG1_ADICLK(ADICLK_BUS);
-    Master_Adc_Config.CONFIG2  = MUXSEL_ADCA    //MUXSEL_ADCA
+    Master_Adc_Config.CONFIG2  = MUXSEL_ADCB    //MUXSEL_ADCB
                                  | ADACKEN_DISABLED
                                  | ADHSC_HISPEED
                                  | ADC_CFG2_ADLSTS(ADLSTS_20) ;
