@@ -62,41 +62,34 @@ void main()
    printf("5:CCDSample Filter Algorithm\n\f");
    printf("6:Motor control test\n\f");
    printf("7:SystemLoop Test\n\f");
-<<<<<<< HEAD
-   
-   g_char_mode = '7';//uart_getchar(UART3); 
-=======
    printf("8: Longer SI Sampling\n\f");
-  
+   
+   //g_char_mode = '7';//uart_getchar(UART3); 
    g_char_mode = uart_getchar(UART3);
    delayms(500); 
->>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
-  
+
      switch (g_char_mode){
       case '1':
         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
         
         //accl_init();
         adc_init(ADC1,AD6b);
-<<<<<<< HEAD
         adc_init(ADC0,AD15);
-=======
-        adc_init(ADC1,AD7b);
->>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
+
         printf("\nEverything Initialized alright\n");
         
         while(1)
         { 
           //printf("\n\f====================================");
-<<<<<<< HEAD
+
           printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-29300);//theta
           printf("\n%d",ad_once(ADC0,AD15,ADC_16bit)-33850);//omega
             delayms(50);
-=======
+
           printf("\n\f%d",ad_once(ADC1,AD6b,ADC_16bit));
           //printf("\n\ftheta is: %d",ad_once(ADC1,AD7b,ADC_16bit));
             delayms(100);
->>>>>>> a6b3ad51c2eb5955e0625728e618b98bb62f43f9
+
         }
      break;
      
