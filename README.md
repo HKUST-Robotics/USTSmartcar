@@ -6,6 +6,11 @@ Compiles in the IAR IDE for the Freescale k60 MCU on a custom made development b
 
 Gyroscope, Accelerometer, encoders and Linear CCD libraries are also written for input.
 
+Useful Links:
+-------------
+Good tool for merging conflicts:
+http://adventuresincoding.com/2010/04/how-to-setup-git-to-use-diffmerge
+
 Conventions
 -----------
 This library attempts to follow the following conventions:
