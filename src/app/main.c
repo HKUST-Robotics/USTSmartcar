@@ -225,7 +225,7 @@ Maximum clock is 8us cycle by using PIT_init_ms
     pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     //pit_init(PIT0,100);
     
-    EnableInterrupts;			              //Enable Interrupts
+    //EnableInterrupts;			              //Enable Interrupts
 }
 
 void ALL_PIN_Init(){

@@ -325,7 +325,8 @@ void ccd_sampling(char mode){
           
        if(mode == 3 || mode == 5){
           ccd_trigger_SI(mode);
-       }else if(mode == 8 && g_u16_ccd_long_SI_counter == 750){ // when clock = 200us , 50ms/200us = 500 , 100ms/200us = 1000
+       }else if(mode == 8 && g_u16_ccd_long_SI_counter == 12500){  // when PIT1 clock = 200us , 25ms/100us =250 50ms/100us = 500 , 100ms/100us = 1000
+                                                                 // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
           ccd_trigger_SI(mode);
        }
           
