@@ -11,6 +11,9 @@ Useful Links:
 Good tool for merging conflicts:
 http://adventuresincoding.com/2010/04/how-to-setup-git-to-use-diffmerge
 
+Website for team:
+http://hkust.github.io/USTSmartcar
+
 Conventions
 -----------
 This library attempts to follow the following conventions:
