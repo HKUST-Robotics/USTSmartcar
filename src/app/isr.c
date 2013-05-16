@@ -27,6 +27,10 @@ volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
 volatile u16 motor_timeout;
 
+volatile u8 motor_pid_counter=0;
+
+volatile car_speed;
+
 extern volatile float accl_tilt16;
 
 u8 system_mode=0;
@@ -96,23 +100,18 @@ void FTM1_IRQHandler()
 
 void encoder_counter(void){
   /*connection config:
-     
      Hardware        Port name       Program name    Physical location
      ---------------+---------------+---------------+-----------------
      encoder_left    PTC18            exti ptc        servo1
      encoder_right   PTC19            exti ptc        servo2
-   
-
-     */
+   */
  
     u8  n=0;
     n=18;
     if(PORTC_ISFR & (1<<n)) 
     {
         PORTC_ISFR  |= (1<<n);
-        
         g_u32encoder_lf++;
-        
     } 
     
     n=19;
@@ -176,10 +175,25 @@ void pit3_system_loop(void){
 //super position for balance + turn
         motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;// + motor_turn_right;
-
-        printf("\n%d",motor_command_balance);
       
       //current dummy motor response, Yumi please implement PID ~johnc
+        
+        if(motor_pid_counter<20){
+          motor_pid_counter++;
+        }else{
+          motor_pid_counter=0;
+          //stuff here happens every 20*5ms=100ms, used for calculating
+          //and capturing encoder motor PID
+          
+          car_speed=(g_u32encoder_lf+g_u32encoder_rt)/2;
+          
+          
+          //saves current encoder count to last count and clears current
+          g_u32encoder_lflast=g_u32encoder_lf;
+          g_u32encoder_rtlast=g_u32encoder_rt;
+          g_u32encoder_lf=g_u32encoder_lf=0;
+        }
+          
         
         //set dir pins on both
           if (motor_command_left>0){
@@ -224,9 +238,7 @@ void pit3_system_loop(void){
           FTM_PWM_Duty(FTM0,CH5,motor_command_right);
         }
       
-      //saves current encoder count to last count
-      //g_u32encoder_lflast=g_u32encoder_lf;
-      //g_u32encoder_rtlast=g_u32encoder_rt;
+
       
       system_mode=0;//back to the top of pit
     break;
