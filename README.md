@@ -6,6 +6,9 @@ Compiles in the IAR IDE for the Freescale k60 MCU on a custom made development b
 
 Gyroscope, Accelerometer, encoders and Linear CCD libraries are also written for input.
 
+magnetic branch
+
+
 Conventions
 -----------
 This library attempts to follow the following conventions:
