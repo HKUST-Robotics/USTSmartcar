@@ -33,8 +33,7 @@ u8 system_mode=0;
 
 void PIT0_IRQHandler(void)
 {
-    
-      gpio_turn(PORTB, 22);       // systemclock Rising and Failing edge    
+      //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge    
       g_u32_systemclock++;
       PIT_Flag_Clear(PIT0);       
 }
@@ -126,7 +125,7 @@ void encoder_counter(void){
 
 void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
-  DisableInterrupts;
+  //DisableInterrupts;
   
   switch (system_mode){
     case 0:
@@ -144,8 +143,10 @@ void pit3_system_loop(void){
     case 1:
       //get ccd values
       //i.e. sample(2);
-          //louis fill this in! ~johnc
+      //louis fill this in! ~johnc
+      ccd_sampling(8);
       
+      //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
     break;
     case 2:

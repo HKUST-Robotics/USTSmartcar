@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=1437177415
+Checksum=-1780298109
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -74,7 +74,8 @@ ShowSource=1
 mode=0
 [Breakpoints2]
 Bp0=_ 0 "EMUL_DATA" "ccd_save_previous_sampling" 0 0 0 0 4294967295
-Count=1
+Bp1=_ 1 "EMUL_DATA" "ccd_finish_one_sampling" 0 0 0 0 4294967295
+Count=2
 [Aliases]
 Count=0
 SuppressDialog=0

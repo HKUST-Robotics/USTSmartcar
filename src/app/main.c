@@ -28,7 +28,6 @@ volatile u32 g_u32encoder_rt=0;
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
 
-
 volatile int motor_deadzone_left,motor_deadzone_right;
 
 u16 motor_test=0;
@@ -64,10 +63,9 @@ void main()
    printf("7:SystemLoop Test\n\f");
    printf("8:Longer SI Sampling\n\f");
    
-   //g_char_mode = '7';
-   //uart_getchar(UART3); 
-   
+   //g_char_mode = '7';                 // Hard code mode = system loop
    g_char_mode = uart_getchar(UART3);
+   
    delayms(500); 
 
      switch (g_char_mode){
@@ -181,6 +179,7 @@ void main()
         adc_init(ADC1,AD6b);
         adc_init(ADC0,AD15);
         pit_init_ms(PIT3,1);
+        interrupts_init(); // Louis added to text ccd code integration
         motor_init();
         delayms(4000);
         
