@@ -13,7 +13,7 @@ Edited by John Ching
 #include  "linearccd.h"
 
 u16 g_u16_ccd_sample_clock=0;
-u16 g_u16_ccd_long_SI_counter=0;
+u16 g_u16_ccd_long_SI_counter=12500;
 
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
@@ -173,7 +173,7 @@ void ccd_SI_failing_edge_condition(char mode){
   else if(g_u16_ccd_sample_clock == 20  &&  g_int_SI_state_flag == 1 && (mode == 3 || mode == 5)){     // condition for SI failing edge to end 
         gpio_set(PORTB, 19, 0); // SI faling edge
   }
-  else if(g_u16_ccd_sample_clock == 20 &&  g_int_SI_state_flag == 1 && mode == 8){                                                                                  // condition for Longer SI failing edge to end
+  else if(g_u16_ccd_sample_clock == 1 &&  g_int_SI_state_flag == 1 && mode == 8){ // condition for Longer SI failing edge to end                                                                            // condition for Longer SI failing edge to end
         gpio_set(PORTB, 19, 0); // SI faling edge
         g_u16_ccd_long_SI_counter = 0;
   }
@@ -302,27 +302,29 @@ void ccd_sampling(char mode){
   
        gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge
        //<- This syntax might be wrong (due to logic and operation of ccd ) if execute in system loop mode ->
-       
-       g_u16_ccd_long_SI_counter++;
    
        //ccd_hard_code_benchmark();
           
        if(mode == 3 || mode == 5){
           ccd_trigger_SI(mode);
        }else if(mode == 8 && g_u16_ccd_long_SI_counter == 12500){  // when PIT1 clock = 200us , 25ms/100us =250 50ms/100us = 500 , 100ms/100us = 1000
-                                                                 // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
-          ccd_trigger_SI(mode);
-       }
+         ccd_trigger_SI(mode);                                     // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
+        }
           
        //ccd_save_previous_sampling();
        
        ccd_detect_track(); 
        
-       g_u16_ccd_sample_clock++;
+       //g_u16_ccd_sample_clock++;
        
        ccd_SI_failing_edge_condition(mode);
        
        ccd_finish_one_sampling(mode);
+       
+       
+       g_u16_ccd_long_SI_counter++;
+       g_u16_ccd_sample_clock++;
+       
        
        //g_u32_meaningless_counter++;
        /*

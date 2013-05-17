@@ -37,8 +37,8 @@ u8 todis[];//for sprintf usage
 /*************************************************************************
 Function header
 *************************************************************************/
-void ALL_PIN_Init(void);
-void interrupts_init(void);
+void all_pin_init(void);
+void ccd_interrupts_init(void);
 //move this into motor.h later
 void motor_init(void);
 
@@ -63,8 +63,8 @@ void main()
    printf("7:SystemLoop Test\n\f");
    printf("8:Longer SI Sampling\n\f");
    
-   //g_char_mode = '7';                 // Hard code mode = system loop
-   g_char_mode = uart_getchar(UART3);
+   g_char_mode = '8';                 // Hard code mode = system loop
+   //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
 
@@ -95,7 +95,7 @@ void main()
      
      case '2':
         uart_sendStr(UART3,"The mode now is 2: Linear CCD");
-        interrupts_init();
+        ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
         
         while(1)
@@ -106,7 +106,7 @@ void main()
       
       case '3':
         uart_sendStr(UART3,"The mode now is 3: Tuning CCD");
-        interrupts_init();
+        ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
         
         while(1)
@@ -129,13 +129,15 @@ void main()
         EnableInterrupts;
         printf("\nEverything Initialized alright\n");
      
-        while(1){}
+        while(1){
+        
+        }
           
       break;
       
         case '5':
         uart_sendStr(UART3,"The mode now is 5: CCD Sample Filtering");
-        interrupts_init();
+        ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
         
         while(1)
@@ -179,7 +181,7 @@ void main()
         adc_init(ADC1,AD6b);
         adc_init(ADC0,AD15);
         pit_init_ms(PIT3,1);
-        interrupts_init(); // Louis added to text ccd code integration
+        ccd_interrupts_init(); // Louis added to text ccd code integration
         motor_init();
         delayms(4000);
         
@@ -192,7 +194,7 @@ void main()
       
         case '8':
         uart_sendStr(UART3,"The mode now is 8: Longer SI Sampling");
-        interrupts_init();
+        ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
         
         while(1)
@@ -200,7 +202,6 @@ void main()
             ccd_sampling(8); // Longer SI CCD Sampling
         }  
       break;
-     
       
       default :
         printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
@@ -209,17 +210,15 @@ void main()
    }
 }
 
-void interrupts_init(void){
+void ccd_interrupts_init(void){
     
     DisableInterrupts;                                //Disable Interrupts
-    ALL_PIN_Init();
+    all_pin_init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
     //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
     //pit_init_ms(PIT0,0.01);                         // Clock, 20us period, 50% duty cycle
  
-/*************************************************************************
-Maximum clock is 8us cycle by using PIT_init_ms
-*************************************************************************/
+    //Maximum clock is 8us cycle by using PIT_init_ms
     
     pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     //pit_init(PIT0,100);
@@ -227,16 +226,20 @@ Maximum clock is 8us cycle by using PIT_init_ms
     //EnableInterrupts;			              //Enable Interrupts
 }
 
-void ALL_PIN_Init(){
+void all_pin_init(){
 
  /*************************************************************************  
   Old Main Board
+  
+  Hardware        Port name       Program name    Physical location
+  ---------------+---------------+---------------+-----------------
+  ccd_3v-5v                                     JP5
+  ccd_GND    					JP5/JP3
+  ccd_SI	PTB19			        JP5
+  ccd_clock	PTB18		                SPI-2b
+  ccd_AO        PTA11	        	        JP8
  *************************************************************************/
-    //gpio_init(PORTD, 0, GPO, 1); //PTD0, D2 LED
-    //gpio_init(PORTD, 1, GPO, 1); //PTD1, D3 LED
-    //gpio_init(PORTD, 2, GPO, 1); //PTD2, D4 LED
-    //gpio_init(PORTD, 3, GPO, 1); //PTD3, D5 LED
-        
+  
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO

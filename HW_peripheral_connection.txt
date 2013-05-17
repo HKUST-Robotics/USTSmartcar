@@ -10,10 +10,10 @@ Accl_IIC_SDA    PTB3            I2C0_SDA        SW2_upper_leg
 Gyro_analog_z   PTB4            ADC1,AD10       SW3_upper_leg
 
 ccd_3v-5v
-ccd_GND    									JP15
-ccd_SI			PTB18							JP15
-ccd_clock		PTB22							SPI-2b
-ccd_AO			PTB10						    JP8/JP9
+ccd_GND    					JP15
+ccd_SI		PTB18			        JP15
+ccd_clock	PTB22		                SPI-2b
+ccd_AO		PTB10	        	        JP8/JP9
 
 encoder_left    PTA8            FTM1,CH0        JP6
 encoder_right   PTA9            FTM1,CH1        JP7
