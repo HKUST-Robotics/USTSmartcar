@@ -105,7 +105,7 @@ void ccd_sample_filtering(){
   }
   
   uart_sendStr(UART3," number of current pixels are same as pervious sample");
-  uart_sendStr(UART3,"\n\014");     // New page form feed
+  uart_sendStr(UART3,"\n\014");     
   
   // if the current sample is unsatisfactory, replace the previous sample
   if(ccd_same_pixel_count > 1 && ccd_same_pixel_count < 60){
@@ -116,16 +116,15 @@ void ccd_sample_filtering(){
      
       uart_sendStr(UART3,"\t\t\t\t");    
       uart_sendStr(UART3,"**************************************************************************");   
-      uart_sendStr(UART3,"\n\014");     // New page form feed   
+      uart_sendStr(UART3,"\n\014");      
       
       uart_sendStr(UART3,"\t\t\t\t");    
       uart_sendStr(UART3,"** The current sample has been filtered and replaced by previous sample **");
-      uart_sendStr(UART3,"\n\014");     // New page form feed   
+      uart_sendStr(UART3,"\n\014");     
       
       uart_sendStr(UART3,"\t\t\t\t");    
       uart_sendStr(UART3,"**************************************************************************");   
-      uart_sendStr(UART3,"\n\014");     // New page form feed   
-  
+      uart_sendStr(UART3,"\n\014");     
   }
   
   // instead of using previous sample, use the benchmark sample
@@ -156,9 +155,9 @@ void ccd_detect_track(){
      //Actual Sampling Code by using CCD
     if(gpio_get(PORTA, 11) == 1) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (old board)
       //if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (new board)
-        g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '1';
+        g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '|';
     }else {                         // if CCD receive white, the pixel respect to that g_u16_ccd_sample_clock is 0
-        g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '0';
+        g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '_';
     }
        
 }
