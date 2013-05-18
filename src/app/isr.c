@@ -40,6 +40,7 @@ void PIT0_IRQHandler(void)
 
 void PIT1_IRQHandler(void)
 {
+    //for encoder testing
     DisableInterrupts;
     printf("\n\fg_u32encoder_lf:%d",g_u32encoder_lf);
     printf("\n\fg_u32encoder_rt:%d",g_u32encoder_rt);
@@ -74,7 +75,7 @@ void FTM1_IRQHandler()
         
         g_u32encoder_lf++; 
         
-        //try not to use disableinterrupt; here, do it in main.c
+        //try not to use DisableInterrupt here, do it in main.c
         FTM_IRQ_EN(FTM1,CHn);  //matches with FTM_IRQ_DIS(FTM1,CHn); 
 
     }
@@ -83,8 +84,7 @@ void FTM1_IRQHandler()
     CHn=1;
     if( s & (1<<CHn) )
     {
-        FTM_IRQ_DIS(FTM1,CHn);      //prevents input capture interrupt
-        
+        FTM_IRQ_DIS(FTM1,CHn);
         
         g_u32encoder_rt++;
         
@@ -100,9 +100,7 @@ void encoder_counter(void){
      ---------------+---------------+---------------+-----------------
      encoder_left    PTC18            exti ptc        servo1
      encoder_right   PTC19            exti ptc        servo2
-   
-
-     */
+   */
  
     u8  n=0;
     n=18;
@@ -137,7 +135,6 @@ void pit3_system_loop(void){
       }else{
         control_integrate+=control_tilt;
       }
-          
       system_mode=1;//go to next state on next cycle
     break;
     case 1:
@@ -155,7 +152,6 @@ void pit3_system_loop(void){
       //rounds the code down to an int
       (control_omg<20)?control_omg=0:control_omg;
       motor_command_balance=(control_tilt*100/250)-(control_omg*10/300);
-      
       
       system_mode=3;
     break;
