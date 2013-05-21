@@ -14,6 +14,7 @@ Edited by John Ching
 
 u16 g_u16_ccd_sample_clock=0;
 u16 g_u16_ccd_long_SI_counter=12500;
+volatile int g_int_ccd_operation_state=0;
 
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
@@ -55,30 +56,6 @@ void convert_char_to_readable_integer(int input_int, char output_char[]){
     output_char[2] = (input_int/100)%10 + '0';    // hundreds
   }
   
-}
-
-void ccd_hard_code_benchmark(){
- 
-      int j;
-     
-      for( j = 0 ; j < 128 ; j++){
-       
-            // condition for benchmark one array to be high
-           if(j > 15 && j < 30 || (j > 85 && j < 100) ){ 
-              g_char_ar_ccd_benchmark_one[j] = '1';
-            }
-           else{
-              g_char_ar_ccd_benchmark_one[j] = '0';
-            }
-           
-            // condition for benchmark two array to be high
-           if(j > 13 && j < 19 || (j > 21 && j < 26) || (j > 28 && j < 30) || (j > 84 && j < 89)|| (j > 90 && j < 92)|| (j > 93 && j < 99)){ 
-              g_char_ar_ccd_benchmark_two[j] = '1';
-            }
-           else{
-              g_char_ar_ccd_benchmark_two[j] = '0';
-           }
-      }
 }
 
 void ccd_sample_filtering(){
@@ -132,7 +109,6 @@ void ccd_sample_filtering(){
   
 }
 
-
 void ccd_save_previous_sampling(){
   
       g_char_ar_ccd_previous_pixel[g_u16_ccd_sample_clock] = g_char_ar_ccd_pixel[g_u16_ccd_sample_clock]; 
@@ -140,7 +116,6 @@ void ccd_save_previous_sampling(){
       // copy previous array, before next sampling
       // ... to be test and edit
 }
-
 
 void ccd_detect_track(){
      
@@ -152,7 +127,7 @@ void ccd_detect_track(){
     }    
     */ 
     
-     //Actual Sampling Code by using CCD
+    //Actual Sampling Code by using CCD
     if(gpio_get(PORTA, 11) == 1) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (old board)
       //if(gpio_get(PORTB, 10) == 0) {  // if CCD receive black, the pixel respect to that g_u16_ccd_sample_clock is 1 (new board)
         g_char_ar_ccd_pixel[g_u16_ccd_sample_clock] = '|';
@@ -198,23 +173,7 @@ void ccd_finish_one_sampling(char mode){
           uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
           uart_sendStr(UART3,"\n\014");     
         }
-    } else if(mode == 3){ // Contiune Sampling
-      
-         if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){ 
-          g_int_SI_state_flag = 0;          // SI Flag off
-          g_int_sampling_state_flag = 0;    // Sampling flag off
-       
-          // Print the sampling array
-          uart_sendStr(UART3,"Just Sampled Array is: ");
-          ccd_print(g_char_ar_ccd_pixel);
-          uart_sendStr(UART3,"\n\014");     // New page form feed
-          
-          gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
-          uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
-          uart_sendStr(UART3,"\n\014");     // New page form feed
-       }
-    }
-    else if(mode == 5){ // Benchmark and Sample Filter
+    }else if(mode == 5){ // Benchmark and Sample Filter
       
          if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){ 
          
@@ -255,7 +214,7 @@ void ccd_finish_one_sampling(char mode){
           uart_sendStr(UART3,"\n\014");    
           
        }
-    }else if(mode == 8){ // Contiune Sampling & adjustable SI time
+    }else if( (mode == 3 || mode == 8) ){ // Contiune Sampling & adjustable SI time
       
          if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){
           g_int_SI_state_flag = 0;          // SI Flag off
@@ -269,7 +228,10 @@ void ccd_finish_one_sampling(char mode){
           gpio_set(PORTA, 8, 1);            // Trigger Oscilloscope          
           //uart_sendStr(UART3,"*.*.*.* Trigger Oscilloscop *.*.*.*");
           //uart_sendStr(UART3,"\n\014");     // New page form feed
-       }
+          
+          g_int_ccd_operation_state = 0;
+          
+       }       
     }
 }
 
@@ -295,10 +257,12 @@ void ccd_trigger_SI(char mode){
       }
 }
 
-void ccd_sampling(char mode){
+void ccd_sampling(char mode,char state){
       
-       //while( g_int_sampling_state_flag == 0){
+       g_int_ccd_operation_state = state;
   
+       while(g_int_ccd_operation_state == 1){
+         
        gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge
        //<- This syntax might be wrong (due to logic and operation of ccd ) if execute in system loop mode ->
    
@@ -307,7 +271,7 @@ void ccd_sampling(char mode){
        if(mode == 3 || mode == 5){
           ccd_trigger_SI(mode);
        }else if(mode == 8 && g_u16_ccd_long_SI_counter == 12500){  // when PIT1 clock = 200us , 25ms/100us =250 50ms/100us = 500 , 100ms/100us = 1000
-         ccd_trigger_SI(mode);                                     // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
+          ccd_trigger_SI(mode);                                     // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
         }
           
        //ccd_save_previous_sampling();
@@ -331,5 +295,34 @@ void ccd_sampling(char mode){
         g_u32_meaningless_counter = 0;
       }
        */
-  //}
+    }
 }
+
+
+
+/*
+
+void ccd_hard_code_benchmark(){
+ 
+      int j;
+     
+      for( j = 0 ; j < 128 ; j++){
+       
+            // condition for benchmark one array to be high
+           if(j > 15 && j < 30 || (j > 85 && j < 100) ){ 
+              g_char_ar_ccd_benchmark_one[j] = '1';
+            }
+           else{
+              g_char_ar_ccd_benchmark_one[j] = '0';
+            }
+           
+            // condition for benchmark two array to be high
+           if(j > 13 && j < 19 || (j > 21 && j < 26) || (j > 28 && j < 30) || (j > 84 && j < 89)|| (j > 90 && j < 92)|| (j > 93 && j < 99)){ 
+              g_char_ar_ccd_benchmark_two[j] = '1';
+            }
+           else{
+              g_char_ar_ccd_benchmark_two[j] = '0';
+           }
+      }
+}
+*/

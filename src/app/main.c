@@ -63,7 +63,7 @@ void main()
    printf("7:SystemLoop Test\n\f");
    printf("8:Longer SI Sampling\n\f");
    
-   g_char_mode = '8';                 // Hard code mode = system loop
+   g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
@@ -84,11 +84,11 @@ void main()
 
           printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-29300);//theta
           printf("\n%d",ad_once(ADC0,AD15,ADC_16bit)-33850);//omega
-            delayms(50);
+          delayms(50);
 
           printf("\n\f%d",ad_once(ADC1,AD6b,ADC_16bit));
           //printf("\n\ftheta is: %d",ad_once(ADC1,AD7b,ADC_16bit));
-            delayms(100);
+          delayms(100);
 
         }
      break;
@@ -99,8 +99,8 @@ void main()
         printf("\nEverything Initialized alright\n");
         
         while(1)
-        { 
-            ccd_sampling(2); // sampling, with more notice message
+        {  
+           ccd_sampling(2,1); // sampling, with more notice message
         }  
      break;
       
@@ -110,8 +110,9 @@ void main()
         printf("\nEverything Initialized alright\n");
         
         while(1)
-        { 
-            ccd_sampling(3); // Tuning CCD, with less notice message
+        {   
+           
+            ccd_sampling(3,1); // Tuning CCD, with less notice message
         }  
       break;
              
@@ -141,8 +142,9 @@ void main()
         printf("\nEverything Initialized alright\n");
         
         while(1)
-        { 
-            ccd_sampling(5); // CCD Sampling with filter algorithm
+        {  
+            
+            ccd_sampling(5,1); // CCD Sampling with filter algorithm
         }  
       break;
       case '6':
@@ -199,7 +201,7 @@ void main()
         
         while(1)
         { 
-            ccd_sampling(8); // Longer SI CCD Sampling
+            ccd_sampling(8,1); // Longer SI CCD Sampling
         }  
       break;
       

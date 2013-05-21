@@ -11,7 +11,7 @@ Edited & compiled by John Ching
 
 void ccd_print(char array[]); // function prints out length128 array to bluetooth
 void convert_char_to_readable_integer(int intput_int, char output_char[]); // convert character into readable integer
-void ccd_sampling(char mode);
+void ccd_sampling(char mode,char state);
 
 //Internal use:
 

@@ -6,6 +6,7 @@
 #define BALANCEKI 0
 
 extern volatile u32 g_u32_systemclock;   // systemclock counter
+extern volatile int g_int_ccd_operation_state;
 
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
@@ -14,6 +15,7 @@ extern volatile u32 g_u32encoder_lflast;
 extern volatile u32 g_u32encoder_rtlast;
 
 extern volatile int motor_deadzone_left,motor_deadzone_right;
+
 
 //for the motor command loop
 
@@ -141,7 +143,11 @@ void pit3_system_loop(void){
       //get ccd values
       //i.e. sample(2);
       //louis fill this in! ~johnc
-      ccd_sampling(8);
+      
+      if(g_int_ccd_operation_state == 0){
+      //g_int_ccd_operation_state = 1;
+      ccd_sampling(8,1);
+      }
       
       //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
