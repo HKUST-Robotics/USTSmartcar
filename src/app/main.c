@@ -15,21 +15,30 @@ volatile unsigned int systemclock=0;             // systemclock
 volatile int SI_state_flag=0;                    // SI flag mode
 volatile int sampling_state_flag=0;              // Sample flag mode
 
-/* for external use
- * just simply call this function to do pin test */
-void pin_test();
+void main() {
+	gpio_init(PORTE, 24, GPO, 0);
+	gpio_init(PORTE, 25, GPO, 0);
+	gpio_init(PORTE, 26, GPO, 0);
+	gpio_init(PORTE, 27, GPO, 0);
+        return ;
+}
 
-/* for internal use */
-void pin_test_action(PINTEST_ACT action, GPIO_CFG state);
-void pintesting(PORTx portX, u16 no, GPIO_CFG CASE);
-void vcc_gnd(u16 vcc, u16 gnd);
-
+/*
 typedef enum PINTEST_ACT {
 	INIT = 0,
 	TEST = 1
 }PINTEST_ACT;
 
-void pin_test() {
+// for external use
+// just simply call this function to do pin test
+void pin_test();
+
+// for internal use
+void pin_test_action(PINTEST_ACT action, GPIO_CFG state);
+void pintesting(PORTx portX, u16 no, GPIO_CFG CASE);
+void vcc_gnd(u16 vcc, u16 gnd);
+
+void main() {
 	u8 portAno, portBno, portCno, portDno, portEno;
 	u16 pinNo = 1;
 
@@ -243,7 +252,7 @@ void pintesting(PORTx portX, u16 no, GPIO_CFG CASE) {
 	else
 		printf("-- Failed\n");
 
-	gpio_init(portX, no, state, 0);
+	gpio_init(portX, no, CASE, 0);
 
 	return;
 }
@@ -252,3 +261,4 @@ void vcc_gnd(u16 vcc, u16 gnd) {
 	printf("Pin %u: VCC_33V -- Skipped\n", vcc);
 	printf("Pin %u: GND -- Skipped\n", gnd);
 }
+*/
