@@ -201,16 +201,16 @@ void pit3_system_loop(void){
         
         //set dir pins on both
           if (motor_command_left>0){
-            gpio_set(PORTD,7,1);
+            gpio_set(PORTC,3,1);
           }else{
-            gpio_set(PORTD,7,0);
+            gpio_set(PORTC,3,0);
             motor_command_left=motor_command_left*-1;
           }
           
           if(motor_command_right>0){
-            gpio_set(PORTE,11,0);
+            gpio_set(PORTC,4,0);
           }else{
-            gpio_set(PORTE,11,1);
+            gpio_set(PORTC,4,1);
             motor_command_right=motor_command_right*-1;
           }
           
@@ -235,7 +235,7 @@ void pit3_system_loop(void){
           }
 
         // kp testing      
-      test_commandl = 0;
+        test_commandl = 0;
         test_commandr = 0;
         motor_error_left = test_commandl - g_u32encoder_lf;
         motor_error_right = test_commandr - g_u32encoder_rt;
@@ -263,8 +263,8 @@ void pit3_system_loop(void){
         }
         
       //saves current encoder count to last count
-      //g_u32encoder_lflast=g_u32encoder_lf;
-      //g_u32encoder_rtlast=g_u32encoder_rt;
+      g_u32encoder_lflast=g_u32encoder_lf;
+      g_u32encoder_rtlast=g_u32encoder_rt;
       
       system_mode=0;//back to the top of pit
     break;
