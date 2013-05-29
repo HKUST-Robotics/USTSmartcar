@@ -194,8 +194,7 @@ void pit3_system_loop(void){
         motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;// + motor_turn_right;
       
-      //current dummy motor response, Yumi please implement PID ~johnc
-        
+      //current dummy motor response, Yumi please implement PID ~johnc=
       
         if(speed_control_counter<20){
           speed_control_counter++;
@@ -207,11 +206,6 @@ void pit3_system_loop(void){
         
         motor_command_left+=speed_control_out;
         motor_command_right+=speed_control_out;
-        
-        
-        
-        
-        
         
         
       motor_execute();
