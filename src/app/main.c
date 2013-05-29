@@ -37,7 +37,84 @@ u8 todis[];//for sprintf usage
 /*************************************************************************
 Function header
 *************************************************************************/
+void motor_init(void){
+  
+  motor_deadzone_left=100;
+  motor_deadzone_right=100;
+     /*connection config:
+     
+     Hardware        DIR             PWM             Physical location
+     ---------------+---------------+---------------+-----------------
+     Motor Left      PTD7            ftm0ch6        Motor0
+     Motor Right     PTE11           ftm0ch5        Motor1
+
+     */
+  gpio_init(PORTC,3,GPO,1);
+  gpio_init(PORTC,4,GPO,0);//this is DIR
+  
+  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
+  
+  DisableInterrupts;
+  exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
+  exti_init(PORTC,19,rising_up);            //inits right encoder interrupt capture
+  
+  EnableInterrupts;
+  
+//  while(g_u32encoder_lf<5&&motor_deadzone_left<200){
+//    motor_deadzone_left++;
+//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_left);
+//    delayms(100);
+//  }
+//  while(g_u32encoder_rt<5&&motor_deadzone_right<200){
+//    motor_deadzone_right++;
+//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_right);
+//    delayms(100);
+//  }
+    
+  
+    
+  
+}
 void main(void){
+  gpio_init(PORTE, 24, GPO, 0);
+  uart_init(UART3, 115200);
+  uart_init(UART0, 115200);
+  
+  gpio_turn(PORTE, 24);
+        uart_sendStr(UART3,"The mode now is 6: Motor Control test");
+  gpio_turn(PORTE, 24);
+  
+        motor_init();
+        printf("\nEverything Initialized alright\n");
+        delayms(3000);
+        
+         
+          FTM_PWM_Duty(FTM0,CH2,200); // left motor PWM
+          FTM_PWM_Duty(FTM0,CH3,200); // right motor PWM
+   /*
+        while(1)
+        { 
+          //printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
+          //motor_test=100*(uart_getchar(UART3)-48);
+          
+          printf("\n\f Input direction : 0 or 1");
+          motor_test = uart_getchar(UART3)-48;
+         
+          FTM_PWM_Duty(FTM0,CH2,200); // left motor PWM
+          FTM_PWM_Duty(FTM0,CH3,200); // right motor PWM
+
+          if (motor_test){
+            gpio_init(PORTC,3,GPO,1); // left motot DIR
+            gpio_init(PORTC,4,GPO,0); // right motot DIR
+          }else{
+            gpio_init(PORTC,3,GPO,0); // left motot DIR
+            gpio_init(PORTC,4,GPO,1); // right motot DIR
+          }
+          
+        }  
+          */
+  /*
   gpio_init(PORTE,24,GPO,1);
   gpio_init(PORTE,25,GPO,1);
   gpio_init(PORTE,26,GPO,1);
@@ -55,5 +132,6 @@ void main(void){
       delayms(300);
     }
   }
+  */
 }
   
