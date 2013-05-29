@@ -7,8 +7,8 @@
 /**********************************  UART   ***************************************/
 
 //      模块通道    端口          可选范围                          建议
-#define UART0_RX    PTD6        //PTA1、PTA15、PTB16、PTD6          PTA1不要用（与Jtag冲突）
-#define UART0_TX    PTD7        //PTA2、PTA14、PTB17、PTD7          PTA2不要用（与Jtag冲突）
+#define UART0_RX    PTB16        //PTA1、PTA15、PTB16、PTD6          PTA1不要用（与Jtag冲突）
+#define UART0_TX    PTB17        //PTA2、PTA14、PTB17、PTD7          PTA2不要用（与Jtag冲突）
 
 #define UART1_RX    PTC3        //PTC3、PTE1
 #define UART1_TX    PTC4        //PTC4、PTE0
@@ -16,8 +16,8 @@
 #define UART2_RX    PTD2        //PTD2
 #define UART2_TX    PTD3        //PTD3
 
-#define UART3_RX    PTC16       //PTB10 、PTC16 = old board、PTE5 = new board
-#define UART3_TX    PTC17       //PTB11 、PTC17 = old board、PTE4 = new board
+#define UART3_RX    PTE5       //PTB10 、PTC16 = old board、PTE5 = new board
+#define UART3_TX    PTE4       //PTB11 、PTC17 = old board、PTE4 = new board
 
 #define UART4_RX    PTE25       //PTC14、PTE25
 #define UART4_TX    PTE24       //PTC15、PTE24

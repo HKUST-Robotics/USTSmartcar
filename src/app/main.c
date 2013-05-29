@@ -43,7 +43,13 @@ void main(void){
   gpio_init(PORTE,26,GPO,1);
   gpio_init(PORTE,27,GPO,1);
   
+  uart_init(UART3, 115200);
+  uart_init(UART0, 115200);
+   printf("\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
+  
   while(1){
+   uart_sendStr(UART0,"\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
+   printf("\n\ftesing\n\f");
     for(int i=24;i<28;i++){
       gpio_turn(PORTE,i);
       delayms(300);
