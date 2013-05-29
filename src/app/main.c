@@ -46,10 +46,13 @@ void motor_init(void);
 
 void main()
 {   
-   uart_init(UART3, 115200); // For our flashed bluetooth
+  gpio_init(PORTE, 24, GPO, 0);
+   uart_init(UART0, 115200); // For our flashed bluetooth
    //uart_init(UART3, 9600); // For un-flash bluetooth
+  gpio_turn(PORTE, 24);
    
-   printf("\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
+   uart_sendStr(UART0,"\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
+  gpio_turn(PORTE, 24);
    while(1){
    printf("========================================================\n\f");
    

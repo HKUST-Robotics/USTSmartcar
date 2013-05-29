@@ -36,7 +36,7 @@ volatile int speed_control_step;
 volatile int speed_control_integral=0;
 volatile u8 speed_control_counter=0;
 
-
+u32 motor_timeout;
 
 volatile int car_speed_set=0;
 
