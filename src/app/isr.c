@@ -29,6 +29,10 @@ volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
 volatile u16 motor_timeout;
 u8 speed_pid_count = 0;
+u32 test_commandl, test_commandr;
+u32 motor_error_left, motor_error_right;
+u32 speed_pid_lf_d, speed_pid_rt_d;
+u32 g_u32encoder_lftotal, g_u32encoder_rttotal;
 
 extern volatile float accl_tilt16;
 
@@ -127,9 +131,6 @@ void encoder_counter(void){
 void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
   //DisableInterrupts;
-  int motor_error_left, motor_error_right;
-  int test_commandl, test_commandr;
-  int i, j;
   
   switch (system_mode){
     case 0:
@@ -180,15 +181,16 @@ void pit3_system_loop(void){
      Motor Right     PTE11           ftm0ch5        Motor1
 
      */
-/*  
-      // reset
-        if(speed_pid_count == 20) {
+
+     // reset gyro
+/*      if(speed_pid_count == 20) {
           speed_pid_count = 0;
           g_u32encoder_lf = 0;
           g_u32encoder_rt = 0;
         }
         ++speed_pid_count;
-*/      
+*/
+
 //super position for balance + turn
         motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;// + motor_turn_right;
@@ -231,18 +233,28 @@ void pit3_system_loop(void){
           }else{
             motor_timeout=0;
           }
-/*      
-          test_commandl = 0;
-          test_commandr = 0;
- 
-              motor_error_left = test_commandl - g_u32encoder_lf;
-              motor_error_right = test_commandr - g_u32encoder_rt;
-//            printf("Error of left motor: %u\n", motor_error_left);
-//            printf("Error of right motor: %u\n", motor_error_right);
+
+        // kp testing      
+      test_commandl = 0;
+        test_commandr = 0;
+        motor_error_left = test_commandl - g_u32encoder_lf;
+        motor_error_right = test_commandr - g_u32encoder_rt;
+//      printf("Error of left motor: %u\n", motor_error_left);
+//      printf("Error of right motor: %u\n", motor_error_right);
 
         motor_command_left += motor_error_left * (1/1);
         motor_command_right += motor_error_right * (1/1);
-*/    
+
+          
+        // kd testing
+          
+        // ki testing
+/*      g_u32encoder_lftotal += motor_error_left * dt;
+        g_u32encoder_rttotal += motor_error_right * dt; // dt is not yet defined
+        motor_command_left  += g_u32encoder_lftotal * (1/1);
+        motor_command_right += g_u32encoder_rttotal * (1/1);
+*/
+          
        //excute motor pwm with PID
         printf("\n%d",motor_timeout);
         if(motor_timeout<1000){
