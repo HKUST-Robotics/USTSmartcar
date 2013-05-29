@@ -27,7 +27,21 @@ volatile int control_omg, control_tilt, control_integrate;
 volatile int motor_command_left,motor_command_right;
 volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
-volatile u16 motor_timeout;
+
+volatile int speed_control_out_old;
+volatile int speed_control_out_new;
+
+volatile int speed_control_out;
+volatile int speed_control_step;
+volatile int speed_control_integral=0;
+volatile u8 speed_control_counter=0;
+
+
+
+volatile int car_speed_set=0;
+
+void motor_execute(void);
+void speed_control(void);
 
 extern volatile float accl_tilt16;
 
@@ -179,57 +193,28 @@ void pit3_system_loop(void){
 //super position for balance + turn
         motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;// + motor_turn_right;
-
-        printf("\n%d",motor_command_balance);
       
       //current dummy motor response, Yumi please implement PID ~johnc
         
-        //set dir pins on both
-          if (motor_command_left>0){
-            gpio_set(PORTD,7,1);
-          }else{
-            gpio_set(PORTD,7,0);
-            motor_command_left=motor_command_left*-1;
-          }
-          
-          if(motor_command_right>0){
-            gpio_set(PORTE,11,0);
-          }else{
-            gpio_set(PORTE,11,1);
-            motor_command_right=motor_command_right*-1;
-          }
-          
-          //deadzone
-          motor_command_left+=60;
-          motor_command_right+=60;
-          
-          //saturation & timeout protection
-          if(motor_command_left>800){
-            motor_command_left=0;
-            motor_timeout++;
-          }
-          else{
-            motor_timeout=0;
-          }
-          
-          if(motor_command_right>800){
-            motor_command_right=0;
-            motor_timeout++;
-          }else{
-            motor_timeout=0;
-          }
-        
-          
-          //excute motor pwm with PID
-        printf("\n%d",motor_timeout);
-        if(motor_timeout<1000){
-          FTM_PWM_Duty(FTM0,CH6,motor_command_left);
-          FTM_PWM_Duty(FTM0,CH5,motor_command_right);
-        }
       
-      //saves current encoder count to last count
-      //g_u32encoder_lflast=g_u32encoder_lf;
-      //g_u32encoder_rtlast=g_u32encoder_rt;
+        if(speed_control_counter<20){
+          speed_control_counter++;
+          speed_control_out+=speed_control_step;
+        }else{
+          speed_control_counter=0;
+          speed_control();
+        }
+        
+        motor_command_left+=speed_control_out;
+        motor_command_right+=speed_control_out;
+        
+        
+        
+        
+        
+        
+        
+      motor_execute();
       
       system_mode=0;//back to the top of pit
     break;
@@ -239,4 +224,77 @@ void pit3_system_loop(void){
   }
       //PIT_Flag_Clear(PIT3);
     //EnableInterrupts;
+}
+
+void motor_execute(void){
+  //set dir pins on both
+  if (motor_command_left>0){
+    gpio_set(PORTD,7,1);
+  }else{
+    gpio_set(PORTD,7,0);
+    motor_command_left=motor_command_left*-1;
+  }
+  
+  if(motor_command_right>0){
+    gpio_set(PORTE,11,0);
+  }else{
+    gpio_set(PORTE,11,1);
+    motor_command_right=motor_command_right*-1;
+  }
+  
+  //deadzone
+  motor_command_left+=60;
+  motor_command_right+=60;
+  
+  //saturation & timeout protection
+  if(motor_command_left>800){
+    motor_command_left=0;
+    motor_timeout++;
+  }
+  else{
+    motor_timeout=0;
+  }
+  
+  if(motor_command_right>800){
+    motor_command_right=0;
+    motor_timeout++;
+  }else{
+    motor_timeout=0;
+  }
+  
+  
+  //excute motor pwm with PID
+  printf("\n%d",motor_timeout);
+  FTM_PWM_Duty(FTM0,CH6,motor_command_left);
+  FTM_PWM_Duty(FTM0,CH5,motor_command_right);
+}
+
+void speed_control(void){
+  int error=0;
+  int car_speed=0;
+  u8 lfs,rts=1;
+  int speed_p,speed_i=0;
+  
+  if (motor_command_left<0){
+   lfs=-1;
+  }
+  
+  if(motor_command_right<0){
+    rts=-1;
+  }
+  
+  car_speed=((g_u32encoder_lf*lfs)+(g_u32encoder_rt*rts))/2;
+  g_u32encoder_lf=g_u32encoder_rt=0;
+  
+  error=car_speed-car_speed_set;
+  
+  speed_control_integral+=error*0;
+  
+  speed_control_out_old=speed_control_out_new;
+  speed_control_out_new=error*0+speed_control_integral;
+  
+  speed_control_step=speed_control_out_old-speed_control_out_new;
+  speed_control_out=speed_control_out_new;
+  
+  
 }
