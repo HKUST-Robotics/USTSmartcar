@@ -278,11 +278,11 @@ void motor_init(void){
      Motor Right     PTE11           ftm0ch5        Motor1
 
      */
-  gpio_init(PORTD,7,GPO,1);
-  gpio_init(PORTE,11,GPO,0);//this is DIR
+  gpio_init(PORTC,3,GPO,1);
+  gpio_init(PORTC,4,GPO,0);//this is DIR
   
-  FTM_PWM_init(FTM0,CH6,10000,0);//motor takes 0-1000 pwm values for duty
-  FTM_PWM_init(FTM0,CH5,10000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
   
   DisableInterrupts;
   exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
