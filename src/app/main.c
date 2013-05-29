@@ -161,17 +161,15 @@ void main()
           printf("\n\f Input direction : 0 or 1");
           motor_test = uart_getchar(UART3)-48;
          
-          FTM_PWM_Duty(FTM0,CH6,200);
-          
-          
-          FTM_PWM_Duty(FTM0,CH5,200);
-          
+          FTM_PWM_Duty(FTM0,CH2,200); // left motor PWM
+          FTM_PWM_Duty(FTM0,CH3,200); // right motor PWM
+
           if (motor_test){
-            gpio_init(PORTD,7,GPO,1);
-            gpio_init(PORTE,11,GPO,0);//this is DIR
+            gpio_init(PORTC,3,GPO,1); // left motot DIR
+            gpio_init(PORTC,4,GPO,0); // right motot DIR
           }else{
-            gpio_init(PORTD,7,GPO,0);
-            gpio_init(PORTE,11,GPO,1);//this is DIR
+            gpio_init(PORTC,3,GPO,0); // left motot DIR
+            gpio_init(PORTC,4,GPO,1); // right motot DIR
           }
           
         }  
