@@ -1,5 +1,4 @@
 /*************************************************************************
-   
   main.c
   HKUST Smartcar 2013 Sensor Group
 
@@ -11,6 +10,7 @@
   Hardware By:
   Zyan Shao
 *************************************************************************/
+
 #include "common.h"
 #include "include.h"
 #include "stdlib.h"
@@ -42,32 +42,27 @@ void ccd_interrupts_init(void);
 //move this into motor.h later
 void motor_init(void);
 
-  
-
 void main()
 {   
-  gpio_init(PORTE, 24, GPO, 0);
-   uart_init(UART0, 115200); // For our flashed bluetooth
-   //uart_init(UART3, 9600); // For un-flash bluetooth
-  gpio_turn(PORTE, 24);
+  uart_init(UART3, 115200); // For our flashed bluetooth
+  //uart_init(UART3, 9600); // For un-flash bluetooth
    
-   uart_sendStr(UART0,"\n\fWelcome to the SmartCar 2013 Sensor team developement system\n\f");
-  gpio_turn(PORTE, 24);
-   while(1){
-   printf("========================================================\n\f");
+  printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
+  while(1){
+   printf("==============================================================\n");
    
-   printf("Please select mode:\n\f---------------------------\n\f");
-   printf("1:Accelerometer&gyro\n\f");
-   printf("2:LinearCCD\n\f");
-   printf("3:Tuning CCD\n\f");
-   printf("4:Encoder testing\n\f");
-   printf("5:CCDSample Filter Algorithm\n\f");
-   printf("6:Motor control test\n\f");
-   printf("7:SystemLoop Test\n\f");
-   printf("8:Longer SI Sampling\n\f");
+   printf("Please select mode:\n---------------------------\n");
+   printf("1:Accelerometer&gyro\n");
+   printf("2:LinearCCD\n");
+   printf("3:Tuning CCD\n");
+   printf("4:Encoder testing\n");
+   printf("5:CCDSample Filter Algorithm\n");
+   printf("6:Motor control test\n");
+   printf("7:SystemLoop Test\n");
+   printf("8:Longer SI Sampling\n");
    
-   g_char_mode = '7';                 // Hard code mode = system loop
-   //g_char_mode = uart_getchar(UART3);
+   //g_char_mode = '7';                 // Hard code mode = system loop
+   g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
 
@@ -77,7 +72,7 @@ void main()
         
         //accl_init();
         adc_init(ADC1,AD6b);
-        adc_init(ADC0,AD15);
+        adc_init(ADC1,AD7b);
 
         printf("\nEverything Initialized alright\n");
         
@@ -86,12 +81,8 @@ void main()
           //printf("\n\f====================================");
 
           printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-29300);//theta
-          printf("\n%d",ad_once(ADC0,AD15,ADC_16bit)-33850);//omega
+          printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-33850);//omega
           delayms(50);
-
-          printf("\n\f%d",ad_once(ADC1,AD6b,ADC_16bit));
-          //printf("\n\ftheta is: %d",ad_once(ADC1,AD7b,ADC_16bit));
-          delayms(100);
 
         }
      break;
@@ -124,9 +115,8 @@ void main()
         uart_sendStr(UART3,"The mode now is 4: encoder test");
              
         DisableInterrupts;
-        exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
-        exti_init(PORTC,19,rising_up);            //inits right encoder interrupt capture
-             //FTM_Input_init(FTM1,CH0,Rising); for new board
+        exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
+        exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
              
         pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
      
@@ -152,7 +142,9 @@ void main()
       break;
       case '6':
         uart_sendStr(UART3,"The mode now is 6: Motor Control test");
-        motor_init();
+        //inits
+
+        
         printf("\nEverything Initialized alright\n");
         delayms(3000);
         
@@ -164,15 +156,15 @@ void main()
           printf("\n\f Input direction : 0 or 1");
           motor_test = uart_getchar(UART3)-48;
          
-          FTM_PWM_Duty(FTM0,CH2,200); // left motor PWM
-          FTM_PWM_Duty(FTM0,CH3,200); // right motor PWM
-
+          FTM_PWM_Duty(FTM0,CH2,200);//right 
+          FTM_PWM_Duty(FTM0,CH3,200);//left
+          
           if (motor_test){
-            gpio_init(PORTC,3,GPO,1); // left motot DIR
-            gpio_init(PORTC,4,GPO,0); // right motot DIR
+            gpio_set(PORTB,22,1);
+            gpio_set(PORTB,23,1);//this is left DIR
           }else{
-            gpio_init(PORTC,3,GPO,0); // left motot DIR
-            gpio_init(PORTC,4,GPO,1); // right motot DIR
+            gpio_set(PORTB,22,0);
+            gpio_set(PORTB,23,0);//this is DIR
           }
           
         }  
@@ -182,7 +174,7 @@ void main()
         printf("\n\f The Mode is now 7: SystemLoop Test");
         
         adc_init(ADC1,AD6b);
-        adc_init(ADC0,AD15);
+        adc_init(ADC0,AD7b);
         pit_init_ms(PIT3,1);
         ccd_interrupts_init(); // Louis added to text ccd code integration
         motor_init();
@@ -274,34 +266,26 @@ void motor_init(void){
      
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
-     Motor Left      PTD7            ftm0ch6        Motor0
-     Motor Right     PTE11           ftm0ch5        Motor1
+     Motor right     PTB22           ftm0ch2        top??
+     Motor left      PTB23           ftm0ch3        top??
 
      */
-  gpio_init(PORTC,3,GPO,1);
-  gpio_init(PORTC,4,GPO,0);//this is DIR
-  
   FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
   FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
   
+  gpio_init(PORTB,22,GPO,0);
+  gpio_init(PORTB,23,GPO,0);
+  
   DisableInterrupts;
-  exti_init(PORTC,18,rising_up);             //inits left encoder interrupt capture
-  exti_init(PORTC,19,rising_up);            //inits right encoder interrupt capture
+  
+  exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
+  exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
+             
+             
+  
   
   EnableInterrupts;
   
-//  while(g_u32encoder_lf<5&&motor_deadzone_left<200){
-//    motor_deadzone_left++;
-//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_left);
-//    delayms(100);
-//  }
-//  while(g_u32encoder_rt<5&&motor_deadzone_right<200){
-//    motor_deadzone_right++;
-//    FTM_PWM_Duty(FTM0,CH6,motor_deadzone_right);
-//    delayms(100);
-//  }
-    
-  
-    
+
   
 }

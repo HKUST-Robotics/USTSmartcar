@@ -19,21 +19,16 @@
 #undef  VECTOR_087
 #define VECTOR_087    pit3_system_loop     //System multitask loop, run on 1ms
 
-
-#undef  VECTOR_079
-#define VECTOR_079    FTM1_IRQHandler     //FTM1 input capture for getting encoder count
-
-#undef  VECTOR_105
-#define VECTOR_105    encoder_counter    //for getting encoder count
+#undef  VECTOR_103
+#define VECTOR_103    encoder_counter    //for getting encoder count
 
 
 
 
 extern void PIT0_IRQHandler();            //PIT0 ©w??�§§¬_?�A?�»®Áº�?
 extern void PIT1_IRQHandler();
-extern void FTM1_IRQHandler();
-extern void encoder_counter();
 extern void pit3_system_loop();
+extern void encoder_counter();
 
 #endif  //__ISR_H
 
