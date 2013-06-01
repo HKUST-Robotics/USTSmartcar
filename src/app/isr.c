@@ -16,6 +16,8 @@ extern volatile u32 g_u32encoder_rtlast;
 
 extern volatile int motor_deadzone_left,motor_deadzone_right;
 
+extern u32 balance_centerpoint_set;
+
 
 //for the motor command loop
 
@@ -27,7 +29,6 @@ volatile int control_omg, control_tilt, control_integrate;
 volatile int motor_command_left,motor_command_right;
 volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
-volatile u16 motor_timeout;
 
 extern volatile float accl_tilt16;
 
@@ -89,8 +90,10 @@ void pit3_system_loop(void){
   switch (system_mode){
     case 0:
       //get gyro & accl values
-      control_omg=ad_once(ADC1,AD7b,ADC_16bit)-33850;
-      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-28400;
+      control_omg=ad_once(ADC1,AD7b,ADC_16bit)-36050;
+      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-31734+balance_centerpoint_set*5;
+      printf("\n%d",(balance_centerpoint_set*5)-31734);
+      //proper offest is -26774
       if((control_integrate>0&&control_tilt<0)||(control_integrate<0&&control_tilt>0)){
         control_integrate=0;
       }else{
@@ -103,11 +106,12 @@ void pit3_system_loop(void){
       //i.e. sample(2);
       //louis fill this in! ~johnc
       
+      /*
       if(g_int_ccd_operation_state == 0){
       //g_int_ccd_operation_state = 1;
       ccd_sampling(8,1);
       }
-      
+      */
       //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
     break;
@@ -135,56 +139,44 @@ void pit3_system_loop(void){
      Motor Right     PTE11           ftm0ch5        Motor1
 
      */
-//super position for balance + turn
+    //super position for balance + turn
         motor_command_left = motor_command_balance; //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;// + motor_turn_right;
-
-        printf("\n%d",motor_command_balance);
       
       //current dummy motor response, Yumi please implement PID ~johnc
         
         //set dir pins on both
           if (motor_command_left>0){
-            gpio_set(PORTD,7,1);
+            gpio_set(PORTB,23,1);
           }else{
-            gpio_set(PORTD,7,0);
+            gpio_set(PORTB,23,0);
             motor_command_left=motor_command_left*-1;
           }
           
           if(motor_command_right>0){
-            gpio_set(PORTE,11,0);
+            gpio_set(PORTB,22,1);
           }else{
-            gpio_set(PORTE,11,1);
+            gpio_set(PORTB,22,0);
             motor_command_right=motor_command_right*-1;
           }
           
           //deadzone
-          motor_command_left+=60;
-          motor_command_right+=60;
+          motor_command_left+=50;
+          motor_command_right+=50;
           
           //saturation & timeout protection
           if(motor_command_left>800){
             motor_command_left=0;
-            motor_timeout++;
-          }
-          else{
-            motor_timeout=0;
           }
           
           if(motor_command_right>800){
             motor_command_right=0;
-            motor_timeout++;
-          }else{
-            motor_timeout=0;
           }
         
           
           //excute motor pwm with PID
-        printf("\n%d",motor_timeout);
-        if(motor_timeout<1000){
-          FTM_PWM_Duty(FTM0,CH6,motor_command_left);
-          FTM_PWM_Duty(FTM0,CH5,motor_command_right);
-        }
+          FTM_PWM_Duty(FTM0,CH3,motor_command_left);
+          FTM_PWM_Duty(FTM0,CH2,motor_command_right);
       
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;

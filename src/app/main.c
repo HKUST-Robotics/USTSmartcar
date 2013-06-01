@@ -30,6 +30,8 @@ volatile u32 g_u32encoder_rtlast=0;
 
 volatile int motor_deadzone_left,motor_deadzone_right;
 
+volatile u32 balance_centerpoint_set=0;
+
 u16 motor_test=0;
 
 u8 todis[];//for sprintf usage
@@ -61,12 +63,23 @@ void main()
    printf("7:SystemLoop Test\n");
    printf("8:Longer SI Sampling\n");
    
-   //g_char_mode = '7';                 // Hard code mode = system loop
-   g_char_mode = uart_getchar(UART3);
+   g_char_mode = '7';                 // Hard code mode = system loop
+   //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
 
      switch (g_char_mode){
+      case '0':
+        //VR analog input
+        adc_init(ADC0,AD14);
+        
+        while(1){
+          delayms(500);
+          printf("\n%d",ad_ave(ADC0,AD14,ADC_12bit,10));//vr value
+        }
+          
+      break;
+       
       case '1':
         uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
         
@@ -80,8 +93,8 @@ void main()
         { 
           //printf("\n\f====================================");
 
-          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-29300);//theta
-          printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-33850);//omega
+          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-31834);//theta
+          //printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-36050);//omega
           delayms(50);
 
         }
@@ -143,7 +156,7 @@ void main()
       case '6':
         uart_sendStr(UART3,"The mode now is 6: Motor Control test");
         //inits
-
+        motor_init();
         
         printf("\nEverything Initialized alright\n");
         delayms(3000);
@@ -174,7 +187,11 @@ void main()
         printf("\n\f The Mode is now 7: SystemLoop Test");
         
         adc_init(ADC1,AD6b);
-        adc_init(ADC0,AD7b);
+        adc_init(ADC1,AD7b);
+        adc_init(ADC0,AD14);
+        
+        balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
+        
         pit_init_ms(PIT3,1);
         ccd_interrupts_init(); // Louis added to text ccd code integration
         motor_init();
