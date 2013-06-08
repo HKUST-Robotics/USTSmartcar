@@ -108,7 +108,7 @@ void main()
         
         while(1)
         {  
-           ccd_sampling(2,1); // sampling, with more notice message
+           ccd_sampling(2); // sampling, with more notice message
         }  
      break;
       
@@ -120,7 +120,7 @@ void main()
         while(1)
         {   
            
-            ccd_sampling(3,1); // Tuning CCD, with less notice message
+            ccd_sampling(3); // Tuning CCD, with less notice message
         }  
       break;
              
@@ -151,7 +151,7 @@ void main()
         while(1)
         {  
             
-            ccd_sampling(5,1); // CCD Sampling with filter algorithm
+            ccd_sampling(5); // CCD Sampling with filter algorithm
         }  
       break;
       case '6':
@@ -212,7 +212,7 @@ void main()
         
         while(1)
         { 
-            ccd_sampling(8,1); // Longer SI CCD Sampling
+            ccd_sampling(8); // Longer SI CCD Sampling
         }  
       break;
       
@@ -228,12 +228,12 @@ void ccd_interrupts_init(void){
     DisableInterrupts;                                //Disable Interrupts
     all_pin_init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
-    pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
+    //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
     //pit_init_ms(PIT0,0.01);                         // Clock, 20us period, 50% duty cycle
  
     //Maximum clock is 8us cycle by using PIT_init_ms
     
-    //pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
+    pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     //pit_init(PIT0,100);
     
     //EnableInterrupts;			              //Enable Interrupts
@@ -269,7 +269,7 @@ void all_pin_init(){
   ccd_3v-5v                                     CCD
   ccd_GND    					CCD
   ccd_SI	PTB8			        CCD
-  ccd_clock	PTB19		                CCD
+  ccd_clock	PTB9		                CCD
   ccd_AO        PTB10	        	        CCD
  **************************************************************************/
   

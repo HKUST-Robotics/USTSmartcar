@@ -36,7 +36,7 @@ u8 system_mode=0;
 
 void PIT0_IRQHandler(void)
 {
-      //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge    
+      //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge   
       g_u32_systemclock++;
       PIT_Flag_Clear(PIT0);       
 }
@@ -109,7 +109,7 @@ void pit3_system_loop(void){
       
       //if(g_int_ccd_operation_state == 0){
       //g_int_ccd_operation_state = 1;
-      ccd_sampling(8,1);
+      ccd_sampling(8);
       //}
       
       //system_mode=1; // hold in this case for testing ccd
