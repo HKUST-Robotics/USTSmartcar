@@ -18,6 +18,7 @@
 /*************************************************************************
 Global Varaible
 *************************************************************************/
+
 char g_char_mode=0;                 // debug and testing mode
 volatile u32 g_u32_systemclock=0;   // systemclock counter
 
@@ -48,11 +49,11 @@ void main()
 {   
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For un-flash bluetooth
-   
+  
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
+    
    printf("==============================================================\n");
-   
    printf("Please select mode:\n---------------------------\n");
    printf("1:Accelerometer&gyro\n");
    printf("2:LinearCCD\n");
@@ -63,11 +64,11 @@ void main()
    printf("7:SystemLoop Test\n");
    printf("8:Longer SI Sampling\n");
    
-   g_char_mode = '7';                 // Hard code mode = system loop
+   g_char_mode = '8';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
-
+ 
      switch (g_char_mode){
       case '0':
         //VR analog input
@@ -227,21 +228,23 @@ void ccd_interrupts_init(void){
     DisableInterrupts;                                //Disable Interrupts
     all_pin_init();
     //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
-    //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
+    pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
     //pit_init_ms(PIT0,0.01);                         // Clock, 20us period, 50% duty cycle
  
     //Maximum clock is 8us cycle by using PIT_init_ms
     
-    pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
+    //pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
     //pit_init(PIT0,100);
     
     //EnableInterrupts;			              //Enable Interrupts
 }
 
-void all_pin_init(){
 
+
+void all_pin_init(){
+  
  /*************************************************************************  
-  Old Main Board
+  1st Gen Main Board
   
   Hardware        Port name       Program name    Physical location
   ---------------+---------------+---------------+-----------------
@@ -250,30 +253,32 @@ void all_pin_init(){
   ccd_SI	PTB19			        JP5
   ccd_clock	PTB18		                SPI-2b
   ccd_AO        PTA11	        	        JP8
- *************************************************************************/
-  
+ *************************************************************************
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
     
     gpio_init(PORTA, 8, GPO, 1);   //PTA8  , Trigger Oscilloscope
-   
-
+  */
+  
  /*************************************************************************  
-  New Main Board
+  2nd Gen Main Board
   
-     gpio_init(PORTE, 24, GPO, 0); //PTE24, D2 LED
-     gpio_init(PORTE, 25, GPO, 0); //PTE25, D3 LED
-     gpio_init(PORTE, 27, GPO, 0); //PTE27, D4 LED
-     gpio_init(PORTE, 28, GPO, 0); //PTE28, D5 LED 
+  Hardware        Port name       Program name    Physical location
+  ---------------+---------------+---------------+-----------------
+  ccd_3v-5v                                     CCD
+  ccd_GND    					CCD
+  ccd_SI	PTB8			        CCD
+  ccd_clock	PTB19		                CCD
+  ccd_AO        PTB10	        	        CCD
+ **************************************************************************/
   
-     gpio_init(PORTB, 22, GPO, 1);  //PTB22 , Clock / CLK
-     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , SI
-     gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO
-  *************************************************************************/
- 
+   gpio_init(PORTB, 8, GPO, 1);   //PTB8 , SI
+   gpio_init(PORTB, 9, GPO, 1);   //PTB9 , Clock / CLK
+   gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO(D1)
+
     //uart_init(UART3, 115200); // BlueTooth UART init
-}
+} 
 
 void motor_init(void){
   
@@ -286,7 +291,7 @@ void motor_init(void){
      Motor right     PTB22           ftm0ch2        top??
      Motor left      PTB23           ftm0ch3        top??
 
-     */
+   */
   FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
   FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
   
@@ -297,12 +302,7 @@ void motor_init(void){
   
   exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
   exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
-             
-             
-  
   
   EnableInterrupts;
   
-
-  
-}
+}  

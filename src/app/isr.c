@@ -106,12 +106,12 @@ void pit3_system_loop(void){
       //i.e. sample(2);
       //louis fill this in! ~johnc
       
-      /*
-      if(g_int_ccd_operation_state == 0){
+      
+      //if(g_int_ccd_operation_state == 0){
       //g_int_ccd_operation_state = 1;
       ccd_sampling(8,1);
-      }
-      */
+      //}
+      
       //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
     break;
