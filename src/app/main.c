@@ -57,14 +57,11 @@ void main()
    printf("Please select mode:\n---------------------------\n");
    printf("1:Accelerometer&gyro\n");
    printf("2:LinearCCD\n");
-   printf("3:Tuning CCD\n");
    printf("4:Encoder testing\n");
-   printf("5:CCDSample Filter Algorithm\n");
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
-   printf("8:Longer SI Sampling\n");
    
-   g_char_mode = '8';                 // Hard code mode = system loop
+   g_char_mode = '2';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
@@ -105,25 +102,13 @@ void main()
         uart_sendStr(UART3,"The mode now is 2: Linear CCD");
         ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
-        
         while(1)
-        {  
-           ccd_sampling(2); // sampling, with more notice message
-        }  
+        { 
+            ccd_sampling(); // Longer SI CCD Sampling
+            ccd_clock_turn(); // Gen 2 main board Clock
+        }
      break;
-      
-      case '3':
-        uart_sendStr(UART3,"The mode now is 3: Tuning CCD");
-        ccd_interrupts_init();
-        printf("\nEverything Initialized alright\n");
         
-        while(1)
-        {   
-           
-            ccd_sampling(3); // Tuning CCD, with less notice message
-        }  
-      break;
-             
       case '4':
         //temporary case for debuggine encoder libraries, move to encoder.h later
         uart_sendStr(UART3,"The mode now is 4: encoder test");
@@ -142,18 +127,7 @@ void main()
         }
           
       break;
-      
-        case '5':
-        uart_sendStr(UART3,"The mode now is 5: CCD Sample Filtering");
-        ccd_interrupts_init();
-        printf("\nEverything Initialized alright\n");
-        
-        while(1)
-        {  
-            
-            ccd_sampling(5); // CCD Sampling with filter algorithm
-        }  
-      break;
+
       case '6':
         uart_sendStr(UART3,"The mode now is 6: Motor Control test");
         //inits
@@ -205,20 +179,8 @@ void main()
       
      break;
       
-        case '8':
-        uart_sendStr(UART3,"The mode now is 8: Longer SI Sampling");
-        ccd_interrupts_init();
-        printf("\nEverything Initialized alright\n");
-        
-        while(1)
-        { 
-            ccd_sampling(8); // Longer SI CCD Sampling
-            gpio_turn(PORTB, 9); // Gen 2 main board Clock
-        }  
-      break;
-      
-      default :
-        printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
+     default :
+     printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
         
     }
    }
