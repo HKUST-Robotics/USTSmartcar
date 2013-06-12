@@ -14,7 +14,7 @@
           
           
           
-        <Column0>200</Column0><Column1>27</Column1><Column2>27</Column2><Column3>0</Column3></ColumnWidths>
+        <Column0>2</Column0><Column1>27</Column1><Column2>27</Column2><Column3>0</Column3></ColumnWidths>
       </Workspace>
       <Build>
         
@@ -44,14 +44,14 @@
       
       
       
-    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\main.c</Filename><XPos>0</XPos><YPos>151</YPos><SelStart>6050</SelStart><SelEnd>6050</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.c</Filename><XPos>0</XPos><YPos>94</YPos><SelStart>2745</SelStart><SelEnd>2745</SelEnd></Tab><ActiveTab>1</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.h</Filename><XPos>0</XPos><YPos>25</YPos><SelStart>1212</SelStart><SelEnd>1240</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\main.c</Filename><XPos>0</XPos><YPos>200</YPos><SelStart>5723</SelStart><SelEnd>5723</SelEnd></Tab><ActiveTab>0</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>367</SelStart><SelEnd>367</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.h</Filename><XPos>0</XPos><YPos>16</YPos><SelStart>188</SelStart><SelEnd>188</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\isr.c</Filename><XPos>0</XPos><YPos>24</YPos><SelStart>992</SelStart><SelEnd>992</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\fire_drivers_cfg.h</Filename><XPos>0</XPos><YPos>8</YPos><SelStart>677</SelStart><SelEnd>677</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
     <Positions>
       
       
       
       
       
-    <Top><Row0><Sizes><Toolbar-00e9f048><key>iaridepm.enu1</key></Toolbar-00e9f048></Sizes></Row0></Top><Left><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>444</Bottom><Right>291</Right><x>-2</x><y>-2</y><xscreen>1208</xscreen><yscreen>6</yscreen><sizeHorzCX>884334</sizeHorzCX><sizeHorzCY>8746</sizeHorzCY><sizeVertCX>214495</sizeVertCX><sizeVertCY>650146</sizeVertCY></Rect></Wnd1></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>197</Bottom><Right>1368</Right><x>-2</x><y>-2</y><xscreen>1370</xscreen><yscreen>199</yscreen><sizeHorzCX>1002928</sizeHorzCX><sizeHorzCY>290087</sizeHorzCY><sizeVertCX>234261</sizeVertCX><sizeVertCY>27697</sizeVertCY></Rect></Wnd0></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+    <Top><Row0><Sizes><Toolbar-00fdf048><key>iaridepm.enu1</key></Toolbar-00fdf048></Sizes></Row0></Top><Left><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>603</Bottom><Right>93</Right><x>-2</x><y>-2</y><xscreen>590</xscreen><yscreen>1</yscreen><sizeHorzCX>431918</sizeHorzCX><sizeHorzCY>1458</sizeHorzCY><sizeVertCX>69546</sizeVertCX><sizeVertCY>881924</sizeVertCY></Rect></Wnd1></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>38</Bottom><Right>1368</Right><x>-2</x><y>-2</y><xscreen>1370</xscreen><yscreen>40</yscreen><sizeHorzCX>1002928</sizeHorzCX><sizeHorzCY>58309</sizeHorzCY><sizeVertCX>114202</sizeVertCX><sizeVertCY>5831</sizeVertCY></Rect></Wnd0></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
   </Desktop>
 </Workspace>
 

@@ -5,7 +5,7 @@
 #define BALANCEKP 0.1
 #define BALANCEKI 0
 
-extern volatile u32 g_u32_systemclock;   // systemclock counter
+//extern volatile u32 g_u32_systemclock;   // systemclock counter
 extern volatile int g_int_ccd_operation_state;
 
 extern volatile u32 g_u32encoder_lf;
@@ -37,7 +37,7 @@ u8 system_mode=0;
 void PIT0_IRQHandler(void)
 {
       //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge   
-      g_u32_systemclock++;
+      //g_u32_systemclock++;
       PIT_Flag_Clear(PIT0);       
 }
 

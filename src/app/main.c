@@ -213,6 +213,7 @@ void main()
         while(1)
         { 
             ccd_sampling(8); // Longer SI CCD Sampling
+            gpio_turn(PORTB, 9); // Gen 2 main board Clock
         }  
       break;
       
@@ -239,8 +240,6 @@ void ccd_interrupts_init(void){
     //EnableInterrupts;			              //Enable Interrupts
 }
 
-
-
 void all_pin_init(){
   
  /*************************************************************************  
@@ -253,7 +252,7 @@ void all_pin_init(){
   ccd_SI	PTB19			        JP5
   ccd_clock	PTB18		                SPI-2b
   ccd_AO        PTA11	        	        JP8
- *************************************************************************
+ ************************************************************************
     gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
@@ -272,12 +271,12 @@ void all_pin_init(){
   ccd_clock	PTB9		                CCD
   ccd_AO        PTB10	        	        CCD
  **************************************************************************/
-  
    gpio_init(PORTB, 8, GPO, 1);   //PTB8 , SI
    gpio_init(PORTB, 9, GPO, 1);   //PTB9 , Clock / CLK
    gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO(D1)
-
-    //uart_init(UART3, 115200); // BlueTooth UART init
+   
+   //LED_init(); // To test ccd sampling function is operating
+  
 } 
 
 void motor_init(void){
