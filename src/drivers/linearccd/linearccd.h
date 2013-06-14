@@ -30,6 +30,12 @@ void ccd_finish_one_sampling();
 void ccd_output_sample_to_UART(); 
 // print the sample result to UART
 
+void ccd_shift_sample_to_manageable_position(char array[]);
+// shift sample position
+
+void ccd_scan_dummy_sample_result(char array[]);
+// scan the array value
+
 void ccd_print(char array[]); 
 // function prints out length128 array to bluetooth
 

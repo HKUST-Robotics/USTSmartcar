@@ -109,7 +109,7 @@ void pit3_system_loop(void){
       
       //if(g_int_ccd_operation_state == 0){
       //g_int_ccd_operation_state = 1;
-      ccd_sampling(8);
+      ccd_sampling();
       //}
       
       //system_mode=1; // hold in this case for testing ccd

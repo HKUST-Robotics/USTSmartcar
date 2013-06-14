@@ -105,7 +105,8 @@ void main()
         while(1)
         { 
             ccd_sampling(); // Longer SI CCD Sampling
-            ccd_clock_turn(); // Gen 2 main board Clock
+            //ccd_clock_turn(); // Gen 2 main board Clock
+            //ccd_array_position_handler(); // increment ccd position
         }
      break;
         

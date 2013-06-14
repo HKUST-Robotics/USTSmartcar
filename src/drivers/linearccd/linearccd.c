@@ -14,30 +14,36 @@ Edited by John Ching
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
-u16 g_u16_ccd_long_SI_counter=12500;
+u16 g_u16_ccd_long_SI_counter=800;
 
 /*********** CCD related status flag ************/
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
-
+int g_int_trash_sample_flag=0;                // notice dummy sample
 
 /*********** CCD related sample result & array ************/
-char g_char_ar_ccd_pixel[128];                // 1-line pixel array
+char g_char_ar_ccd_pixel[256];                // 1-line pixel array
 char g_char_ar_ccd_previous_pixel[128];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[128];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
 
-void ccd_clock_turn(){
-  gpio_turn(PORTB, 9); // Gen 2 main board Clock
-}
-
 void ccd_sampling(){
-      
-       if(g_u16_ccd_long_SI_counter == 12500){   // when PIT1 clock = 200us , 25ms/100us =250 50ms/100us = 500 , 100ms/100us = 1000
-          ccd_trigger_SI();                                     // when PIT1 clock = 2us , 25ms/2us = 12500 50ms/2us = 25000 , 100ms/2us = 50000
+  
+       ccd_clock_turn();
+       
+       if(g_u16_ccd_long_SI_counter == 800){   
+        ccd_trigger_SI();                          
        }
-          
-       ccd_detect_track(); 
+       
+       // When PIT0 clock = 2.5us 
+       //  1ms/2.5us = 500
+       //2.5ms/2.5us = 1000 (Nice response in lab testing)
+       //  5ms/2.5us = 2000
+       // 25ms/2.5us = 10000
+       // 50ms/2.5us = 20000
+       //100ms/2.5us = 40000
+       
+       ccd_detect_track();
        
        ccd_SI_failing_edge_condition();
        
@@ -49,13 +55,16 @@ void ccd_sampling(){
       
 }
 
+void ccd_clock_turn(){
+  gpio_turn(PORTB, 9); // Gen 2 main board Clock
+}
+
 void ccd_trigger_SI(){
     if(g_int_SI_state_flag == 0 ){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
                g_u16_ccd_sample_clock = 0;
                gpio_set(PORTB, 8, 1);                // Gen 2 main board SI rising edge
-           
     }
 }
 
@@ -70,17 +79,26 @@ void ccd_detect_track(){
 }
 
 void ccd_SI_failing_edge_condition(){
-  if(g_u16_ccd_sample_clock == 1 &&  g_int_SI_state_flag == 1){ // condition for Longer SI failing edge to end
+  if(g_u16_ccd_sample_clock == 1 && g_int_SI_state_flag == 1){ // condition for Longer SI failing edge to end
         gpio_set(PORTB, 8, 0); // Gen 2 SI faling edge
         g_u16_ccd_long_SI_counter = 0;
   }
 }
 
 void ccd_finish_one_sampling(){
-     if(g_u16_ccd_sample_clock == 128 && g_int_sampling_state_flag == 1){
+  
+     if(g_u16_ccd_sample_clock == 512){
           g_int_SI_state_flag = 0;          // SI Flag off
           g_int_sampling_state_flag = 0;    // Sampling flag off
+          
+     ccd_shift_sample_to_manageable_position(g_char_ar_ccd_pixel);
+     ccd_scan_dummy_sample_result(g_char_ar_ccd_pixel);
+          
+          if(g_int_trash_sample_flag == 1){
+             // do nth
+          }else{
           ccd_output_sample_to_UART();
+          }
      }       
 }
 
@@ -90,11 +108,41 @@ void ccd_output_sample_to_UART(){
      uart_sendStr(UART3,"\n"); 
 }
 
-void ccd_print(char array[]){
-      int i;  
-      for( i = 0 ; i < 128 ; i++){
-           uart_putchar(UART3,array[i]);      // print One pixel One loop
+void ccd_shift_sample_to_manageable_position(char array[]){
+       
+      u16 i; 
+      for( i = 0 ; i < 256 ; i++){
+      array[i] = array[i+2];
       }
+}
+
+void ccd_scan_dummy_sample_result(char array[]){
+  
+      u16 i; 
+      u16 dummy = 0;
+      g_int_trash_sample_flag = 0; // reset trash flag
+      
+      for( i = 0 ; i < 256 ; i++){
+        if(array[i] == '_'){
+          dummy++;
+        }
+      }
+      
+      if(dummy == 256) // if dummy sample detect
+      {
+        g_int_trash_sample_flag = 1; // trash flag ON
+      }
+    
+}
+
+void ccd_print(char array[]){
+      u16 i;  
+      //for( i = 128 ; i < 258 ; i++){
+      for( i = 0 ; i < 256 ; i++){
+        uart_putchar(UART3,array[i]);      // print One pixel One loop
+      }
+  
+  
 }
 
 
