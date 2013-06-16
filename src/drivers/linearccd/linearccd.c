@@ -29,7 +29,7 @@ char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
 
 void ccd_sampling(){
   
-       ccd_clock_turn();
+       //ccd_clock_turn();
        
        if(g_u16_ccd_long_SI_counter == 800){   
         ccd_trigger_SI();                          

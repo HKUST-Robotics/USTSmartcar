@@ -197,7 +197,7 @@ void ccd_interrupts_init(void){
  
     //Maximum clock is 8us cycle by using PIT_init_ms
     
-    pit_init(PIT0,10);   // Faster Clock, 2us period, 50% duty cycle
+    pit_init(PIT0,10);   // Faster Clock, 2.5us period, 50% duty cycle
     //pit_init(PIT0,100);
     
     //EnableInterrupts;			              //Enable Interrupts
@@ -207,21 +207,10 @@ void all_pin_init(){
   
  /*************************************************************************  
   1st Gen Main Board
-  
-  Hardware        Port name       Program name    Physical location
-  ---------------+---------------+---------------+-----------------
-  ccd_3v-5v                                     JP5
-  ccd_GND    					JP5/JP3
-  ccd_SI	PTB19			        JP5
-  ccd_clock	PTB18		                SPI-2b
-  ccd_AO        PTA11	        	        JP8
- ************************************************************************
-    gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
+   gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
     gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
     gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-    
-    gpio_init(PORTA, 8, GPO, 1);   //PTA8  , Trigger Oscilloscope
-  */
+ */
   
  /*************************************************************************  
   2nd Gen Main Board
@@ -247,13 +236,11 @@ void motor_init(void){
   motor_deadzone_left=100;
   motor_deadzone_right=100;
      /*connection config:
-     
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
      Motor right     PTB22           ftm0ch2        top??
      Motor left      PTB23           ftm0ch3        top??
-
-   */
+     */
   FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
   FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
   
