@@ -5,8 +5,7 @@
 #define BALANCEKP 0.1
 #define BALANCEKI 0
 
-//extern volatile u32 g_u32_systemclock;   // systemclock counter
-extern volatile int g_int_ccd_operation_state;
+extern volatile int g_int_ccd_operation_state; // ccd operation state
 
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
@@ -28,7 +27,6 @@ volatile int motor_command_speed=0;
 volatile int motor_command_speed_delta=0;
 volatile int speed_control_integral=0;
 
-
 //for the motor command loop
 
 /******************************************
@@ -49,9 +47,7 @@ extern volatile float accl_tilt16;
 u8 system_mode=0;
 
 void PIT0_IRQHandler(void)
-{
-      //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge   
-      //g_u32_systemclock++;
+{     //gpio_turn(PORTB, 9); // Gen 2 main board Clock  
       PIT_Flag_Clear(PIT0);       
 }
 
@@ -71,7 +67,6 @@ void PIT1_IRQHandler(void)
 
 void encoder_counter(void){
   /*connection config:
-     
      Hardware        Port name       Program name    Physical location
      ---------------+---------------+---------------+-----------------
      encoder_left    PTA8            exti pta        servo1
@@ -102,7 +97,6 @@ void pit3_system_loop(void){
   //main system control loop, runs every 1ms, each case runs every 5 ms
   DisableInterrupts;
 
-  
   switch (system_mode){
     case 0:
       //get gyro & accl values
@@ -118,11 +112,9 @@ void pit3_system_loop(void){
     case 1:
       //get ccd values      
       if(g_int_ccd_operation_state == 0){
-        //g_int_ccd_operation_state = 1;
         ccd_sampling(1);
       }
       
-      //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
     break;
     case 2:
@@ -165,8 +157,6 @@ void pit3_system_loop(void){
           speed_control_integral+=speed_i;
           motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/20;
           
-          
-          
         }
         
         motor_command_speed+=motor_command_speed_delta;
@@ -175,8 +165,6 @@ void pit3_system_loop(void){
         //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;//-motor_command_speed;
         // + motor_turn_right;
-        
-        
         
       //current dummy motor response, Yumi please implement PID ~johnc
         
@@ -214,7 +202,6 @@ void pit3_system_loop(void){
           
           printf("\nmotor command left:%d");
           
-          
           //excute motor pwm with PID
           FTM_PWM_Duty(FTM0,CH3,motor_command_left);
           FTM_PWM_Duty(FTM0,CH2,motor_command_right);
@@ -225,8 +212,6 @@ void pit3_system_loop(void){
       
       system_mode=0;//back to the top of pit
     break;
-    
-
       
   }
     PIT_Flag_Clear(PIT3);

@@ -31,7 +31,7 @@ char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
 void ccd_sampling(int state){
   
   g_int_ccd_operation_state = state;
-    
+  
   while(g_int_ccd_operation_state == 1){
         
        ccd_clock_turn();
@@ -43,10 +43,6 @@ void ccd_sampling(int state){
        // When PIT0 clock = 2.5us 
        //  1ms/2.5us = 500
        //2.5ms/2.5us = 1000 (Nice response in lab testing)
-       //  5ms/2.5us = 2000
-       // 25ms/2.5us = 10000
-       // 50ms/2.5us = 20000
-       //100ms/2.5us = 40000
        
        ccd_detect_track();
        
@@ -61,7 +57,7 @@ void ccd_sampling(int state){
 }
 
 void ccd_clock_turn(){
-  gpio_turn(PORTB, 9); // Gen 2 main board Clock
+    gpio_turn(PORTB, 9); // Gen 2 main board Clock
 }
 
 void ccd_trigger_SI(){
@@ -115,7 +111,6 @@ void ccd_output_sample_to_UART(){
 }
 
 void ccd_shift_sample_to_manageable_position(char array[]){
-       
       u16 i; 
       for( i = 0 ; i < 256 ; i++){
       array[i] = array[i+2];
@@ -123,7 +118,6 @@ void ccd_shift_sample_to_manageable_position(char array[]){
 }
 
 void ccd_scan_dummy_sample_result(char array[]){
-  
       u16 i; 
       u16 dummy = 0;
       g_int_trash_sample_flag = 0; // reset trash flag
@@ -134,11 +128,9 @@ void ccd_scan_dummy_sample_result(char array[]){
         }
       }
       
-      if(dummy == 256) // if dummy sample detect
-      {
+      if(dummy == 256){// if dummy sample detect
         g_int_trash_sample_flag = 1; // trash flag ON
       }
-    
 }
 
 void ccd_print(char array[]){

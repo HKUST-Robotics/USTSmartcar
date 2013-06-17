@@ -186,21 +186,18 @@ void main()
 }
 
 void ccd_interrupts_init(void){
-    
     DisableInterrupts;                                //Disable Interrupts
     ccd_all_pin_init();    
-    pit_init(PIT0,10);   // Faster Clock, 2.5us period, 50% duty cycle
+    pit_init(PIT0,10);                                // Faster Clock, 2.5us period, 50% duty cycle
     EnableInterrupts;			              //Enable Interrupts
 }
 
 void ccd_all_pin_init(){
   
- /*************************************************************************  
-  1st Gen Main Board
-   gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
-    gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
-    gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
- */
+  //1st Gen Main Board
+  //gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
+  //gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
+  //gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
   
  /*************************************************************************  
   2nd Gen Main Board
