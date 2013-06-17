@@ -40,8 +40,8 @@ u8 todis[];//for sprintf usage
 /*************************************************************************
 Function header
 *************************************************************************/
-void all_pin_init(void);
 void ccd_interrupts_init(void);
+void ccd_all_pin_init(void);
 //move this into motor.h later
 void motor_init(void);
 
@@ -61,7 +61,7 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   g_char_mode = '2';                 // Hard code mode = system loop
+   g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
@@ -104,9 +104,7 @@ void main()
         printf("\nEverything Initialized alright\n");
         while(1)
         { 
-            ccd_sampling(); // Longer SI CCD Sampling
-            //ccd_clock_turn(); // Gen 2 main board Clock
-            //ccd_array_position_handler(); // increment ccd position
+            ccd_sampling(1); // Longer SI CCD Sampling
         }
      break;
         
@@ -168,9 +166,9 @@ void main()
         
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
+        motor_init();
         pit_init_ms(PIT3,1);
         ccd_interrupts_init(); // Louis added to text ccd code integration
-        motor_init();
         delayms(4000);
         
         printf("\nEverything inited alright");
@@ -190,20 +188,12 @@ void main()
 void ccd_interrupts_init(void){
     
     DisableInterrupts;                                //Disable Interrupts
-    all_pin_init();
-    //pit_init_ms(PIT0,5);                            // Clock, 10ms period, 50% duty cycle
-    //pit_init_ms(PIT0,10);                           // Clock, 20ms period, 50% duty cycle
-    //pit_init_ms(PIT0,0.01);                         // Clock, 20us period, 50% duty cycle
- 
-    //Maximum clock is 8us cycle by using PIT_init_ms
-    
+    ccd_all_pin_init();    
     pit_init(PIT0,10);   // Faster Clock, 2.5us period, 50% duty cycle
-    //pit_init(PIT0,100);
-    
-    //EnableInterrupts;			              //Enable Interrupts
+    EnableInterrupts;			              //Enable Interrupts
 }
 
-void all_pin_init(){
+void ccd_all_pin_init(){
   
  /*************************************************************************  
   1st Gen Main Board
@@ -214,7 +204,6 @@ void all_pin_init(){
   
  /*************************************************************************  
   2nd Gen Main Board
-  
   Hardware        Port name       Program name    Physical location
   ---------------+---------------+---------------+-----------------
   ccd_3v-5v                                     CCD
@@ -228,7 +217,6 @@ void all_pin_init(){
    gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO(D1)
    
    //LED_init(); // To test ccd sampling function is operating
-  
 } 
 
 void motor_init(void){

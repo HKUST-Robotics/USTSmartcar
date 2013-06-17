@@ -20,6 +20,7 @@ u16 g_u16_ccd_long_SI_counter=800;
 int g_int_SI_state_flag=0;                    // SI flag
 int g_int_sampling_state_flag=0;              // sampling state flag
 int g_int_trash_sample_flag=0;                // notice dummy sample
+int g_int_ccd_operation_state=0;
 
 /*********** CCD related sample result & array ************/
 char g_char_ar_ccd_pixel[256];                // 1-line pixel array
@@ -27,9 +28,13 @@ char g_char_ar_ccd_previous_pixel[128];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[128];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[128];        // benchmark 2
 
-void ccd_sampling(){
+void ccd_sampling(int state){
   
-       //ccd_clock_turn();
+  g_int_ccd_operation_state = state;
+    
+  while(g_int_ccd_operation_state == 1){
+        
+       ccd_clock_turn();
        
        if(g_u16_ccd_long_SI_counter == 800){   
         ccd_trigger_SI();                          
@@ -52,7 +57,7 @@ void ccd_sampling(){
        g_u16_ccd_long_SI_counter++;
        
        g_u16_ccd_sample_clock++;
-      
+  }   
 }
 
 void ccd_clock_turn(){
@@ -98,6 +103,7 @@ void ccd_finish_one_sampling(){
              // do nth
           }else{
           ccd_output_sample_to_UART();
+          g_int_ccd_operation_state = 0;
           }
      }       
 }
@@ -137,12 +143,9 @@ void ccd_scan_dummy_sample_result(char array[]){
 
 void ccd_print(char array[]){
       u16 i;  
-      //for( i = 128 ; i < 258 ; i++){
       for( i = 0 ; i < 256 ; i++){
         uart_putchar(UART3,array[i]);      // print One pixel One loop
       }
-  
-  
 }
 
 

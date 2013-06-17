@@ -9,7 +9,7 @@ Edited & compiled by John Ching
 
 *******************************************/
 
-void ccd_sampling();
+void ccd_sampling(int state);
 // ccd main loop
 
 void ccd_clock_turn(); 

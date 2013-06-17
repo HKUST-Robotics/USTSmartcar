@@ -50,12 +50,9 @@ u8 system_mode=0;
 
 void PIT0_IRQHandler(void)
 {
-    DisableInterrupts;
       //gpio_turn(PORTB, 18);       // CCD Clock Rising and Failing edge   
       //g_u32_systemclock++;
-    ccd_clock_turn();
-    PIT_Flag_Clear(PIT0);   
-    EnableInterrupts;
+      PIT_Flag_Clear(PIT0);       
 }
 
 void PIT1_IRQHandler(void)
@@ -73,7 +70,8 @@ void PIT1_IRQHandler(void)
 }
 
 void encoder_counter(void){
-   /*connection config:
+  /*connection config:
+     
      Hardware        Port name       Program name    Physical location
      ---------------+---------------+---------------+-----------------
      encoder_left    PTA8            exti pta        servo1
@@ -103,6 +101,7 @@ void pit3_system_loop(void){
   int speed_p,speed_i;
   //main system control loop, runs every 1ms, each case runs every 5 ms
   DisableInterrupts;
+
   
   switch (system_mode){
     case 0:
@@ -117,15 +116,11 @@ void pit3_system_loop(void){
       system_mode=1;//go to next state on next cycle
     break;
     case 1:
-      //get ccd values
-      //i.e. sample(2);
-      //louis fill this in! ~johnc
-      
-      
-      //if(g_int_ccd_operation_state == 0){
-      //g_int_ccd_operation_state = 1;
-      //ccd_sampling();
-      //}
+      //get ccd values      
+      if(g_int_ccd_operation_state == 0){
+        //g_int_ccd_operation_state = 1;
+        ccd_sampling(1);
+      }
       
       //system_mode=1; // hold in this case for testing ccd
       system_mode=2;
@@ -181,9 +176,6 @@ void pit3_system_loop(void){
         motor_command_right = motor_command_balance;//-motor_command_speed;
         // + motor_turn_right;
         
-        printf("\nmotor_command_speed:%d",motor_command_speed);
-        printf("\nMotor_balance:%d",motor_command_balance);
-        
         
         
       //current dummy motor response, Yumi please implement PID ~johnc
@@ -220,13 +212,13 @@ void pit3_system_loop(void){
             motor_command_right=8000;
           }
           
-
-        
+          printf("\nmotor command left:%d");
+          
           
           //excute motor pwm with PID
           FTM_PWM_Duty(FTM0,CH3,motor_command_left);
           FTM_PWM_Duty(FTM0,CH2,motor_command_right);
-      
+          
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;
       //g_u32encoder_rtlast=g_u32encoder_rt;

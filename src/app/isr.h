@@ -1,9 +1,7 @@
-/******************** (C) COPYRIGHT 2011 ?�•§ı¥O§J¶°?�}µo§u?@´« ********************
-  isr.h
+/****************************************
+   isr.h
    HKUST Smartcar 2013 - Zyan,John,Louis,Yumi
 **********************************************************************************/	
-
-
 
 #ifndef __ISR_H
 #define __ISR_H 1
@@ -23,9 +21,7 @@
 #define VECTOR_103    encoder_counter    //for getting encoder count
 
 
-
-
-extern void PIT0_IRQHandler();            //PIT0 ©w??�§§¬_?�A?�»®Áº�?
+extern void PIT0_IRQHandler();            
 extern void PIT1_IRQHandler();
 extern void pit3_system_loop();
 extern void encoder_counter();
