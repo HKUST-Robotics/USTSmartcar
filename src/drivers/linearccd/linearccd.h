@@ -61,3 +61,6 @@ void ccd_sample_filtering(char array[]);
 /*********** Supplementary function************/
 void convert_char_to_readable_integer(int intput_int, char output_char[]); 
 // convert character into readable integer
+
+void ccd_save_previous_sampling(char input_array[], char output_stored_array[]);
+// copy sample from input array to output array

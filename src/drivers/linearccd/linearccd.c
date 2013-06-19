@@ -23,18 +23,18 @@ int g_int_trash_sample_flag=0;                // notice dummy sample
 int g_int_ccd_operation_state=0;
 
 /*********** CCD related sample result & array ************/
-char g_char_ar_ccd_pixel[256];                // 1-line pixel array
+char g_char_ar_ccd_current_pixel[256];                // 1-line pixel array
 char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
 char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
-/*********** CCD track decision related variable ************/
+/*********** CCD edge decision related variable ************/
 u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
 u16 g_u16_ccd_right_pos=0;               // dynamic right edge scan
-u16 g_u16_ccd_previous_left_pos=0;
-u16 g_u16_ccd_previous_right_pos=0;
-//u16 g_u16_ccd_valid_range=0;                  // dynamic valid range
+u16 g_u16_ccd_previous_left_pos=0;       // temporary previous left
+u16 g_u16_ccd_previous_right_pos=0;      // temporary previous right
+u16 g_u16_ccd_valid_range=0;           
 
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state){  
@@ -140,57 +140,70 @@ void ccd_print(char array[]){
       }
 }
 
-/*********** CCD track decision ***********
+/*********** CCD track decision ************/
 void ccd_analyze_track_from_sample(char array[]){  
-  
   u16 i;  
   u16 straight_line_similarity=0;
-  for(i = 0 ; i < g_u16_ccd_left_edge_pos ; i++){ // scan 1st half left array
+  u16 straight_line_positive_range=0;
+  u16 straight_line_negative_range=0;
+  
+  for(i = 0 ; i < g_u16_ccd_right_pos ; i++){ // scan 1st half left array
     if(array[i] == '|'){
     straight_line_similarity++;
     }
   }
   
-  for(i = g_u16_ccd_right_edge_pos; i < 256 ; i++){
+  for(i = g_u16_ccd_left_pos; i < 256 ; i++){ // scan 2nd half right array
     if(array[i] == '|'){
     straight_line_similarity++;
     }
-  }   
+  }  
   
-  if( (g_u16_ccd_valid_range - straight_line_similarity) <= 10 ){ // check difference
-  uart_sendStr(UART3,"*.* Straight Line *.*");  
-  // straight line case
+  g_u16_ccd_valid_range = (g_u16_ccd_left_pos + (256 - g_u16_ccd_right_pos)); // reference value from 0 to 256
+  
+  printf("g_u16_ccd_valid_range reference is :");
+  printf("%d", g_u16_ccd_valid_range);
+  printf("\n");
+  
+  straight_line_positive_range = g_u16_ccd_valid_range - straight_line_similarity; // in valid range > similarity case 
+  straight_line_negative_range = straight_line_similarity -  g_u16_ccd_valid_range; // in similarity > valid range case 
+  
+  printf("straight_line_possitive_range is :");
+  printf("%d", straight_line_positive_range);
+  printf("\n");
+  
+  printf("straight_line_negative_range :");
+  printf("%d", straight_line_negative_range );
+  printf("\n");
+  
+  if(straight_line_positive_range <= 20){ // straight line case 1
+    printf("\n");
+    printf("Valid reference range > similarity : Straight Line Case");  
+    printf("\n");
   }
   
-  // ............... to be edit
-  
-}*/
-
-void ccd_save_previous_sampling(char input_array[], char output_stored_array[]){ 
-      u16 i;  
-      for( i = 0 ; i < 256 ; i++){
-        output_stored_array[i] = input_array[i]; // copy previous array, before next sampling
-      }
+  else if(straight_line_negative_range <= 20){  // straight line case 2
+    printf("\n");
+    printf("Similarity > valid reference range : Straight Line Case");  
+    printf("\n");
+  }
+ 
 }
 
 void ccd_decide_range_for_detection(char array[]){
       u16 i;  
       u16 update_left;
       u16 update_right;
-      
       for( i = 0 ; i < 128 ; i++){ // scan 1st half left array
         if(array[i] == '|'){
         g_u16_ccd_left_pos = i; // set left edge
         }
       }
-      
       for( i = 256 ; i > 128 ; i--){ // scan 2nd half right array
         if(array[i] == '|'){
         g_u16_ccd_right_pos = i; // set right edge 
         }
       }
-      
-      //g_u16_ccd_valid_range = g_u16_ccd_left_edge_pos + (256 - g_u16_ccd_right_edge_pos);    
 
      /********Left *******/
      uart_sendStr(UART3,"This Left edge position is:"); 
@@ -226,7 +239,7 @@ void ccd_decide_range_for_detection(char array[]){
      printf("%d", update_right);
      uart_sendStr(UART3,"\n");
      
-     g_u16_ccd_previous_right_pos = update_left;         //update previous pos to current pos 
+     g_u16_ccd_previous_right_pos = update_right;         //update previous pos to current pos 
      g_u16_ccd_right_pos = update_right;                 //final pos before this function end
 }
 
@@ -256,7 +269,7 @@ void ccd_sample_filtering(char array[]){
   // eveulate the similarity between previous sample and currenct sample
   // by int value 0 to 127, higher is better
   for( x = 0 ; x < 128 ; x++){
-          if ( g_char_ar_ccd_previous_pixel[x] == g_char_ar_ccd_pixel[x]){
+          if ( g_char_ar_ccd_previous_pixel[x] == g_char_ar_ccd_current_pixel[x]){
           ccd_same_pixel_count++;
           }
   }
@@ -274,7 +287,7 @@ void ccd_sample_filtering(char array[]){
   if(ccd_same_pixel_count > 1 && ccd_same_pixel_count < 60){
     
      for( y = 0 ; y < 128 ; y++){
-     g_char_ar_ccd_pixel[y] = g_char_ar_ccd_previous_pixel[y]; 
+     g_char_ar_ccd_current_pixel[y] = g_char_ar_ccd_previous_pixel[y]; 
      } 
      
       uart_sendStr(UART3,"\t\t\t\t");    
@@ -312,4 +325,11 @@ void convert_char_to_readable_integer(int input_int, char output_char[]){
     output_char[1] = (input_int/10)%10 + '0';     // tens
     output_char[2] = (input_int/100)%10 + '0';    // hundreds
   }  
+}
+
+void ccd_save_previous_sampling(char input_array[], char output_stored_array[]){ 
+      u16 i;  
+      for( i = 0 ; i < 256 ; i++){
+        output_stored_array[i] = input_array[i]; // copy previous array, before next sampling
+      }
 }

@@ -9,7 +9,7 @@
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 
 /*********** CCD related sample result & array ************/
-extern char g_char_ar_ccd_pixel[256];                // 1-line pixel array
+extern char g_char_ar_ccd_current_pixel[256];                // 1-line pixel array
 extern char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
 extern char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
 extern char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
@@ -142,7 +142,7 @@ void pit3_system_loop(void){
     case 1:
       //get ccd values      
       if(g_int_ccd_operation_state == 0){
-        ccd_sampling(g_char_ar_ccd_pixel , 1);
+        ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
       
       system_mode=2;
@@ -159,7 +159,7 @@ void pit3_system_loop(void){
     case 3:
       //calculate turning command from ccd
       //in the end set motor_command_left and motor_command_right to desired values;
-      
+      ccd_analyze_track_from_sample(g_char_ar_ccd_current_pixel);
       system_mode=4;
     break;
     case 4:
