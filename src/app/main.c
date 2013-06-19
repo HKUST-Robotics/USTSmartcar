@@ -104,7 +104,7 @@ void main()
         printf("\nEverything Initialized alright\n");
         while(1)
         { 
-            ccd_sampling(1); // Longer SI CCD Sampling
+            //ccd_sampling(1); // Longer SI CCD Sampling
         }
      break;
         
@@ -175,7 +175,7 @@ void main()
         while(1){
           //system loop runs
         }
-      
+        
      break;
       
      default :
