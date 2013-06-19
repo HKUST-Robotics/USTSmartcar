@@ -48,7 +48,6 @@ void motor_init(void);
 void main()
 {   
   uart_init(UART3, 115200); // For our flashed bluetooth
-  //uart_init(UART3, 9600); // For un-flash bluetooth
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
@@ -61,8 +60,8 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   g_char_mode = '7';                 // Hard code mode = system loop
-   //g_char_mode = uart_getchar(UART3);
+   //g_char_mode = '7';                 // Hard code mode = system loop
+   g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
  
@@ -73,7 +72,7 @@ void main()
         
         while(1){
           delayms(500);
-          printf("\n%d",ad_ave(ADC0,AD14,ADC_12bit,10));//vr value
+          printf("\n%d",ad_once(ADC0,AD14,ADC_16bit));//vr value
         }
           
       break;
@@ -84,6 +83,10 @@ void main()
         //accl_init();
         adc_init(ADC1,AD6b);
         adc_init(ADC1,AD7b);
+        
+        adc_init(ADC0,AD14);
+        
+        balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
 
         printf("\nEverything Initialized alright\n");
         
@@ -91,7 +94,7 @@ void main()
         { 
           //printf("\n\f====================================");
 
-          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-31834);//theta
+          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-45000+balance_centerpoint_set*5);//theta
           //printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-36050);//omega
           delayms(50);
 

@@ -131,7 +131,7 @@ void pit3_system_loop(void){
     case 0:
       //get gyro & accl values
       control_tilt_last=control_tilt;
-      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-26650+balance_centerpoint_set*5;
+      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-45000+balance_centerpoint_set*5;
       control_omg=control_tilt_last-control_tilt;
       
       //control_omg=ad_once(ADC1,AD7b,ADC_16bit)-36050;
