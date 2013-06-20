@@ -46,7 +46,7 @@ volatile int speed_control_integral=0;
  Variables for control PIT
  ******************************************/
 
-volatile int control_omg, control_tilt, control_tilt_last;
+volatile int control_omg=0, control_tilt=0, control_tilt_last;
 volatile int motor_command_left,motor_command_right;
 volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
@@ -109,8 +109,8 @@ void pit3_system_loop(void){
   int speed_p,speed_i;
   //main system control loop, runs every 1ms, each case runs every 5 ms
   DisableInterrupts;  
-  
   // detect vaild range when system start up
+  /*
   if(ccd_benchmark_state == 1){
      ccd_sampling(g_char_ar_ccd_benchmark_reuse,1); 
      ccd_decide_range_for_detection(g_char_ar_ccd_benchmark_reuse); // caculate valid black range
@@ -124,14 +124,13 @@ void pit3_system_loop(void){
       printf("%d", g_int_ccd_benchmark_counter);
       printf(" time startup sampling");
       printf("\n");  
-  }
-  
+  }*/
   switch (system_mode){
     
     case 0:
       //get gyro & accl values
       control_tilt_last=control_tilt;
-      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-45000+balance_centerpoint_set*5;
+      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-37646+(balance_centerpoint_set*5);
       control_omg=control_tilt_last-control_tilt;
       
       //control_omg=ad_once(ADC1,AD7b,ADC_16bit)-36050;
@@ -140,26 +139,29 @@ void pit3_system_loop(void){
       system_mode=1;//go to next state on next cycle
     break;
     case 1:
-      //get ccd values      
+      //get ccd values   
+      /*
       if(g_int_ccd_operation_state == 0){
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
-      
+      */
       system_mode=2;
     break;
     case 2:
       //calculate balance command with input angle
       //in the end edit motor_command_balance to desired value
       //rounds the code down to an int
-      motor_command_balance=(control_tilt*8/2)+(control_omg*1);
+      motor_command_balance=(control_tilt*8/2);//+(control_omg*1);
       //printf("\nMotorBalance:%d",motor_command_balance);
       
       system_mode=3;
     break;
     case 3:
+      /*
       //calculate turning command from ccd
       //in the end set motor_command_left and motor_command_right to desired values;
       ccd_analyze_track_from_sample(g_char_ar_ccd_current_pixel);
+      */
       system_mode=4;
     break;
     case 4:
@@ -190,7 +192,8 @@ void pit3_system_loop(void){
         }
         
         motor_command_speed+=motor_command_speed_delta;
-    //super position for balance + turn
+        
+        
         motor_command_left = motor_command_balance;//-motor_command_speed; 
         //+ motor_turn_left;//add this when ccd turn is implemented
         motor_command_right = motor_command_balance;//-motor_command_speed;
@@ -230,7 +233,7 @@ void pit3_system_loop(void){
             motor_command_right=8000;
           }
           
-          printf("\nmotor command left:%d");
+          printf("\nmotor command left:%d",motor_command_left);
           
           //excute motor pwm with PID
           FTM_PWM_Duty(FTM0,CH3,motor_command_left);

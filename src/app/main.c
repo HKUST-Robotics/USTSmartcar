@@ -32,6 +32,7 @@ volatile u32 g_u32encoder_rtlast=0;
 volatile int motor_deadzone_left,motor_deadzone_right;
 
 volatile u32 balance_centerpoint_set=0;
+extern volatile int control_tilt;
 
 u16 motor_test=0;
 
@@ -92,9 +93,10 @@ void main()
         
         while(1)
         { 
+          
           //printf("\n\f====================================");
-
-          printf("\n%d",ad_once(ADC1,AD6b,ADC_16bit)-45000+balance_centerpoint_set*5);//theta
+          control_tilt=(ad_once(ADC1,AD6b,ADC_16bit)-37646)+(balance_centerpoint_set*5);
+          printf("\nMain gyro%d",control_tilt);//theta
           //printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-36050);//omega
           delayms(50);
 
@@ -161,7 +163,7 @@ void main()
       break;
 
       case '7':
-        printf("\n\f The Mode is now 7: SystemLoop Test");
+        printf("\n The Mode is now 7: SystemLoop Test");
         
         adc_init(ADC1,AD6b);
         adc_init(ADC1,AD7b);
@@ -170,8 +172,12 @@ void main()
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
+        
+        //ccd_interrupts_init(); // Louis added to text ccd code integration
+        
         pit_init_ms(PIT3,1);
-        ccd_interrupts_init(); // Louis added to text ccd code integration
+        
+        printf("\npit init ok");
         delayms(4000);
         
         printf("\nEverything inited alright");
