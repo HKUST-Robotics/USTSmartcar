@@ -14,7 +14,6 @@ Edited by John Ching
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
-u16 g_u16_ccd_long_SI_counter=800;
 
 /*********** CCD related status flag ************/
 int g_int_SI_state_flag=0;                    // SI flag
@@ -41,16 +40,12 @@ void ccd_sampling(char array[], int state){
   g_int_ccd_operation_state = state;  
   while(g_int_ccd_operation_state == 1){        
        ccd_clock_turn();       
-       if(g_u16_ccd_long_SI_counter == 800){   
-        ccd_trigger_SI();                          
-       }       
        // When PIT0 clock = 2.5us 
        //  1ms/2.5us = 500
        //2.5ms/2.5us = 1000 (Nice response in lab testing)     
        ccd_detect_track(array);       
        ccd_SI_failing_edge_condition();       
-       ccd_finish_one_sampling(array);       
-       g_u16_ccd_long_SI_counter++;       
+       ccd_finish_one_sampling(array);     
        g_u16_ccd_sample_clock++;
   }   
 }
@@ -81,12 +76,11 @@ void ccd_detect_track(char array[]){
 void ccd_SI_failing_edge_condition(){
   if(g_u16_ccd_sample_clock == 1 && g_int_SI_state_flag == 1){ // condition for Longer SI failing edge to end
         gpio_set(PORTB, 8, 0); // Gen 2 SI faling edge
-        g_u16_ccd_long_SI_counter = 0;
   }
 }
 
 void ccd_finish_one_sampling(char array[]){  
-     if(g_u16_ccd_sample_clock == 512){
+     if(g_u16_ccd_sample_clock == 256){
           g_int_SI_state_flag = 0;          // SI Flag off
           g_int_sampling_state_flag = 0;    // Sampling flag off
         
@@ -103,12 +97,11 @@ void ccd_finish_one_sampling(char array[]){
 }
 
 void ccd_output_sample_to_UART(char array[]){
-     uart_sendStr(UART3,"\n"); 
-     uart_sendStr(UART3,"The Sample is:");
-     ccd_print(array);
-     uart_sendStr(UART3,"\n"); 
-    
      ccd_output_edge_to_UART(); //temp
+     //uart_sendStr(UART3,"\n"); 
+     uart_sendStr(UART3,"CCD Sample: ");
+     ccd_print(array);
+     //uart_sendStr(UART3,"\n"); 
 }
 
 void ccd_shift_sample_to_manageable_position(char array[]){
@@ -160,14 +153,14 @@ void ccd_analyze_track_from_sample(char array[]){
   }  
   
   g_u16_ccd_valid_range = (g_u16_ccd_left_pos + (256 - g_u16_ccd_right_pos)); // reference value from 0 to 256
-  
+  /*
   printf("g_u16_ccd_valid_range reference is :");
   printf("%d", g_u16_ccd_valid_range);
   printf("\n");
-  
+  */
   straight_line_positive_range = g_u16_ccd_valid_range - straight_line_similarity; // in valid range > similarity case 
   straight_line_negative_range = straight_line_similarity -  g_u16_ccd_valid_range; // in similarity > valid range case 
-  
+  /*
   printf("straight_line_possitive_range is :");
   printf("%d", straight_line_positive_range);
   printf("\n");
@@ -175,7 +168,7 @@ void ccd_analyze_track_from_sample(char array[]){
   printf("straight_line_negative_range :");
   printf("%d", straight_line_negative_range );
   printf("\n");
-  
+  */
   if(straight_line_positive_range <= 20){ // straight line case 1
     printf("\n");
     printf("Valid reference range > similarity : Straight Line Case");  
@@ -206,38 +199,38 @@ void ccd_decide_range_for_detection(char array[]){
       }
 
      /********Left *******/
-     uart_sendStr(UART3,"This Left edge position is:"); 
+     /*uart_sendStr(UART3,"This Left edge position is:"); 
      printf("%d", g_u16_ccd_left_pos);
      uart_sendStr(UART3,"\n");
      
      uart_sendStr(UART3,"Previous left edge position is:"); 
      printf("%d", g_u16_ccd_previous_left_pos);
-     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"\n");*/
      
      update_left = (g_u16_ccd_left_pos+g_u16_ccd_previous_left_pos)/2; // factor : 50% from previous average, 50% from current effect
      
-     uart_sendStr(UART3,"Final left edge position for decision is:"); 
+     /*uart_sendStr(UART3,"Final left edge position for decision is:"); 
      printf("%d", update_left);
      uart_sendStr(UART3,"\n");
-     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"\n");*/
 
      g_u16_ccd_previous_left_pos = update_left;        //update previous pos to current pos 
      g_u16_ccd_left_pos = update_left;                 //final pos before this function end
      
      /********Right *******/
-     uart_sendStr(UART3,"This Right edge position is:"); 
+     /*uart_sendStr(UART3,"This Right edge position is:"); 
      printf("%d", g_u16_ccd_right_pos);
      uart_sendStr(UART3,"\n");
      
      uart_sendStr(UART3,"Previous right edge position is:"); 
      printf("%d", g_u16_ccd_previous_right_pos);
-     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"\n");*/
      
      update_right = (g_u16_ccd_right_pos+g_u16_ccd_previous_right_pos)/2; // factor : 50% from previous average, 50% from current effect
      
-     uart_sendStr(UART3,"Final right edge position for decision is:"); 
+     /*uart_sendStr(UART3,"Final right edge position for decision is:"); 
      printf("%d", update_right);
-     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"\n");*/
      
      g_u16_ccd_previous_right_pos = update_right;         //update previous pos to current pos 
      g_u16_ccd_right_pos = update_right;                 //final pos before this function end
@@ -246,13 +239,13 @@ void ccd_decide_range_for_detection(char array[]){
 void ccd_output_edge_to_UART(){
      // temporary function
      uart_sendStr(UART3,"\n");
-     uart_sendStr(UART3,"Left edge valid position is:");
+     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"Left edge detect position: ");
      printf("%d", g_u16_ccd_left_pos);
      uart_sendStr(UART3,"\n");
      
-     uart_sendStr(UART3,"Right edge valid position is:");
+     uart_sendStr(UART3,"Right edge detect position: ");
      printf("%d", g_u16_ccd_right_pos);
-     uart_sendStr(UART3,"\n");
      uart_sendStr(UART3,"\n");
 }
 

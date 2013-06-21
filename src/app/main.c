@@ -61,8 +61,8 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   //g_char_mode = '7';                 // Hard code mode = system loop
-   g_char_mode = uart_getchar(UART3);
+   g_char_mode = '7';                 // Hard code mode = system loop
+   //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
  
@@ -172,12 +172,8 @@ void main()
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
-        
-        //ccd_interrupts_init(); // Louis added to text ccd code integration
-        
         pit_init_ms(PIT3,1);
-        
-        printf("\npit init ok");
+        ccd_interrupts_init();
         delayms(4000);
         
         printf("\nEverything inited alright");

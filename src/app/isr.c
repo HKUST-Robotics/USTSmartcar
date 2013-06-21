@@ -5,7 +5,7 @@
 #define BALANCEKP 0.1
 #define BALANCEKI 0
 
-// for ccd
+/*********** CCD startup variable ************/
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 
 /*********** CCD related sample result & array ************/
@@ -16,9 +16,9 @@ extern char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
 extern char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /*********** CCD track decision related variable ***********/
-int g_int_ccd_benchmark_counter=0;                     // benchmark counter  
-int ccd_pre_set_benchmark_time_value = 100;         // adjustable
-int ccd_benchmark_state=1;                          // default active 
+int g_int_ccd_benchmark_counter=0;                   // benchmark counter  
+int g_int_ccd_preset_benchmark_time=100;            // adjustable startbenchmark time
+int g_int_ccd_benchmark_state=1;                        // default active 
 
 extern volatile u32 g_u32encoder_lf;
 extern volatile u32 g_u32encoder_rt;
@@ -109,22 +109,19 @@ void pit3_system_loop(void){
   int speed_p,speed_i;
   //main system control loop, runs every 1ms, each case runs every 5 ms
   DisableInterrupts;  
-  // detect vaild range when system start up
-  /*
-  if(ccd_benchmark_state == 1){
+  
+  // detect vaild range when system start up/reset
+  if(g_int_ccd_benchmark_state == 1){
+     ccd_trigger_SI();
      ccd_sampling(g_char_ar_ccd_benchmark_reuse,1); 
      ccd_decide_range_for_detection(g_char_ar_ccd_benchmark_reuse); // caculate valid black range
      g_int_ccd_benchmark_counter++;
   
-    if(g_int_ccd_benchmark_counter == ccd_pre_set_benchmark_time_value){
-        ccd_benchmark_state = 0;
+    if(g_int_ccd_benchmark_counter == g_int_ccd_preset_benchmark_time){
+       g_int_ccd_benchmark_state = 0;
     }
-      ccd_output_edge_to_UART();
-      printf("The edge value is analyzed from ");
-      printf("%d", g_int_ccd_benchmark_counter);
-      printf(" time startup sampling");
-      printf("\n");  
-  }*/
+  }
+  
   switch (system_mode){
     
     case 0:
@@ -140,11 +137,10 @@ void pit3_system_loop(void){
     break;
     case 1:
       //get ccd values   
-      /*
       if(g_int_ccd_operation_state == 0){
+        ccd_trigger_SI();
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
-      */
       system_mode=2;
     break;
     case 2:
