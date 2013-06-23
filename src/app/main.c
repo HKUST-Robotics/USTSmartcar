@@ -61,8 +61,8 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   g_char_mode = '7';                 // Hard code mode = system loop
-   //g_char_mode = uart_getchar(UART3);
+   //g_char_mode = '7';                 // Hard code mode = system loop
+   g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
  
@@ -95,9 +95,9 @@ void main()
         { 
           
           //printf("\n\f====================================");
-          control_tilt=(ad_once(ADC1,AD6b,ADC_16bit)-37646)+(balance_centerpoint_set*5);
-          printf("\nMain gyro%d",control_tilt);//theta
-          //printf("\n%d",ad_once(ADC1,AD7b,ADC_16bit)-36050);//omega
+          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set);
+          //printf("\nMain gyro%d",control_tilt);//theta
+          printf("\n%d",ad_once(ADC1,AD7b,ADC_12bit)-1940);//omega
           delayms(50);
 
         }

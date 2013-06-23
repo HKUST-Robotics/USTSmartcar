@@ -33,6 +33,7 @@ extern u32 balance_centerpoint_set;
 volatile u8 motor_pid_counter;
 
 //position control 
+u8  omgready_flag=0;
 
 volatile int car_speed;
 volatile int control_car_speed=0;
@@ -126,12 +127,7 @@ void pit3_system_loop(void){
     
     case 0:
       //get gyro & accl values
-      control_tilt_last=control_tilt;
-      control_tilt=ad_once(ADC1,AD6b,ADC_16bit)-37646+(balance_centerpoint_set*5);
-      control_omg=control_tilt_last-control_tilt;
-      
-      //control_omg=ad_once(ADC1,AD7b,ADC_16bit)-36050;
-      printf("\ncontrol tilt:%d",control_tilt);
+      //control_omg=ad_ave(ADC1,AD7b,ADC_16bit,20)-36050;
       //proper offest is -26774
       system_mode=1;//go to next state on next cycle
     break;
@@ -144,20 +140,21 @@ void pit3_system_loop(void){
       system_mode=2;
     break;
     case 2:
-      //calculate balance command with input angle
-      //in the end edit motor_command_balance to desired value
-      //rounds the code down to an int
-      motor_command_balance=(control_tilt*8/2);//+(control_omg*1);
-      //printf("\nMotorBalance:%d",motor_command_balance);
-      
+      control_tilt_last=control_tilt;
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-3200)+(balance_centerpoint_set);
+      control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
+      /*if(omgready_flag==0){
+        control_omg=0;
+        omgready_flag=1;
+      }else{
+        control_omg=control_tilt-control_tilt_last;
+      }*/
       system_mode=3;
     break;
     case 3:
-      /*
-      //calculate turning command from ccd
-      //in the end set motor_command_left and motor_command_right to desired values;
-      ccd_analyze_track_from_sample(g_char_ar_ccd_current_pixel);
-      */
+      
+      motor_command_balance=((control_tilt)*0/100)+(control_omg*0/100);
+
       system_mode=4;
     break;
     case 4:
