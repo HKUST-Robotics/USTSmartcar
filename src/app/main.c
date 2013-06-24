@@ -61,8 +61,8 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   //g_char_mode = '7';                 // Hard code mode = system loop
-   g_char_mode = uart_getchar(UART3);
+   g_char_mode = '7';                 // Hard code mode = system loop
+   //g_char_mode = uart_getchar(UART3);
    
    delayms(500); 
  
@@ -84,7 +84,6 @@ void main()
         //accl_init();
         adc_init(ADC1,AD6b);
         adc_init(ADC1,AD7b);
-        
         adc_init(ADC0,AD14);
         
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
@@ -93,13 +92,11 @@ void main()
         
         while(1)
         { 
-          
           //printf("\n\f====================================");
           control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set);
           //printf("\nMain gyro%d",control_tilt);//theta
           printf("\n%d",ad_once(ADC1,AD7b,ADC_12bit)-1940);//omega
           delayms(50);
-
         }
      break;
      
@@ -191,34 +188,25 @@ void main()
 }
 
 void ccd_interrupts_init(void){
-    DisableInterrupts;                                //Disable Interrupts
-    ccd_all_pin_init();    
-    pit_init(PIT0,10);                                // Faster Clock, 2.5us period, 50% duty cycle
-    EnableInterrupts;			              //Enable Interrupts
+    DisableInterrupts;                                
+    ccd_all_pin_init(); // init ccd gpio  
+    pit_init(PIT0,10);  // Faster Clock, 2.5us period, 50% duty cycle
+    EnableInterrupts;			             
 }
 
 void ccd_all_pin_init(){
   
-  //1st Gen Main Board
+ /****************** 1st Gen Main Board ******************/
   //gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
   //gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
   //gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
   
- /*************************************************************************  
-  2nd Gen Main Board
-  Hardware        Port name       Program name    Physical location
-  ---------------+---------------+---------------+-----------------
-  ccd_3v-5v                                     CCD
-  ccd_GND    					CCD
-  ccd_SI	PTB8			        CCD
-  ccd_clock	PTB9		                CCD
-  ccd_AO        PTB10	        	        CCD
- **************************************************************************/
-   gpio_init(PORTB, 8, GPO, 1);   //PTB8 , SI
-   gpio_init(PORTB, 9, GPO, 1);   //PTB9 , Clock / CLK
-   gpio_init(PORTB, 10, GPI, 1);  //PTB10 , AO(D1)
+ /****************** 2nd Gen Main Board ******************/
+   gpio_init(PORTB, 8, GPO, 1);    //PTB8 , SI
+   gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
+   gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
    
-   //LED_init(); // To test ccd sampling function is operating
+   LED_init(); // To test ccd sampling function is operating
 } 
 
 void motor_init(void){

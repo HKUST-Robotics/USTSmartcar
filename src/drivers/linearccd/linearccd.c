@@ -22,7 +22,7 @@ int g_int_trash_sample_flag=0;                // notice dummy sample
 int g_int_ccd_operation_state=0;
 
 /*********** CCD related sample result & array ************/
-char g_char_ar_ccd_current_pixel[256];                // 1-line pixel array
+char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
 char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
@@ -39,10 +39,7 @@ u16 g_u16_ccd_valid_range=0;
 void ccd_sampling(char array[], int state){  
   g_int_ccd_operation_state = state;  
   while(g_int_ccd_operation_state == 1){        
-       ccd_clock_turn();       
-       // When PIT0 clock = 2.5us 
-       //  1ms/2.5us = 500
-       //2.5ms/2.5us = 1000 (Nice response in lab testing)     
+       ccd_clock_turn();      
        ccd_detect_track(array);       
        ccd_SI_failing_edge_condition();       
        ccd_finish_one_sampling(array);     
@@ -97,11 +94,10 @@ void ccd_finish_one_sampling(char array[]){
 }
 
 void ccd_output_sample_to_UART(char array[]){
-     ccd_output_edge_to_UART(); //temp
-     //uart_sendStr(UART3,"\n"); 
+     //ccd_output_edge_to_UART(); //temp
+     uart_sendStr(UART3,"\n");
      uart_sendStr(UART3,"CCD Sample: ");
      ccd_print(array);
-     //uart_sendStr(UART3,"\n"); 
 }
 
 void ccd_shift_sample_to_manageable_position(char array[]){
@@ -170,15 +166,22 @@ void ccd_analyze_track_from_sample(char array[]){
   printf("\n");
   */
   if(straight_line_positive_range <= 20){ // straight line case 1
-    printf("\n");
-    printf("Valid reference range > similarity : Straight Line Case");  
-    printf("\n");
+    //printf("\n");
+    //printf("Valid reference range > similarity : Straight Line Case");  
+    //printf("\n");
+    gpio_set(PORTE,24,0); // Straight line case
+  }
+  else{
+    gpio_set(PORTE,24,1);
   }
   
-  else if(straight_line_negative_range <= 20){  // straight line case 2
-    printf("\n");
-    printf("Similarity > valid reference range : Straight Line Case");  
-    printf("\n");
+  if(straight_line_negative_range <= 20){  // straight line case 2
+    //printf("\n");
+    //printf("Similarity > valid reference range : Straight Line Case");  
+    //printf("\n");
+    gpio_set(PORTE,24,0);  // Straight line case
+  }else{
+    gpio_set(PORTE,24,1);
   }
  
 }
