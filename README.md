@@ -31,3 +31,5 @@ This library attempts to follow the following conventions:
 4.With the exception of special deployment scenarios, (i.e. pintest), refrain from defining functions inside of main.c, 
 - increase readability. 
 - try to place them in their own .h & .c files
+
+cAMERA
