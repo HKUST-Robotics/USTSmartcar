@@ -64,6 +64,8 @@ void main()
    g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
    
+
+   
    delayms(500); 
  
      switch (g_char_mode){
@@ -93,7 +95,7 @@ void main()
         while(1)
         { 
           //printf("\n\f====================================");
-          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set);
+          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set/2);
           //printf("\nMain gyro%d",control_tilt);//theta
           printf("\n%d",ad_once(ADC1,AD7b,ADC_12bit)-1940);//omega
           delayms(50);
@@ -174,6 +176,8 @@ void main()
         delayms(4000);
         
         printf("\nEverything inited alright");
+        
+        
         while(1){
           //system loop runs
         }

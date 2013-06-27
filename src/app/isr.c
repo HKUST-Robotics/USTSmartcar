@@ -54,6 +54,9 @@ volatile int motor_command_balance;
 volatile int speed_error=0;
 volatile int leftDir,rightDir=0;
 
+
+volatile int speed_p,speed_i;
+
 int testcommand=0;
 
 extern volatile float accl_tilt16;
@@ -103,7 +106,6 @@ void encoder_counter(void){
 }
 
 void pit3_system_loop(void){
-  int speed_p,speed_i;
   //main system control loop, runs every 1ms, each case runs every 5 ms
   DisableInterrupts;  
   
@@ -126,6 +128,8 @@ void pit3_system_loop(void){
   }
   
   
+  
+  
   switch (system_mode){
     
     case 0:
@@ -146,16 +150,33 @@ void pit3_system_loop(void){
     case 2:
       //calculate turning command from ccd
       //in the end set motor_command_left and motor_command_right to desired values;
-      ccd_analyze_track_from_sample(g_char_ar_ccd_current_pixel);
+      
+      ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
     
+      
+      //dir_error = 
+      
+      /* Test: if match ccd sample, straight case motor will move
+      if(gpio_get(PORTE,24) == 0){
+      motor_turn_left = -1800;
+      motor_turn_right = 1800;
+      }
+      else{
+      motor_turn_left = 0;
+      motor_turn_right = 0; 
+      }
+      */
+      
+      
+      
       system_mode=3;
     
     case 3:
-      control_tilt_last=control_tilt;
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1200)+(balance_centerpoint_set);
+      control_tilt_last=control_tilt;              // offset
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1300)+(balance_centerpoint_set/2);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
-      printf("\ncontrol tilt:%d",control_tilt);
-      //printf("\n%d",control_tilt);
+      //printf("\ncontrol tilt:%d",control_tilt);
+      printf("\n%d",control_tilt);
       /*if(omgready_flag==0){
         control_omg=0;
         omgready_flag=1;
@@ -165,8 +186,13 @@ void pit3_system_loop(void){
       system_mode=4;
     break;
     case 4:
+      /*
+      if(control_tilt<-350||control_tilt>350){
+      motor_command_balance=0;
+      }else{*/
                                      // angle kp ~ 93.5      //angle kd ~12
-      motor_command_balance= ((control_tilt)*58867/1000) - (control_omg*565/100);
+      motor_command_balance= ((control_tilt)*79961/1000) - (control_omg*8331/1000);
+      //}
       system_mode=5;
     break;
     case 5:
@@ -186,13 +212,20 @@ void pit3_system_loop(void){
           
           speed_error=control_car_speed-car_speed;
           
-          speed_p=speed_error*0/1000;//speed kp
-          speed_i=speed_error*0/1000;//speed ki
+          speed_p=speed_error*200561/10000;//speed kp ~20
+          speed_i=speed_error*40092/10000;//speed ki ~4
           
           speed_control_integral+=speed_i;
           motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/20;
-          
+          /*
+          if(speed_control_integral < -1000 || speed_control_integral > 1000){
+            
+          }else{
+               printf("\n%d",speed_control_integral);
+          }*/
         }
+        
+        
         
         motor_command_speed+=motor_command_speed_delta;
         
@@ -236,7 +269,7 @@ void pit3_system_loop(void){
             motor_command_right=8000;
           }
           
-          printf("\nmotor command left:%d",motor_command_left);
+          //printf("\nmotor command left:%d",motor_command_left);
           
           //excute motor pwm with PID
           /*

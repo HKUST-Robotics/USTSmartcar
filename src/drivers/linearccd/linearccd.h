@@ -43,13 +43,19 @@ void ccd_print(char array[]);
 
 /*********** CCD track decision ************/
 void ccd_analyze_track_from_sample(char array[]);
-// motor decision from sample
+// motor decision from sample, will be deleted
 
 void ccd_save_benchmark_sample(char array[]);
 // record benchmark
 
+void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]);
+// detect left and right edge for each sample and filter middle noise
+
+void ccd_calculate_current_mid_error(char array[]);
+// calculate current middle error
+
 void ccd_decide_range_for_detection(char array[]);
-// dynamic record detection range
+// dynamic record detection range, will be deleted
 
 void ccd_output_edge_to_UART();
 // temporary display edge output
