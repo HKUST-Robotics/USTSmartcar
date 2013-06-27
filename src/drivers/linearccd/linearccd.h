@@ -9,7 +9,6 @@ Edited & compiled by John Ching
 
 *******************************************/
 
-
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state);
 // ccd main loop
@@ -42,20 +41,11 @@ void ccd_print(char array[]);
 // function prints out length128 array to bluetooth
 
 /*********** CCD track decision ************/
-void ccd_analyze_track_from_sample(char array[]);
-// motor decision from sample, will be deleted
-
-void ccd_save_benchmark_sample(char array[]);
-// record benchmark
-
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]);
 // detect left and right edge for each sample and filter middle noise
 
 void ccd_calculate_current_mid_error(char array[]);
 // calculate current middle error
-
-void ccd_decide_range_for_detection(char array[]);
-// dynamic record detection range, will be deleted
 
 void ccd_output_edge_to_UART();
 // temporary display edge output
@@ -70,3 +60,15 @@ void convert_char_to_readable_integer(int intput_int, char output_char[]);
 
 void ccd_save_previous_sampling(char input_array[], char output_stored_array[]);
 // copy sample from input array to output array
+
+
+/*********** dummy function***********
+void ccd_save_benchmark_sample(char array[]);
+// record benchmark
+
+void ccd_decide_range_for_detection(char array[]);
+// dynamic record detection range, will be deleted
+
+void ccd_analyze_track_from_sample(char array[]);
+// motor decision from sample, will be deleted
+*/

@@ -24,18 +24,13 @@ int g_int_ccd_operation_state=0;
 /*********** CCD related sample result & array ************/
 char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
-char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
-char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
+char g_char_ar_ccd_benchmark_one[256];        // benchmark
 char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /*********** CCD edge decision related variable ************/
 u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
 u16 g_u16_ccd_right_pos=0;               // dynamic right edge scan
-u16 g_u16_ccd_previous_left_pos=0;       // temporary previous left
-u16 g_u16_ccd_previous_right_pos=0;      // temporary previous right
-u16 g_u16_ccd_valid_range=0;   
-u16 g_u16_ccd_middle_pos=0;               // dynamic middle point 
-
+u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
 
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state){  
@@ -132,63 +127,6 @@ void ccd_print(char array[]){
 }
 
 /*********** CCD track decision ************/
-void ccd_analyze_track_from_sample(char array[]){  
-  u16 i;  
-  u16 straight_line_similarity=0;
-  u16 straight_line_positive_range=0;
-  u16 straight_line_negative_range=0;
-  
-  for(i = 0 ; i < g_u16_ccd_right_pos ; i++){ // scan 1st half left array
-    if(array[i] == '|'){
-    straight_line_similarity++;
-    }
-  }
-  
-  for(i = g_u16_ccd_left_pos; i < 256 ; i++){ // scan 2nd half right array
-    if(array[i] == '|'){
-    straight_line_similarity++;
-    }
-  }  
-  
-  g_u16_ccd_valid_range = (g_u16_ccd_left_pos + (256 - g_u16_ccd_right_pos)); // reference value from 0 to 256
-  /*
-  printf("g_u16_ccd_valid_range reference is :");
-  printf("%d", g_u16_ccd_valid_range);
-  printf("\n");
-  */
-  straight_line_positive_range = g_u16_ccd_valid_range - straight_line_similarity; // in valid range > similarity case 
-  straight_line_negative_range = straight_line_similarity -  g_u16_ccd_valid_range; // in similarity > valid range case 
-  /*
-  printf("straight_line_possitive_range is :");
-  printf("%d", straight_line_positive_range);
-  printf("\n");
-  
-  printf("straight_line_negative_range :");
-  printf("%d", straight_line_negative_range );
-  printf("\n");
-  */
-  if(straight_line_positive_range <= 20){ // straight line case 1
-    //printf("\n");
-    //printf("Valid reference range > similarity : Straight Line Case");  
-    //printf("\n");
-    gpio_set(PORTE,24,0); // Straight line case
-  }
-  else{
-    gpio_set(PORTE,24,1);
-  }
-  
-  if(straight_line_negative_range <= 20){  // straight line case 2
-    //printf("\n");
-    //printf("Similarity > valid reference range : Straight Line Case");  
-    //printf("\n");
-    gpio_set(PORTE,24,0);  // Straight line case
-  }else{
-    gpio_set(PORTE,24,1);
-  }
- 
-}
-
-
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
   u16 i;
   
@@ -210,16 +148,10 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
               g_u16_ccd_left_pos = i; // update left edge
           }else if( first_time_left_break == 1){ // blakc edge not continues alreday
               if(white_cout_left > (g_u16_ccd_left_pos/2)){ // continues white cannot > continues black/2
-              // filter case, keep previous left pos
-              i = 128;
-              uart_sendStr(UART3,"\n");
-              uart_sendStr(UART3,"Left discontinues part filtered"); 
+              i = 128; // filter case, keep previous left pos
               } else if(black_cont_left >= g_u16_ccd_left_pos/2){ // if 2nd part black length > 1st part black length/2
-              // update previous, update left pos
               g_u16_ccd_left_pos = i; // update left edge 
-              white_cout_left = 0;
-              uart_sendStr(UART3,"\n");
-              uart_sendStr(UART3,"Keep discontinues left black part ");
+              white_cout_left = 0; // erase previous, update left pos
               }
            }
           black_cont_left++;
@@ -241,16 +173,10 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
               first_edge_lenght = (256 - g_u16_ccd_right_pos);
           }else if( first_time_right_break == 1){ // black edge not continues alreday
               if(white_cout_right > (first_edge_lenght/2)){ // continues white cannot > continues black/2
-              // filter case, keep previous right pos
-              i = 128;
-              uart_sendStr(UART3,"\n");
-              uart_sendStr(UART3,"Right discontinues part filtered"); 
+              i = 128; // filter case, keep previous right pos
               } else if(black_cont_right >= first_edge_lenght/2){ // if 2nd part black length > 1st part black length/2
-              // update previous, update right pos
-              g_u16_ccd_right_pos = i; // update left edge 
+              g_u16_ccd_right_pos = i ;// erase previous, update right pos 
               white_cout_right = 0;
-              uart_sendStr(UART3,"\n");
-              uart_sendStr(UART3,"Keep discontinues right black part");
               }
            }
           black_cont_right++;
@@ -263,78 +189,15 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
           white_cout_right++;
         }
   }
-    
-  ccd_output_edge_to_UART(array);
+  //ccd_output_edge_to_UART(array);
   ccd_calculate_current_mid_error(array);
-  
 }
 
 void ccd_calculate_current_mid_error(char array[]){
-  
   g_u16_ccd_middle_pos = ( g_u16_ccd_left_pos + g_u16_ccd_right_pos)/2;
-  
-  uart_sendStr(UART3,"This current middle point is: "); 
-  printf("%d", g_u16_ccd_middle_pos);
-  uart_sendStr(UART3,"\n");
-}
-
-
-
-
-
-
-
-void ccd_decide_range_for_detection(char array[]){
-      u16 i;  
-      u16 update_left;
-      u16 update_right;
-      for( i = 0 ; i < 128 ; i++){ // scan 1st half left array
-        if(array[i] == '|'){
-        g_u16_ccd_left_pos = i; // set left edge
-        }
-      }
-      for( i = 256 ; i > 128 ; i--){ // scan 2nd half right array
-        if(array[i] == '|'){
-        g_u16_ccd_right_pos = i; // set right edge 
-        }
-      }
-
-     /********Left *******/
-     /*uart_sendStr(UART3,"This Left edge position is:"); 
-     printf("%d", g_u16_ccd_left_pos);
-     uart_sendStr(UART3,"\n");
-     
-     uart_sendStr(UART3,"Previous left edge position is:"); 
-     printf("%d", g_u16_ccd_previous_left_pos);
-     uart_sendStr(UART3,"\n");*/
-     
-     update_left = (g_u16_ccd_left_pos+g_u16_ccd_previous_left_pos)/2; // factor : 50% from previous average, 50% from current effect
-     
-     /*uart_sendStr(UART3,"Final left edge position for decision is:"); 
-     printf("%d", update_left);
-     uart_sendStr(UART3,"\n");
-     uart_sendStr(UART3,"\n");*/
-
-     g_u16_ccd_previous_left_pos = update_left;        //update previous pos to current pos 
-     g_u16_ccd_left_pos = update_left;                 //final pos before this function end
-     
-     /********Right *******/
-     /*uart_sendStr(UART3,"This Right edge position is:"); 
-     printf("%d", g_u16_ccd_right_pos);
-     uart_sendStr(UART3,"\n");
-     
-     uart_sendStr(UART3,"Previous right edge position is:"); 
-     printf("%d", g_u16_ccd_previous_right_pos);
-     uart_sendStr(UART3,"\n");*/
-     
-     update_right = (g_u16_ccd_right_pos+g_u16_ccd_previous_right_pos)/2; // factor : 50% from previous average, 50% from current effect
-     
-     /*uart_sendStr(UART3,"Final right edge position for decision is:"); 
-     printf("%d", update_right);
-     uart_sendStr(UART3,"\n");*/
-     
-     g_u16_ccd_previous_right_pos = update_right;         //update previous pos to current pos 
-     g_u16_ccd_right_pos = update_right;                 //final pos before this function end
+  //uart_sendStr(UART3,"This current middle point is: "); 
+  //printf("%d", g_u16_ccd_middle_pos);
+  //uart_sendStr(UART3,"\n");
 }
 
 void ccd_output_edge_to_UART(){
@@ -427,3 +290,140 @@ void ccd_save_previous_sampling(char input_array[], char output_stored_array[]){
         output_stored_array[i] = input_array[i]; // copy previous array, before next sampling
       }
 }
+
+
+/************ dummy code 
+
+void ccd_analyze_track_from_sample(char array[]){  
+  u16 i;  
+  u16 straight_line_similarity=0;
+  u16 straight_line_positive_range=0;
+  u16 straight_line_negative_range=0;
+  
+  for(i = 0 ; i < g_u16_ccd_right_pos ; i++){ // scan 1st half left array
+    if(array[i] == '|'){
+    straight_line_similarity++;
+    }
+  }
+  
+  for(i = g_u16_ccd_left_pos; i < 256 ; i++){ // scan 2nd half right array
+    if(array[i] == '|'){
+    straight_line_similarity++;
+    }
+  }  
+  
+  g_u16_ccd_valid_range = (g_u16_ccd_left_pos + (256 - g_u16_ccd_right_pos)); // reference value from 0 to 256
+  
+  printf("g_u16_ccd_valid_range reference is :");
+  printf("%d", g_u16_ccd_valid_range);
+  printf("\n");
+ 
+  straight_line_positive_range = g_u16_ccd_valid_range - straight_line_similarity; // in valid range > similarity case 
+  straight_line_negative_range = straight_line_similarity -  g_u16_ccd_valid_range; // in similarity > valid range case 
+  
+  printf("straight_line_possitive_range is :");
+  printf("%d", straight_line_positive_range);
+  printf("\n");
+  
+  printf("straight_line_negative_range :");
+  printf("%d", straight_line_negative_range );
+  printf("\n");
+  
+  if(straight_line_positive_range <= 20){ // straight line case 1
+    //printf("\n");
+    //printf("Valid reference range > similarity : Straight Line Case");  
+    //printf("\n");
+    gpio_set(PORTE,24,0); // Straight line case
+  }
+  else{
+    gpio_set(PORTE,24,1);
+  }
+  
+  if(straight_line_negative_range <= 20){  // straight line case 2
+    //printf("\n");
+    //printf("Similarity > valid reference range : Straight Line Case");  
+    //printf("\n");
+    gpio_set(PORTE,24,0);  // Straight line case
+  }else{
+    gpio_set(PORTE,24,1);
+  }
+ 
+}
+
+
+
+void ccd_decide_range_for_detection(char array[]){
+      u16 i;  
+      u16 update_left;
+      u16 update_right;
+      for( i = 0 ; i < 128 ; i++){ // scan 1st half left array
+        if(array[i] == '|'){
+        g_u16_ccd_left_pos = i; // set left edge
+        }
+      }
+      for( i = 256 ; i > 128 ; i--){ // scan 2nd half right array
+        if(array[i] == '|'){
+        g_u16_ccd_right_pos = i; // set right edge 
+        }
+      }
+
+     //Left
+     /*uart_sendStr(UART3,"This Left edge position is:"); 
+     printf("%d", g_u16_ccd_left_pos);
+     uart_sendStr(UART3,"\n");
+     
+     uart_sendStr(UART3,"Previous left edge position is:"); 
+     printf("%d", g_u16_ccd_previous_left_pos);
+     uart_sendStr(UART3,"\n");
+     
+     update_left = (g_u16_ccd_left_pos+g_u16_ccd_previous_left_pos)/2; // factor : 50% from previous average, 50% from current effect
+     
+     uart_sendStr(UART3,"Final left edge position for decision is:"); 
+     printf("%d", update_left);
+     uart_sendStr(UART3,"\n");
+     uart_sendStr(UART3,"\n");
+
+     g_u16_ccd_previous_left_pos = update_left;        //update previous pos to current pos 
+     g_u16_ccd_left_pos = update_left;                 //final pos before this function end
+     
+     //Right
+     /*uart_sendStr(UART3,"This Right edge position is:"); 
+     printf("%d", g_u16_ccd_right_pos);
+     uart_sendStr(UART3,"\n");
+     
+     uart_sendStr(UART3,"Previous right edge position is:"); 
+     printf("%d", g_u16_ccd_previous_right_pos);
+     uart_sendStr(UART3,"\n");
+     
+     update_right = (g_u16_ccd_right_pos+g_u16_ccd_previous_right_pos)/2; // factor : 50% from previous average, 50% from current effect
+     
+     /*uart_sendStr(UART3,"Final right edge position for decision is:"); 
+     printf("%d", update_right);
+     uart_sendStr(UART3,"\n");
+     
+     g_u16_ccd_previous_right_pos = update_right;         //update previous pos to current pos 
+     g_u16_ccd_right_pos = update_right;                 //final pos before this function end
+}
+
+
+  isr.c
+  if(g_int_ccd_benchmark_state == 1){
+    
+     FTM_PWM_Duty(FTM0,CH3,0);
+     FTM_PWM_Duty(FTM0,CH2,0);
+     gpio_set(PORTE,25,0);
+     ccd_trigger_SI();
+     ccd_sampling(g_char_ar_ccd_benchmark_reuse,1); 
+     ccd_decide_range_for_detection(g_char_ar_ccd_benchmark_reuse); // caculate valid black range
+     g_int_ccd_benchmark_counter++;
+  
+    if(g_int_ccd_benchmark_counter == g_int_ccd_preset_benchmark_time){
+       g_int_ccd_benchmark_state = 0;
+       gpio_set(PORTE,25,1);
+    }
+    gpio_set(PORTE,25,1);
+  }
+  
+
+
+*/

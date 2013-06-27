@@ -2,51 +2,22 @@
 #include "include.h"
 #include "linearccd.h"
 
-#define BALANCEKP 0.1
-#define BALANCEKI 0
-
-/*********** CCD startup variable ************/
+/*********** CCD startup variables ************/
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 
 /*********** CCD related sample result & array ************/
-extern char g_char_ar_ccd_current_pixel[256];                // 1-line pixel array
-extern char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
+extern char g_char_ar_ccd_current_pixel[256];        // current sample
+extern char g_char_ar_ccd_previous_pixel[256];       // previous sample
 extern char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
 extern char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
 extern char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
-/*********** CCD track decision related variable ***********/
+/*********** CCD track decision related variables ***********/
 int g_int_ccd_benchmark_counter=0;                   // benchmark counter  
 int g_int_ccd_preset_benchmark_time=100;             // adjustable startbenchmark time
 int g_int_ccd_benchmark_state=1;                     // default active 
 
-extern volatile u32 g_u32encoder_lf;
-extern volatile u32 g_u32encoder_rt;
-
-extern volatile u32 g_u32encoder_lflast;
-extern volatile u32 g_u32encoder_rtlast;
-
-extern volatile int motor_deadzone_left,motor_deadzone_right;
-
-extern u32 balance_centerpoint_set;
-
-volatile u8 motor_pid_counter;
-
-//position control 
-u8  omgready_flag=0;
-
-volatile int car_speed;
-volatile int control_car_speed=0;
-volatile int motor_command_speed=0;
-volatile int motor_command_speed_delta=0;
-volatile int speed_control_integral=0;
-
-//for the motor command loop
-
-/******************************************
- Variables for control PIT
- ******************************************/
-
+/************* Variables for control PID *************/
 volatile int control_omg=0, control_tilt=0, control_tilt_last;
 volatile int motor_command_left=0,motor_command_right=0;
 volatile int motor_turn_left,motor_turn_right;
@@ -54,13 +25,28 @@ volatile int motor_command_balance;
 volatile int speed_error=0;
 volatile int leftDir,rightDir=0;
 
-
+/************* Variables for speed/position PID *************/
 volatile int speed_p,speed_i;
+volatile int car_speed;
+volatile int control_car_speed=0;
+volatile int motor_command_speed=0;
+volatile int motor_command_speed_delta=0;
+volatile int speed_control_integral=0;
+u8  omgready_flag=0; //position control 
 
-int testcommand=0;
+/************* Variables for direction PID *************/
+volatile int dir_error=0;
+u16 turn_kp=0;
+extern u16 g_u16_ccd_middle_pos;
 
-extern volatile float accl_tilt16;
+/************* Variables for motor *************/
+extern volatile u32 g_u32encoder_lf;
+extern volatile u32 g_u32encoder_rt;
+extern volatile int motor_deadzone_left,motor_deadzone_right;
+extern u32 balance_centerpoint_set;
+volatile u8 motor_pid_counter;  //for the motor command loop
 
+/************* system loop counter*************/
 u8 system_mode=0;
 
 void PIT0_IRQHandler(void){
@@ -81,99 +67,72 @@ void PIT1_IRQHandler(void)
 }
 
 void encoder_counter(void){
-  /*connection config:
+    /*connection config:
      Hardware        Port name       Program name    Physical location
      ---------------+---------------+---------------+-----------------
      encoder_left    PTA8            exti pta        servo1
-     encoder_right   PTA9            exti pta        servo2
-   */
- 
+     encoder_right   PTA9            exti pta        servo2    */
     u8  n=0;
     n=8;
     if(PORTA_ISFR & (1<<n)) 
-    {
-        PORTA_ISFR  |= (1<<n);
-        g_u32encoder_lf++;
+    {PORTA_ISFR  |= (1<<n);
+     g_u32encoder_lf++;
     } 
     
     n=9;
     if(PORTA_ISFR & (1<<n))
-    {
-        PORTA_ISFR  |= (1<<n);
-        g_u32encoder_rt++;
+    {PORTA_ISFR  |= (1<<n);
+    g_u32encoder_rt++;        
     }
-  
 }
 
+//main system control loop, runs every 1ms, each case runs every 5 ms
 void pit3_system_loop(void){
-  //main system control loop, runs every 1ms, each case runs every 5 ms
-  DisableInterrupts;  
-  
-  // detect vaild range when system start up/reset
-  if(g_int_ccd_benchmark_state == 1){
-    
-     FTM_PWM_Duty(FTM0,CH3,0);
-     FTM_PWM_Duty(FTM0,CH2,0);
-     gpio_set(PORTE,25,0);
-     ccd_trigger_SI();
-     ccd_sampling(g_char_ar_ccd_benchmark_reuse,1); 
-     ccd_decide_range_for_detection(g_char_ar_ccd_benchmark_reuse); // caculate valid black range
-     g_int_ccd_benchmark_counter++;
-  
-    if(g_int_ccd_benchmark_counter == g_int_ccd_preset_benchmark_time){
-       g_int_ccd_benchmark_state = 0;
-       gpio_set(PORTE,25,1);
-    }
-    gpio_set(PORTE,25,1);
-  }
-  
-  
-  
-  
+  DisableInterrupts;   
   switch (system_mode){
     
+    /****** Case 0: get ccd values  ******/
     case 0:
-      //get gyro & accl values
-      //control_omg=ad_ave(ADC1,AD7b,ADC_16bit,20)-36050;
-      //proper offest is -26774
-      system_mode=1;//go to next state on next cycle
-    break;
-    case 1:
-      //get ccd values   
       if(g_int_ccd_operation_state == 0){
         ccd_trigger_SI();
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
-      system_mode=2;
+    system_mode=1;
     break;
     
-    case 2:
-      //calculate turning command from ccd
-      //in the end set motor_command_left and motor_command_right to desired values;
-      
+    /****** Case 1: calculate turning command from ccd******/
+    case 1:
       ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
+      dir_error = g_u16_ccd_middle_pos - 128;  
+      
+      //printf("g_u16_ccd_middle_pos:");
+      //printf("%d",g_u16_ccd_middle_pos);
+      //printf("\n");
+      
+      //printf("Direction error:");
+      //printf("%d",dir_error);
+      //printf("\n");
+      
+      turn_kp = (1000000/10000);    //dir kp
+      motor_turn_left = dir_error * turn_kp;
+      motor_turn_right = dir_error * (-turn_kp);
+      
+      //printf("motor_turn_left");
+      //printf("%d",motor_turn_left);
+      //printf("\n");
+      
+      //printf("motor_turn_right");
+      //printf("%d", motor_turn_right);
+      //printf("\n");
+      
+      //in the end set motor_command_left and motor_command_right to desired values;   
+    system_mode=2;
+    break;
     
-      
-      //dir_error = 
-      
-      /* Test: if match ccd sample, straight case motor will move
-      if(gpio_get(PORTE,24) == 0){
-      motor_turn_left = -1800;
-      motor_turn_right = 1800;
-      }
-      else{
-      motor_turn_left = 0;
-      motor_turn_right = 0; 
-      }
-      */
-      
-      
-      
-      system_mode=3;
-    
-    case 3:
+    /****** Case 2: get gyro & accl values******/
+    case 2:
       control_tilt_last=control_tilt;              // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1300)+(balance_centerpoint_set/2);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1150)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       //printf("\ncontrol tilt:%d",control_tilt);
       printf("\n%d",control_tilt);
@@ -183,21 +142,19 @@ void pit3_system_loop(void){
       }else{
         control_omg=control_tilt-control_tilt_last;
       }*/
-      system_mode=4;
+    system_mode=3;
     break;
+   
+    /****** Case 3: balance pid ******/
+    case 3:                               
+      motor_command_balance= ((control_tilt)*1219811/10000) - (control_omg*10644/1000);
+    //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
+    system_mode=4;                    // angle kp ~ 121.9811      //angle kd ~10.644
+    break;
+    
+    /****** Case 4: output motor ******/
     case 4:
-      /*
-      if(control_tilt<-350||control_tilt>350){
-      motor_command_balance=0;
-      }else{*/
-                                     // angle kp ~ 93.5      //angle kd ~12
-      motor_command_balance= ((control_tilt)*79961/1000) - (control_omg*8331/1000);
-      //}
-      system_mode=5;
-    break;
-    case 5:
       
-      //grab encoder functions
         if(motor_pid_counter<20){
           motor_pid_counter++;
         }else{
@@ -212,30 +169,22 @@ void pit3_system_loop(void){
           
           speed_error=control_car_speed-car_speed;
           
-          speed_p=speed_error*200561/10000;//speed kp ~20
-          speed_i=speed_error*40092/10000;//speed ki ~4
+          speed_p=speed_error*200563/10000;//speed kp ~20.0563
+          speed_i=speed_error*40093/10000;//speed ki ~4.0093
+          
+          //speed_p=speed_error*0/10000;//speed kp 
+          //speed_i=speed_error*0/10000;//speed ki
           
           speed_control_integral+=speed_i;
           motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/20;
-          /*
-          if(speed_control_integral < -1000 || speed_control_integral > 1000){
-            
-          }else{
-               printf("\n%d",speed_control_integral);
-          }*/
         }
-        
-        
-        
+       
         motor_command_speed+=motor_command_speed_delta;
         
-        
-        motor_command_left = motor_command_balance-motor_command_speed; 
-        //+ motor_turn_left;//add this when ccd turn is implemented
-        motor_command_right = motor_command_balance-motor_command_speed;
-        // + motor_turn_right;
-        
-        //current dummy motor response, Yumi please implement PID ~johnc
+        motor_command_left = motor_command_balance - motor_command_speed;
+        //+ motor_turn_left;
+        motor_command_right = motor_command_balance - motor_command_speed;
+        //+ motor_turn_right;
         
         //set dir pins on both
           if (motor_command_left>0){
@@ -271,17 +220,16 @@ void pit3_system_loop(void){
           
           //printf("\nmotor command left:%d",motor_command_left);
           
-          //excute motor pwm with PID
-          /*
-          if(motor_command_left>6500){
+          /* Safety
+          if(control_tilt>450){
           motor_command_left = 0;
-          }
-          
-          if(motor_command_right>6500){
           motor_command_right = 0;
-          }
-          */
+          } else if (control_tilt<(-400)){
+          motor_command_left = 0;
+          motor_command_right = 0;
+          }*/
           
+          //excute motor pwm with PID
           FTM_PWM_Duty(FTM0,CH3,motor_command_left);
           FTM_PWM_Duty(FTM0,CH2,motor_command_right);
           
@@ -289,9 +237,8 @@ void pit3_system_loop(void){
       //g_u32encoder_lflast=g_u32encoder_lf;
       //g_u32encoder_rtlast=g_u32encoder_rt;
       
-      system_mode=0;//back to the top of pit
+    system_mode=0;//back to the top of pit
     break;
-      
   }
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;

@@ -95,7 +95,7 @@ void main()
         while(1)
         { 
           //printf("\n\f====================================");
-          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set/2);
+          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3300)+(balance_centerpoint_set/10);
           //printf("\nMain gyro%d",control_tilt);//theta
           printf("\n%d",ad_once(ADC1,AD7b,ADC_12bit)-1940);//omega
           delayms(50);
