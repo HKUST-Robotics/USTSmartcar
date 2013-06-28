@@ -53,9 +53,8 @@ void PIT0_IRQHandler(void){
   PIT_Flag_Clear(PIT0);       
 }
 
-void PIT1_IRQHandler(void)
-{   //for encoder testing
-    DisableInterrupts;
+void PIT1_IRQHandler(void) //for encoder testing
+{   DisableInterrupts;
     printf("\n\fg_u32encoder_lf:%d",g_u32encoder_lf);
     printf("\n\fg_u32encoder_rt:%d",g_u32encoder_rt);
     
@@ -87,74 +86,72 @@ void encoder_counter(void){
 }
 
 //main system control loop, runs every 1ms, each case runs every 5 ms
+//updated system loop: 250us, each 1ms
 void pit3_system_loop(void){
   DisableInterrupts;   
+  gpio_set(PORTD,10,0);
   switch (system_mode){
     
-    /****** Case 0: get ccd values  ******/
+    /****** Case 0: get ccd values and calculate turning command from ccd ~0.4us ******/
     case 0:
+     
+      gpio_set(PORTD,10,1);  
       if(g_int_ccd_operation_state == 0){
         ccd_trigger_SI();
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
-    system_mode=1;
-    break;
-    
-    /****** Case 1: calculate turning command from ccd******/
-    case 1:
+      
       ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
       dir_error = g_u16_ccd_middle_pos - 128;  
-      
-      //printf("g_u16_ccd_middle_pos:");
-      //printf("%d",g_u16_ccd_middle_pos);
-      //printf("\n");
-      
-      //printf("Direction error:");
-      //printf("%d",dir_error);
-      //printf("\n");
       
       turn_kp = (1000000/10000);    //dir kp
       motor_turn_left = dir_error * turn_kp;
       motor_turn_right = dir_error * (-turn_kp);
       
-      //printf("motor_turn_left");
-      //printf("%d",motor_turn_left);
-      //printf("\n");
+      /*
+      printf("Direction error:");
+      printf("%d",dir_error);
+      printf("\n");
       
-      //printf("motor_turn_right");
-      //printf("%d", motor_turn_right);
-      //printf("\n");
+      printf("g_u16_ccd_middle_pos:");
+      printf("%d",g_u16_ccd_middle_pos);
+      printf("\n");
       
-      //in the end set motor_command_left and motor_command_right to desired values;   
-    system_mode=2;
+      printf("motor_turn_left");
+      printf("%d",motor_turn_left);
+      printf("\n");
+     
+      printf("motor_turn_right");
+      printf("%d", motor_turn_right);
+      printf("\n");
+      */
+      
+    system_mode=1;
     break;
     
-    /****** Case 2: get gyro & accl values******/
-    case 2:
+    /****** Case 1: get gyro & accl values ~120us + balance pid ~700ns ******/
+    case 1:
       control_tilt_last=control_tilt;              // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1150)+(balance_centerpoint_set/10);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1130)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       //printf("\ncontrol tilt:%d",control_tilt);
-      printf("\n%d",control_tilt);
+      //printf("\n%d",control_tilt);
+      
       /*if(omgready_flag==0){
         control_omg=0;
         omgready_flag=1;
       }else{
         control_omg=control_tilt-control_tilt_last;
       }*/
-    system_mode=3;
-    break;
-   
-    /****** Case 3: balance pid ******/
-    case 3:                               
-      motor_command_balance= ((control_tilt)*1219811/10000) - (control_omg*10644/1000);
-    //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
-    system_mode=4;                    // angle kp ~ 121.9811      //angle kd ~10.644
+                               // angle kp ~ 121.9811      //angle kd ~10.644
+      motor_command_balance= ((control_tilt)*1181850/10000) - (control_omg*9050/1000);
+     //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
+    system_mode=2;
     break;
     
-    /****** Case 4: output motor ******/
-    case 4:
-      
+    /****** Case 2: output motor ~4-5us******/
+    case 2:
+   
         if(motor_pid_counter<20){
           motor_pid_counter++;
         }else{
@@ -169,8 +166,8 @@ void pit3_system_loop(void){
           
           speed_error=control_car_speed-car_speed;
           
-          speed_p=speed_error*200563/10000;//speed kp ~20.0563
-          speed_i=speed_error*40093/10000;//speed ki ~4.0093
+          speed_p=speed_error*200975/10000;//speed kp ~20.0563
+          speed_i=speed_error*40013/10000;//speed ki ~4.0093
           
           //speed_p=speed_error*0/10000;//speed kp 
           //speed_i=speed_error*0/10000;//speed ki
@@ -184,7 +181,7 @@ void pit3_system_loop(void){
         motor_command_left = motor_command_balance - motor_command_speed;
         //+ motor_turn_left;
         motor_command_right = motor_command_balance - motor_command_speed;
-        //+ motor_turn_right;
+        // + motor_turn_right;
         
         //set dir pins on both
           if (motor_command_left>0){
@@ -235,11 +232,41 @@ void pit3_system_loop(void){
           
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;
-      //g_u32encoder_rtlast=g_u32encoder_rt;
-      
+      //g_u32encoder_rtlast=g_u32encoder_rt; 
     system_mode=0;//back to the top of pit
     break;
   }
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
 }
+
+/*
+
+
+    Case 1: calculate turning command from ccd
+    case 1:
+      ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
+      dir_error = g_u16_ccd_middle_pos - 128;  
+      
+      printf("g_u16_ccd_middle_pos:");
+      printf("%d",g_u16_ccd_middle_pos);
+      printf("\n");
+     
+      turn_kp = (1000000/10000);    //dir kp
+      motor_turn_left = dir_error * turn_kp;
+      motor_turn_right = dir_error * (-turn_kp);
+      
+      printf("motor_turn_left");
+      printf("%d",motor_turn_left);
+      printf("\n");
+     
+      printf("motor_turn_right");
+      printf("%d", motor_turn_right);
+      printf("\n");
+      
+      //in the end set motor_command_left and motor_command_right to desired values;   
+    system_mode=2;
+
+
+
+*/

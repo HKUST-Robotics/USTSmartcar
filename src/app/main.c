@@ -172,6 +172,11 @@ void main()
         
         motor_init();
         pit_init_ms(PIT3,1);
+        
+        //DisableInterrupts;    
+        //pit_init(PIT3,1380);
+        //EnableInterrupts;
+        
         ccd_interrupts_init();
         delayms(4000);
         
@@ -179,7 +184,7 @@ void main()
         
         
         while(1){
-          //system loop runs
+          //system loop runs 
         }
         
      break;
@@ -209,6 +214,10 @@ void ccd_all_pin_init(){
    gpio_init(PORTB, 8, GPO, 1);    //PTB8 , SI
    gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
    gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
+   
+   gpio_init(PORTD, 10, GPO, 1);   
+   gpio_init(PORTD, 9, GPO, 1);   
+   
    
    LED_init(); // To test ccd sampling function is operating
 } 
