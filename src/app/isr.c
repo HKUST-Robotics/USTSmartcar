@@ -4,17 +4,17 @@
 
 /*********** CCD startup variables ************/
 extern volatile int g_int_ccd_operation_state; // ccd operation state
+volatile int g_int_ccd_si_counter=0;
 
 /*********** CCD related sample result & array ************/
 extern char g_char_ar_ccd_current_pixel[256];        // current sample
 extern char g_char_ar_ccd_previous_pixel[256];       // previous sample
 extern char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
-extern char g_char_ar_ccd_benchmark_two[256];        // benchmark 2
 extern char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /*********** CCD track decision related variables ***********/
 int g_int_ccd_benchmark_counter=0;                   // benchmark counter  
-int g_int_ccd_preset_benchmark_time=100;             // adjustable startbenchmark time
+int g_int_ccd_preset_benchmark_time=100;             // adjustable start benchmark time
 int g_int_ccd_benchmark_state=1;                     // default active 
 
 /************* Variables for control PID *************/
@@ -40,8 +40,8 @@ u16 turn_kp=0;
 extern u16 g_u16_ccd_middle_pos;
 
 /************* Variables for motor *************/
-extern volatile u32 g_u32encoder_lf;
-extern volatile u32 g_u32encoder_rt;
+extern volatile int g_u32encoder_lf;
+extern volatile int g_u32encoder_rt;
 extern volatile int motor_deadzone_left,motor_deadzone_right;
 extern u32 balance_centerpoint_set;
 volatile u8 motor_pid_counter;  //for the motor command loop
@@ -74,29 +74,40 @@ void encoder_counter(void){
     u8  n=0;
     n=8;
     if(PORTA_ISFR & (1<<n)) 
-    {PORTA_ISFR  |= (1<<n);
-     g_u32encoder_lf++;
+    {
+      PORTA_ISFR  |= (1<<n);
+      if(leftDir==1){
+        g_u32encoder_lf++;
+      }else{
+        g_u32encoder_lf--;
+      }
     } 
     
     n=9;
     if(PORTA_ISFR & (1<<n))
-    {PORTA_ISFR  |= (1<<n);
-    g_u32encoder_rt++;        
+    {
+      PORTA_ISFR  |= (1<<n);
+    
+      if(rightDir==1){
+        g_u32encoder_rt++; 
+      }else{
+       g_u32encoder_rt--; 
+     }
     }
 }
 
-//main system control loop, runs every 1ms, each case runs every 5 ms
-//updated system loop: 250us, each 1ms
+//main system control loop, runs every 1ms, each case runs every 3 ms
 void pit3_system_loop(void){
   DisableInterrupts;   
-  gpio_set(PORTD,10,0);
   switch (system_mode){
     
-    /****** Case 0: get ccd values and calculate turning command from ccd ~0.4us ******/
+    /****** Case 0: get ccd values and calculate turning command from ccd ~410us******/
     case 0:
-     
-      gpio_set(PORTD,10,1);  
-      if(g_int_ccd_operation_state == 0){
+      
+      if( g_int_ccd_si_counter < 6){
+      g_int_ccd_si_counter++;
+      }else if(g_int_ccd_operation_state == 0){
+        g_int_ccd_si_counter = 0;
         ccd_trigger_SI();
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
       }
@@ -104,11 +115,11 @@ void pit3_system_loop(void){
       ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
       dir_error = g_u16_ccd_middle_pos - 128;  
       
-      turn_kp = (1000000/10000);    //dir kp
+      turn_kp = (3150000/10000);    //dir kp
       motor_turn_left = dir_error * turn_kp;
       motor_turn_right = dir_error * (-turn_kp);
-      
       /*
+      printf("\n");
       printf("Direction error:");
       printf("%d",dir_error);
       printf("\n");
@@ -129,10 +140,10 @@ void pit3_system_loop(void){
     system_mode=1;
     break;
     
-    /****** Case 1: get gyro & accl values ~120us + balance pid ~700ns ******/
+    /****** Case 1: get gyro & accl values + balance pid ~140us ******/
     case 1:
       control_tilt_last=control_tilt;              // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1130)+(balance_centerpoint_set/10);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1211)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       //printf("\ncontrol tilt:%d",control_tilt);
       //printf("\n%d",control_tilt);
@@ -144,44 +155,51 @@ void pit3_system_loop(void){
         control_omg=control_tilt-control_tilt_last;
       }*/
                                // angle kp ~ 121.9811      //angle kd ~10.644
-      motor_command_balance= ((control_tilt)*1181850/10000) - (control_omg*9050/1000);
+      motor_command_balance= ((control_tilt)*1636046/10000) - (control_omg*7595/1000);
      //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
+        
     system_mode=2;
     break;
     
-    /****** Case 2: output motor ~4-5us******/
+    /****** Case 2: output motor ~3.8-5us******/
     case 2:
-   
-        if(motor_pid_counter<20){
+  
+        if(motor_pid_counter<33){ //updated from 20 to 33
           motor_pid_counter++;
         }else{
           motor_pid_counter=0;
           //stuff here happens every 20*5ms=100ms, used for calculating
           //and capturing encoder motor PID
           
-          car_speed=g_u32encoder_lf*leftDir+g_u32encoder_rt*rightDir;
+          car_speed=g_u32encoder_lf+g_u32encoder_rt;
 
           //clears current encoder
           g_u32encoder_lf=g_u32encoder_rt=0;
           
-          speed_error=control_car_speed-car_speed;
+          control_car_speed = 25;
+                      //speed offset
+          speed_error = 38 + control_car_speed-car_speed;;
+      
+          //speed_p=speed_error*200403/10000;//old speed kp ~20.0563
+          //speed_i=speed_error*40193/10000;//old speed ki ~4.0093
           
-          speed_p=speed_error*200975/10000;//speed kp ~20.0563
-          speed_i=speed_error*40013/10000;//speed ki ~4.0093
-          
-          //speed_p=speed_error*0/10000;//speed kp 
-          //speed_i=speed_error*0/10000;//speed ki
+          speed_p=speed_error*258000/10000;//speed kp 
+          speed_i=speed_error*49500/10000;//speed ki
           
           speed_control_integral+=speed_i;
-          motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/20;
+          motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/33; //updated from 20 to 33
+          
+          //printf("\n%d",speed_control_integral);
         }
        
         motor_command_speed+=motor_command_speed_delta;
         
-        motor_command_left = motor_command_balance - motor_command_speed;
-        //+ motor_turn_left;
-        motor_command_right = motor_command_balance - motor_command_speed;
-        // + motor_turn_right;
+        motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
+        //motor_command_left = motor_turn_left;
+
+        motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
+        //motor_command_right = motor_turn_right;
+        
         
         //set dir pins on both
           if (motor_command_left>0){
@@ -203,8 +221,8 @@ void pit3_system_loop(void){
           }
           
           //deadzone
-          //motor_command_left+=100;
-          //motor_command_right+=100;
+          //motor_command_left+=150;
+          //motor_command_right+=150;
           
           //saturation & timeout protection
           if(motor_command_left>8000){
@@ -233,6 +251,7 @@ void pit3_system_loop(void){
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;
       //g_u32encoder_rtlast=g_u32encoder_rt; 
+          
     system_mode=0;//back to the top of pit
     break;
   }

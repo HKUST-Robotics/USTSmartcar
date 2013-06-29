@@ -23,8 +23,8 @@ char g_char_mode=0;                 // debug and testing mode
 volatile u32 g_u32_systemclock=0;   // systemclock counter
 
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
-volatile u32 g_u32encoder_lf=0;
-volatile u32 g_u32encoder_rt=0;
+volatile int g_u32encoder_lf=0;
+volatile int g_u32encoder_rt=0;
 
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
@@ -63,8 +63,6 @@ void main()
    
    g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
-   
-
    
    delayms(500); 
  
@@ -171,12 +169,7 @@ void main()
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
-        pit_init_ms(PIT3,1);
-        
-        //DisableInterrupts;    
-        //pit_init(PIT3,1380);
-        //EnableInterrupts;
-        
+        pit_init_ms(PIT3,1);        
         ccd_interrupts_init();
         delayms(4000);
         

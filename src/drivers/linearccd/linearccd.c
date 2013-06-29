@@ -29,7 +29,7 @@ char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /*********** CCD edge decision related variable ************/
 u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
-u16 g_u16_ccd_right_pos=0;               // dynamic right edge scan
+u16 g_u16_ccd_right_pos=256;             // dynamic right edge scan
 u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
 
 /*********** CCD basic library ************/
@@ -84,7 +84,7 @@ void ccd_finish_one_sampling(char array[]){
           if(g_int_trash_sample_flag == 1){
              // do nth
           }else{
-          //ccd_output_sample_to_UART(array);
+          ccd_output_sample_to_UART(array);
           g_int_ccd_operation_state = 0;
           }
      }       
@@ -134,22 +134,24 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
   u16 white_cout_left=0;
   u16 left_break_pos=0;
   int first_time_left_break=0;
+  u16 first_left_edge_lenght = 0;
   
   u16 black_cont_right=0;
   u16 white_cout_right=0;
   u16 right_break_pos=0;
   int first_time_right_break=0;
-  u16 first_edge_lenght = 0;
+  u16 first_right_edge_lenght = 0;
   
   // Left edge case
   for( i = 0 ; i < 128 ; i++){ // scan 1st half left array
       if(array[i] == '|'){
           if( first_time_left_break == 0){ 
               g_u16_ccd_left_pos = i; // update left edge
+              first_left_edge_lenght = g_u16_ccd_left_pos;
           }else if( first_time_left_break == 1){ // blakc edge not continues alreday
-              if(white_cout_left > (g_u16_ccd_left_pos/2)){ // continues white cannot > continues black/2
+              if(white_cout_left/2 > (first_left_edge_lenght)){ // continues white cannot > continues black/2
               i = 128; // filter case, keep previous left pos
-              } else if(black_cont_left >= g_u16_ccd_left_pos/2){ // if 2nd part black length > 1st part black length/2
+              } else if(black_cont_left >= first_left_edge_lenght/3){ // if 2nd part black length > 1st part black length/2
               g_u16_ccd_left_pos = i; // update left edge 
               white_cout_left = 0; // erase previous, update left pos
               }
@@ -170,11 +172,11 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
       if(array[i] == '|'){
           if( first_time_right_break == 0){ 
               g_u16_ccd_right_pos = i; // update right edge
-              first_edge_lenght = (256 - g_u16_ccd_right_pos);
+              first_right_edge_lenght = (256 - g_u16_ccd_right_pos);
           }else if( first_time_right_break == 1){ // black edge not continues alreday
-              if(white_cout_right > (first_edge_lenght/2)){ // continues white cannot > continues black/2
+              if(white_cout_right/2 > (first_right_edge_lenght)){ // continues white cannot > continues black/2
               i = 128; // filter case, keep previous right pos
-              } else if(black_cont_right >= first_edge_lenght/2){ // if 2nd part black length > 1st part black length/2
+              } else if(black_cont_right >= first_right_edge_lenght/3){ // if 2nd part black length > 1st part black length/2
               g_u16_ccd_right_pos = i ;// erase previous, update right pos 
               white_cout_right = 0;
               }
@@ -188,6 +190,11 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
             }
           white_cout_right++;
         }
+      /*
+      if( white_cout_right == 128 ){
+      g_u16_ccd_right_pos = 256;  
+      }
+      */
   }
   //ccd_output_edge_to_UART(array);
   ccd_calculate_current_mid_error(array);
