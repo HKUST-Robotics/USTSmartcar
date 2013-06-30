@@ -104,6 +104,7 @@ void main()
         uart_sendStr(UART3,"The mode now is 2: Linear CCD");
         ccd_interrupts_init();
         printf("\nEverything Initialized alright\n");
+       
         while(1)
         { 
             //ccd_sampling(1); // Longer SI CCD Sampling

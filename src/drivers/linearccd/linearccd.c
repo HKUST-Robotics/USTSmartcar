@@ -29,8 +29,12 @@ char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /*********** CCD edge decision related variable ************/
 u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
-u16 g_u16_ccd_right_pos=256;             // dynamic right edge scan
+u16 g_u16_ccd_right_pos=250;             // dynamic right edge scan
 u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
+
+/************* Variables for direction PID *************/
+char dir_pid_mode='U';
+volatile int previous_dir_error=0;
 
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state){  
@@ -39,7 +43,7 @@ void ccd_sampling(char array[], int state){
        ccd_clock_turn();      
        ccd_detect_track(array);       
        ccd_SI_failing_edge_condition();       
-       ccd_finish_one_sampling(array);     
+       ccd_finish_one_sampling(array);
        g_u16_ccd_sample_clock++;
   }   
 }
@@ -60,10 +64,10 @@ void ccd_trigger_SI(){
 void ccd_detect_track(char array[]){
    if(gpio_get(PORTB, 10) == 1) {  
    // if CCD receives black (2nd gen)
-        array[g_u16_ccd_sample_clock] = '|';
+        array[g_u16_ccd_sample_clock] = 'W';
    } else {                        
    // if CCD receives white (2nd gen)
-        array[g_u16_ccd_sample_clock] = '_';
+        array[g_u16_ccd_sample_clock] = 'o';
    }
 }
 
@@ -74,7 +78,7 @@ void ccd_SI_failing_edge_condition(){
 }
 
 void ccd_finish_one_sampling(char array[]){  
-     if(g_u16_ccd_sample_clock == 256){
+     if(g_u16_ccd_sample_clock == 255){
           g_int_SI_state_flag = 0;          // SI Flag off
           g_int_sampling_state_flag = 0;    // Sampling flag off
         
@@ -96,10 +100,10 @@ void ccd_output_sample_to_UART(char array[]){
      uart_sendStr(UART3,"CCD Sample: ");
      ccd_print(array);
 }
-
+  
 void ccd_shift_sample_to_manageable_position(char array[]){
       u16 i; 
-      for( i = 0 ; i < 256 ; i++){
+      for( i = 0 ; i < 254 ; i++){
       array[i] = array[i+2];
       }
 }
@@ -110,70 +114,172 @@ void ccd_scan_dummy_sample_result(char array[]){
       g_int_trash_sample_flag = 0; // reset trash flag
       
       for( i = 0 ; i < 256 ; i++){
-        if(array[i] == '_'){
+        if(array[i] == 'o'){
           dummy++; }
       }
       
-      if(dummy == 256){              // if dummy sample detect
+      if(dummy == 255){              // if dummy sample detect
         g_int_trash_sample_flag = 1; // trash flag ON
       }
 }
 
 void ccd_print(char array[]){
       u16 i;  
-      for( i = 0 ; i < 256 ; i++){
+      for( i = 0 ; i < 251 ; i++){
         uart_putchar(UART3,array[i]); // print sample to UART
       }
 }
 
-/*********** CCD track decision ************/
+/*********** CCD Direction PID decision ************/
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
-  u16 i;
   
+  g_u16_ccd_left_pos=0; //reset to initial value
+  g_u16_ccd_right_pos=250; //reset to initial value
+  
+  char ccd_left_mode='0'; 
+  char ccd_right_mode='0';
+  char ccd_abnormal_mode='0';
+  u16 i;
+    
+  /***** Case 1 Variables *****/  
   u16 black_cont_left=0;
   u16 white_cout_left=0;
-  u16 left_break_pos=0;
-  int first_time_left_break=0;
-  u16 first_left_edge_lenght = 0;
+  //u16 left_break_pos=0;
+  int first_time_left_white_break=0;
+  u16 first_left_edge_lenght=0;  
   
+  /***** Case 2 Variables *****/
+  int first_time_left_black=0;  
+  u16 first_left_black_pos=0;  
+  
+  /***** Case 3 Variables *****/    
   u16 black_cont_right=0;
   u16 white_cout_right=0;
-  u16 right_break_pos=0;
-  int first_time_right_break=0;
-  u16 first_right_edge_lenght = 0;
+  //u16 right_break_pos=0;
+  int first_time_right_white_break=0;
+  u16 first_right_edge_lenght=0;
   
-  // Left edge case
-  for( i = 0 ; i < 128 ; i++){ // scan 1st half left array
-      if(array[i] == '|'){
-          if( first_time_left_break == 0){ 
+  /***** Case 4 Variables *****/
+  int first_time_right_black=0;  
+  u16 first_right_black_pos=0;    
+  
+  /***** Abnormal case Variables ****
+  u8 middle_black_counter=0;
+  u16 all_white_counter=0;*/
+  
+  //printf("\n");
+  
+  /***** Left mode *****/ 
+  if(array[0] == 'W'){
+  ccd_left_mode = '1';
+  dir_pid_mode = 'S';
+    printf("Left Case 1: Start from black pixel\n");
+  }else if(array[0] == 'o'){
+  ccd_left_mode = '2';
+  dir_pid_mode = 'S';
+     printf("Left Case 2: Start from white pixel\n");
+  }
+  
+  /***** Right mode *****/   
+  if(array[250] == 'W'){
+  ccd_right_mode = '3';
+  dir_pid_mode = 'S';
+    printf("Right Case 3: Start from black pixel\n");
+  }else if(array[250] == 'o'){
+  ccd_right_mode = '4';
+  dir_pid_mode = 'S';
+    printf("Right Case 4: Start from white pixel\n");
+  }
+
+  if(array[0] == 'o' && array[250] == 'o'){ // one-side line case
+    ccd_handle_one_side_black_edge(array);
+    dir_pid_mode = 'E';
+    ccd_left_mode ='0'; //reset
+    ccd_right_mode ='0'; //reset
+    printf("One-side track case\n");
+  }
+
+    
+  /***** Left *****/ 
+  switch(ccd_left_mode){  
+  
+  case '1': //Case 1: Left, start form Black edge  
+    
+  for( i = 0 ; i < 128 ; i++){ // scan 1st left half array
+      if(array[i] == 'W'){
+          if( first_time_left_white_break == 0){ // 1st part black is still continous 
               g_u16_ccd_left_pos = i; // update left edge
-              first_left_edge_lenght = g_u16_ccd_left_pos;
-          }else if( first_time_left_break == 1){ // blakc edge not continues alreday
-              if(white_cout_left/2 > (first_left_edge_lenght)){ // continues white cannot > continues black/2
+              first_left_edge_lenght = g_u16_ccd_left_pos+1;
+          }else if( first_time_left_white_break == 1){ // black edge not continues alreday
+              if(white_cout_left/2 > (first_left_edge_lenght)){ //  continues white/2 cannot > 1st left black part lenght
               i = 128; // filter case, keep previous left pos
-              } else if(black_cont_left >= first_left_edge_lenght/3){ // if 2nd part black length > 1st part black length/2
+              } else if(black_cont_left >= first_left_edge_lenght/3){ // if 2nd part black length > 1st part black length/3
               g_u16_ccd_left_pos = i; // update left edge 
               white_cout_left = 0; // erase previous, update left pos
               }
            }
           black_cont_left++;
-      }else if (array[i] == '_'){
+      }else if (array[i] == 'o'){
           black_cont_left = 0;
-            if( first_time_left_break == 0){
-            left_break_pos = i;
-            first_time_left_break = 1;
+            if( first_time_left_white_break == 0){
+            //left_break_pos = i;
+            first_time_left_white_break = 1;
             }
           white_cout_left++;
-        }
+       }
+  }
+  break;
+       
+  case '2':  //Case 2: Left, start form White edge  
+  
+  for( i = 0 ; i < 128 ; i++){ // scan 1st left half array    
+      if(array[i] == 'W'){     
+        
+          if( first_time_left_black == 0){ // if 1st part black edge happened, after a chain of white
+            white_cout_left=0;
+            first_time_left_black = 1;
+            first_left_black_pos=i; // set 1st part edge, 1st black position
+          }                      
+           
+          if( first_time_left_white_break == 0){ // 1st part black is still continous 
+            g_u16_ccd_left_pos = i; // update left edge
+            first_left_edge_lenght = (g_u16_ccd_left_pos - first_left_black_pos)+1;            
+          }else if( first_time_left_white_break == 1){ // 2nd discontinues black part
+              if(white_cout_left/2 > (first_left_edge_lenght)){ // continues white/2 cannot > 1st left black part lenght 
+              i = 128; // filter case, keep previous left pos            
+              }else if(black_cont_left >= first_left_edge_lenght/3){ // if 2nd part black length > 1st part black length/3
+              g_u16_ccd_left_pos = i; // update left edge 
+              white_cout_left = 0; // erase previous, update left pos
+              }
+          }
+          black_cont_left++;    
+      }else if (array[i] == 'o'){  
+          black_cont_left = 0;           
+            if( first_time_left_black == 0){ // beginning edge, this case must be white 
+            // do nth            
+            } else if( first_time_left_black == 1){ // 1st part black edge alreday dected           
+                if( first_time_left_white_break == 0){
+                //left_break_pos = i;
+                first_time_left_white_break = 1;
+                }            
+            }          
+          white_cout_left++;  
+       }
+  }  
+  break; 
   }
   
-  // Right edge case
-  for( i = 256 ; i > 128 ; i--){ // scan right half array
-      if(array[i] == '|'){
-          if( first_time_right_break == 0){ 
+  
+  /***** Right *****/    
+  switch(ccd_right_mode){ 
+    
+  case '3': //Case 3: Right, start form Black edge   
+  for( i = 250 ; i > 128 ; i--){ // scan right half array
+      if(array[i] == 'W'){
+          if( first_time_right_white_break == 0){ 
               g_u16_ccd_right_pos = i; // update right edge
-              first_right_edge_lenght = (256 - g_u16_ccd_right_pos);
-          }else if( first_time_right_break == 1){ // black edge not continues alreday
+              first_right_edge_lenght = (250 - g_u16_ccd_right_pos)+1;
+          }else if( first_time_right_white_break == 1){ // black edge not continues alreday
               if(white_cout_right/2 > (first_right_edge_lenght)){ // continues white cannot > continues black/2
               i = 128; // filter case, keep previous right pos
               } else if(black_cont_right >= first_right_edge_lenght/3){ // if 2nd part black length > 1st part black length/2
@@ -182,23 +288,102 @@ void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]){
               }
            }
           black_cont_right++;
-      }else if (array[i] == '_'){
+      }else if (array[i] == 'o'){
           black_cont_right = 0;
-            if( first_time_right_break == 0){
-            right_break_pos = i;
-            first_time_right_break = 1;
+            if( first_time_right_white_break == 0){
+            //right_break_pos = i;
+            first_time_right_white_break = 1;
             }
           white_cout_right++;
         }
-      /*
-      if( white_cout_right == 128 ){
-      g_u16_ccd_right_pos = 256;  
-      }
-      */
+
   }
+  break;
+    
+  case '4': //Case 4: Right, start form White edge
+    
+  for( i = 250 ; i > 128 ; i--){ // scan right half array    
+      if(array[i] == 'W'){     
+        
+          if( first_time_right_black == 0){ // if 1st part black edge happened, after a chain of white
+            white_cout_right=0;
+            first_time_right_black = 1;
+            first_right_black_pos=i; // set 1st part edge, 1st black position
+          }                      
+           
+          if( first_time_right_white_break == 0){ // 1st part black is still continous 
+            g_u16_ccd_right_pos = i; // update right edge
+            first_right_edge_lenght = (first_right_black_pos - g_u16_ccd_right_pos)+1;            
+          }else if( first_time_right_white_break == 1){ // 2nd discontinues black part
+              if(white_cout_right/2 > (first_right_edge_lenght)){ // continues white/2 cannot > 1st left black part lenght 
+              i = 128; // filter case, keep previous right pos            
+              }else if(black_cont_right >= first_right_edge_lenght/3){ // if 2nd part black length > 1st part black length/3
+              g_u16_ccd_right_pos = i; // update right edge 
+              white_cout_right = 0; // erase previous, update right pos
+              }
+          }
+          black_cont_right++;    
+      }else if (array[i] == 'o'){  
+          black_cont_right = 0;           
+            if( first_time_right_black == 0){ // beginning edge, this case must be white 
+            // do nth            
+            } else if( first_time_right_black == 1){ // 1st part black edge alreday dected           
+                if( first_time_right_white_break == 0){
+                //right_break_pos = i;
+                first_time_right_white_break = 1;
+                }            
+            }          
+          white_cout_right++;  
+       }
+  }      
+    
+  break;
+  
+  }  
+  
   //ccd_output_edge_to_UART(array);
   ccd_calculate_current_mid_error(array);
 }
+
+void ccd_handle_one_side_black_edge(char array[]){
+ 
+  u16 i;
+  int first_time_left_black=0;
+  int first_time_right_black=0;
+  
+  if(previous_dir_error > 0){
+    
+      printf("Previous dir error is positive \n");
+  
+    for( i = 0 ; i < 251 ; i++){ // scan from left to right
+        if(array[i] == 'W'){
+          if(first_time_left_black == 0){
+            g_u16_ccd_left_pos = i;
+            first_time_left_black = 1;
+          } else if(first_time_left_black == 1){
+            i = 250;
+          }
+        }
+    }
+  } else if (previous_dir_error < 0){
+    
+      printf("Previous dir error is negative \n");
+    
+    for( i = 250 ; i > 0 ; i--){ // scan from right to left
+        if(array[i] == 'W'){
+          if(first_time_right_black == 0){
+            g_u16_ccd_right_pos = i;
+            first_time_right_black = 1;
+          } else if(first_time_right_black == 1){
+            i = 1;
+          }
+        }
+    }
+    
+  }
+  
+}
+
 
 void ccd_calculate_current_mid_error(char array[]){
   g_u16_ccd_middle_pos = ( g_u16_ccd_left_pos + g_u16_ccd_right_pos)/2;
@@ -223,8 +408,7 @@ void ccd_output_edge_to_UART(){
 /*********** CCD sample filtering ************/
 void ccd_sample_filtering(char array[]){
   
-  // compare currect sample with previos sample
-  
+  // compare currect sample with previos sample  
   int ccd_same_pixel_count = 0;
   char ccd_similar_count_digit[3];
   int x;
@@ -241,7 +425,7 @@ void ccd_sample_filtering(char array[]){
   convert_char_to_readable_integer(ccd_same_pixel_count,ccd_similar_count_digit);
    
   for( x = 2 ; x >= 0 ; x--){
-  uart_putchar(UART3,ccd_similar_count_digit[x]);
+    uart_putchar(UART3,ccd_similar_count_digit[x]);
   }
   
   uart_sendStr(UART3," number of current pixels are same as pervious sample");
@@ -251,9 +435,8 @@ void ccd_sample_filtering(char array[]){
   if(ccd_same_pixel_count > 1 && ccd_same_pixel_count < 60){
     
      for( y = 0 ; y < 128 ; y++){
-     g_char_ar_ccd_current_pixel[y] = g_char_ar_ccd_previous_pixel[y]; 
-     } 
-     
+        g_char_ar_ccd_current_pixel[y] = g_char_ar_ccd_previous_pixel[y]; 
+     }      
       uart_sendStr(UART3,"\t\t\t\t");    
       uart_sendStr(UART3,"**************************************************************************");   
       uart_sendStr(UART3,"\n");      
@@ -265,11 +448,9 @@ void ccd_sample_filtering(char array[]){
       uart_sendStr(UART3,"\t\t\t\t");    
       uart_sendStr(UART3,"**************************************************************************");   
       uart_sendStr(UART3,"\n");     
-  }
-  
+  }  
   // instead of using previous sample, use the benchmark sample
-  // ... to be edit
-  
+  // ... to be edit  
 }
 
 
@@ -375,7 +556,7 @@ void ccd_decide_range_for_detection(char array[]){
       }
 
      //Left
-     /*uart_sendStr(UART3,"This Left edge position is:"); 
+     uart_sendStr(UART3,"This Left edge position is:"); 
      printf("%d", g_u16_ccd_left_pos);
      uart_sendStr(UART3,"\n");
      
@@ -394,7 +575,7 @@ void ccd_decide_range_for_detection(char array[]){
      g_u16_ccd_left_pos = update_left;                 //final pos before this function end
      
      //Right
-     /*uart_sendStr(UART3,"This Right edge position is:"); 
+     uart_sendStr(UART3,"This Right edge position is:"); 
      printf("%d", g_u16_ccd_right_pos);
      uart_sendStr(UART3,"\n");
      
@@ -404,7 +585,7 @@ void ccd_decide_range_for_detection(char array[]){
      
      update_right = (g_u16_ccd_right_pos+g_u16_ccd_previous_right_pos)/2; // factor : 50% from previous average, 50% from current effect
      
-     /*uart_sendStr(UART3,"Final right edge position for decision is:"); 
+     uart_sendStr(UART3,"Final right edge position for decision is:"); 
      printf("%d", update_right);
      uart_sendStr(UART3,"\n");
      
@@ -432,5 +613,27 @@ void ccd_decide_range_for_detection(char array[]){
   }
   
 
-
+  
+  // Abnormal mode
+  if(array[0] == 'o' && array[250] == 'o'){ // dectected one-side black track or cross cases 
+    
+      for( i = 120; i < 130; i++){  // check one-side black similarity
+        if(array[i] == 'o'){
+          middle_black_counter++;
+        }
+        if(middle_black_counter >=5){ // similar fall into one-side black
+          ccd_abnormal_mode ='7';
+        }
+      }
+    
+      for( i = 0; i < 256; i++){
+        if(array[i] == 'o'){
+          all_white_counter++;
+        }
+        if( all_white_counter >= 250){ // similar fall into cross
+          ccd_abnormal_mode ='8';
+        }
+      }
+    }
+  
 */

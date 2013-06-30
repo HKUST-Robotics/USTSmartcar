@@ -40,9 +40,11 @@ void ccd_scan_dummy_sample_result(char array[]);
 void ccd_print(char array[]); 
 // function prints out length128 array to bluetooth
 
-/*********** CCD track decision ************/
+/*********** CCD Direction PID decision ************/
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]);
 // detect left and right edge for each sample and filter middle noise
+
+void ccd_handle_one_side_black_edge(char array[]);
 
 void ccd_calculate_current_mid_error(char array[]);
 // calculate current middle error

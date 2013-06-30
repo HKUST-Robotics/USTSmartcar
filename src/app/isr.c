@@ -23,6 +23,7 @@ volatile int motor_command_left=0,motor_command_right=0;
 volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
 volatile int speed_error=0;
+volatile int speed_offset=10;
 volatile int leftDir,rightDir=0;
 
 /************* Variables for speed/position PID *************/
@@ -35,9 +36,19 @@ volatile int speed_control_integral=0;
 u8  omgready_flag=0; //position control 
 
 /************* Variables for direction PID *************/
+extern char dir_pid_mode;
 volatile int dir_error=0;
+extern volatile int previous_dir_error;
 u16 turn_kp=0;
 extern u16 g_u16_ccd_middle_pos;
+volatile int motor_command_turn_delta=0;
+int left_bias_flag=0;
+int right_bias_flag=0;
+
+
+/*********** CCD edge decision related variable ************/
+extern volatile u16 g_u16_ccd_left_pos;                // dynamic left edge scan
+extern volatile u16 g_u16_ccd_right_pos;             // dynamic right edge scan
 
 /************* Variables for motor *************/
 extern volatile int g_u32encoder_lf;
@@ -110,32 +121,66 @@ void pit3_system_loop(void){
         g_int_ccd_si_counter = 0;
         ccd_trigger_SI();
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
-      }
+     
+        ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
+        
+        previous_dir_error = dir_error;
+        
+        if(dir_pid_mode == 'S'){
+          
+          left_bias_flag = 0;
+          right_bias_flag = 0;
+          
+          dir_error = g_u16_ccd_middle_pos - 126;  
+          turn_kp = (2910000/10000);    //dir kp
+          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/6;
+        
+        }else if (dir_pid_mode == 'E'){
+          
+          if(previous_dir_error > 0 || left_bias_flag == 1){ // left bias
+               dir_error = g_u16_ccd_left_pos; 
+               printf("left bias");
+               left_bias_flag = 1;
+          } else if (previous_dir_error <0 || right_bias_flag == 1){ // right bias
+               dir_error = (250 - g_u16_ccd_right_pos)*(-1); 
+               printf("right bias");
+               right_bias_flag = 1;
+          }
+          
+          printf("Edge case dir error");
+        
+          turn_kp = (2510000/10000);    //dir kp
+          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/6;
+          
+        }
       
-      ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
-      dir_error = g_u16_ccd_middle_pos - 128;  
+      ccd_output_edge_to_UART();
       
-      turn_kp = (3150000/10000);    //dir kp
-      motor_turn_left = dir_error * turn_kp;
-      motor_turn_right = dir_error * (-turn_kp);
-      /*
       printf("\n");
       printf("Direction error:");
       printf("%d",dir_error);
       printf("\n");
       
-      printf("g_u16_ccd_middle_pos:");
+      /*
+      printf("middle position:");
       printf("%d",g_u16_ccd_middle_pos);
       printf("\n");
       
-      printf("motor_turn_left");
+      printf("motor_turn_left:");
       printf("%d",motor_turn_left);
       printf("\n");
      
-      printf("motor_turn_right");
+      printf("motor_turn_right:");
       printf("%d", motor_turn_right);
       printf("\n");
       */
+      
+      
+      }
+      
+      motor_turn_left+=motor_command_turn_delta;
+      motor_turn_right-=motor_command_turn_delta;
+      
       
     system_mode=1;
     break;
@@ -143,7 +188,7 @@ void pit3_system_loop(void){
     /****** Case 1: get gyro & accl values + balance pid ~140us ******/
     case 1:
       control_tilt_last=control_tilt;              // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1211)+(balance_centerpoint_set/10);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1245)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       //printf("\ncontrol tilt:%d",control_tilt);
       //printf("\n%d",control_tilt);
@@ -155,7 +200,7 @@ void pit3_system_loop(void){
         control_omg=control_tilt-control_tilt_last;
       }*/
                                // angle kp ~ 121.9811      //angle kd ~10.644
-      motor_command_balance= ((control_tilt)*1636046/10000) - (control_omg*7595/1000);
+      motor_command_balance= ((control_tilt)*1426046/10000) - (control_omg*9595/1000);
      //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
         
     system_mode=2;
@@ -176,14 +221,15 @@ void pit3_system_loop(void){
           //clears current encoder
           g_u32encoder_lf=g_u32encoder_rt=0;
           
-          control_car_speed = 25;
-                      //speed offset
-          speed_error = 38 + control_car_speed-car_speed;;
+          control_car_speed = 40;
+          //speed_offset = 10;
+                      //speed offset ~10
+          speed_error = speed_offset + control_car_speed-car_speed;;
       
           //speed_p=speed_error*200403/10000;//old speed kp ~20.0563
           //speed_i=speed_error*40193/10000;//old speed ki ~4.0093
           
-          speed_p=speed_error*258000/10000;//speed kp 
+          speed_p=speed_error*298000/10000;//speed kp 
           speed_i=speed_error*49500/10000;//speed ki
           
           speed_control_integral+=speed_i;
@@ -194,9 +240,11 @@ void pit3_system_loop(void){
        
         motor_command_speed+=motor_command_speed_delta;
         
+        //motor_command_left = motor_command_balance - motor_command_speed;
         motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
         //motor_command_left = motor_turn_left;
 
+        //motor_command_right = motor_command_balance - motor_command_speed;
         motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
         //motor_command_right = motor_turn_right;
         
