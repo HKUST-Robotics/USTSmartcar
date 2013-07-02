@@ -61,10 +61,9 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
+   delayms(2500);
    g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
-   
-   delayms(500); 
  
      switch (g_char_mode){
       case '0':
@@ -79,7 +78,7 @@ void main()
       break;
        
       case '1':
-        uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
+        uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope Test");
         
         //accl_init();
         adc_init(ADC1,AD6b);
@@ -170,9 +169,9 @@ void main()
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
-        pit_init_ms(PIT3,1);        
         ccd_interrupts_init();
-        delayms(4000);
+        pit_init_ms(PIT3,1);
+        //delayms(4000);
         
         printf("\nEverything inited alright");
         
@@ -209,11 +208,11 @@ void ccd_all_pin_init(){
    gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
    gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
    
-   gpio_init(PORTD, 10, GPO, 1);   
-   gpio_init(PORTD, 9, GPO, 1);   
+   //gpio_init(PORTD, 10, GPO, 1);   
+   //gpio_init(PORTD, 9, GPO, 1);   
    
    
-   LED_init(); // To test ccd sampling function is operating
+   //LED_init(); // To test ccd sampling function is operating
 } 
 
 void motor_init(void){
@@ -226,8 +225,8 @@ void motor_init(void){
      Motor right     PTB22           ftm0ch2        top??
      Motor left      PTB23           ftm0ch3        top??
      */
-  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
-  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
+  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-10000 pwm values for duty
+  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-10000 pwm values for duty
   
   gpio_init(PORTB,22,GPO,0);
   gpio_init(PORTB,23,GPO,0);
