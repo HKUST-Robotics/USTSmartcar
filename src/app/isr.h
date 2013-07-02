@@ -25,7 +25,6 @@ extern void PIT0_IRQHandler();
 extern void PIT1_IRQHandler();
 extern void pit3_system_loop();
 extern void encoder_counter();
-
 #endif  //__ISR_H
 
 /* End of "isr.h" */

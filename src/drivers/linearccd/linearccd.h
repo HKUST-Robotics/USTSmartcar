@@ -41,10 +41,14 @@ void ccd_print(char array[]);
 // function prints out length128 array to bluetooth
 
 /*********** CCD Direction PID decision ************/
+void ccd_recongize_left_right_edge_and_return_dir_error(char array[]);
+// algorithm 2: return dir error
+
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]);
-// detect left and right edge for each sample and filter middle noise
+// algorithm 1: detect left and right edge for each sample and filter middle noise
 
 void ccd_handle_one_side_black_edge(char array[]);
+// algorithm 1 sub-function
 
 void ccd_calculate_current_mid_error(char array[]);
 // calculate current middle error

@@ -5,6 +5,7 @@
 /*********** CCD startup variables ************/
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 volatile int g_int_ccd_si_counter=0;
+int pre_set_si_time = 3;
 
 /*********** CCD related sample result & array ************/
 extern char g_char_ar_ccd_current_pixel[256];        // current sample
@@ -23,19 +24,19 @@ volatile int motor_command_left=0,motor_command_right=0;
 volatile int motor_turn_left,motor_turn_right;
 volatile int motor_command_balance;
 volatile int speed_error=0;
-volatile int speed_offset=10;
+volatile int speed_offset=10; //adjustable value
 volatile int leftDir,rightDir=0;
 
 /************* Variables for speed/position PID *************/
 volatile int speed_p,speed_i;
 volatile int car_speed;
-volatile int control_car_speed=0;
+volatile int control_car_speed=55; //adjustable value, increase car speed
 volatile int motor_command_speed=0;
 volatile int motor_command_speed_delta=0;
 volatile int speed_control_integral=0;
 u8  omgready_flag=0; //position control 
 
-/************* Variables for direction PID *************/
+/************* Variables for direction PID : algorthm 1 *************/
 extern char dir_pid_mode;
 volatile int dir_error=0;
 extern volatile int previous_dir_error;
@@ -44,7 +45,14 @@ extern u16 g_u16_ccd_middle_pos;
 volatile int motor_command_turn_delta=0;
 int left_bias_flag=0;
 int right_bias_flag=0;
+void temp_ccd_output_debug_message_function(); //temporary
+extern char ccd_left_mode; //temporary
+extern char ccd_right_mode; //temporary
 
+
+/************* Variables for direction PID : algorthm 2 *************/
+extern int current_dir_arc_value_error;
+extern int current_dir_error;
 
 /*********** CCD edge decision related variable ************/
 extern volatile u16 g_u16_ccd_left_pos;                // dynamic left edge scan
@@ -115,67 +123,26 @@ void pit3_system_loop(void){
     /****** Case 0: get ccd values and calculate turning command from ccd ~410us******/
     case 0:
       
-      if( g_int_ccd_si_counter < 6){
+      if( g_int_ccd_si_counter < pre_set_si_time){
       g_int_ccd_si_counter++;
       }else if(g_int_ccd_operation_state == 0){
         g_int_ccd_si_counter = 0;
         ccd_trigger_SI();
+        
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
      
-        ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
+        ccd_recongize_left_right_edge_and_return_dir_error(g_char_ar_ccd_current_pixel);
         
-        previous_dir_error = dir_error;
+        turn_kp = (380000/10000);    //dir kp
         
-        if(dir_pid_mode == 'S'){
-          
-          left_bias_flag = 0;
-          right_bias_flag = 0;
-          
-          dir_error = g_u16_ccd_middle_pos - 126;  
-          turn_kp = (2910000/10000);    //dir kp
-          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/6;
+        //motor_command_turn_delta = ((current_dir_error * turn_kp ) - motor_turn_left)/pre_set_si_time;
         
-        }else if (dir_pid_mode == 'E'){
-          
-          if(previous_dir_error > 0 || left_bias_flag == 1){ // left bias
-               dir_error = g_u16_ccd_left_pos; 
-               printf("left bias");
-               left_bias_flag = 1;
-          } else if (previous_dir_error <0 || right_bias_flag == 1){ // right bias
-               dir_error = (250 - g_u16_ccd_right_pos)*(-1); 
-               printf("right bias");
-               right_bias_flag = 1;
-          }
-          
-          printf("Edge case dir error");
+        motor_command_turn_delta = ((current_dir_arc_value_error * turn_kp ) - motor_turn_left)/pre_set_si_time;
         
-          turn_kp = (2510000/10000);    //dir kp
-          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/6;
-          
-        }
-      
-      ccd_output_edge_to_UART();
-      
-      printf("\n");
-      printf("Direction error:");
-      printf("%d",dir_error);
-      printf("\n");
-      
-      /*
-      printf("middle position:");
-      printf("%d",g_u16_ccd_middle_pos);
-      printf("\n");
-      
-      printf("motor_turn_left:");
-      printf("%d",motor_turn_left);
-      printf("\n");
-     
-      printf("motor_turn_right:");
-      printf("%d", motor_turn_right);
-      printf("\n");
-      */
-      
-      
+        //ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
+        
+        //temp_ccd_output_debug_message_function();
+        
       }
       
       motor_turn_left+=motor_command_turn_delta;
@@ -201,7 +168,6 @@ void pit3_system_loop(void){
       }*/
                                // angle kp ~ 121.9811      //angle kd ~10.644
       motor_command_balance= ((control_tilt)*1426046/10000) - (control_omg*9595/1000);
-     //motor_command_balance= ((control_tilt)*0/10000) - (control_omg*0/1000);
         
     system_mode=2;
     break;
@@ -221,16 +187,11 @@ void pit3_system_loop(void){
           //clears current encoder
           g_u32encoder_lf=g_u32encoder_rt=0;
           
-          control_car_speed = 40;
-          //speed_offset = 10;
-                      //speed offset ~10
-          speed_error = speed_offset + control_car_speed-car_speed;;
-      
-          //speed_p=speed_error*200403/10000;//old speed kp ~20.0563
-          //speed_i=speed_error*40193/10000;//old speed ki ~4.0093
-          
-          speed_p=speed_error*298000/10000;//speed kp 
-          speed_i=speed_error*49500/10000;//speed ki
+          //control_car_speed = 40;
+          speed_error = speed_offset + control_car_speed-car_speed; //optimal speed offset ~10
+                      
+          speed_p=speed_error*298000/10000;//speed kp ~29.8
+          speed_i=speed_error*49500/10000;//speed ki ~4.9
           
           speed_control_integral+=speed_i;
           motor_command_speed_delta=((speed_p+speed_control_integral)-motor_command_speed)/33; //updated from 20 to 33
@@ -307,33 +268,81 @@ void pit3_system_loop(void){
     EnableInterrupts;
 }
 
-/*
-
-
-    Case 1: calculate turning command from ccd
-    case 1:
-      ccd_detect_current_left_right_edge_and_filter_middle_noise(g_char_ar_ccd_current_pixel);
-      dir_error = g_u16_ccd_middle_pos - 128;  
+void temp_ccd_output_debug_message_function(){
+  
+  ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
+  //ccd_output_edge_to_UART();
+        
+  if(ccd_left_mode == '1'){
+    printf("Left Case 1: Start from black pixel\n");
+  } else if(ccd_left_mode == '2'){
+    printf("Left Case 2: Start from white pixel\n"); 
+  }
+  
+  if(ccd_right_mode == '3'){
+    printf("Right Case 3: Start from black pixel\n");
+  } else if(ccd_right_mode == '4'){
+    printf("Right Case 4: Start from white pixel\n");
+  }
+  
+  
+  printf("\n");
+  if(dir_pid_mode == 'S'){
+   printf("STRAIGHT line error case "); 
+  } else if(dir_pid_mode == 'E'){
+   printf("EDGE error case"); 
+  }
+  
+      /*
+  printf("and Direction error is:");
+  printf("%d",dir_error);
+  printf("\n");
+  
+  
       
-      printf("g_u16_ccd_middle_pos:");
+      printf("middle position:");
       printf("%d",g_u16_ccd_middle_pos);
       printf("\n");
-     
-      turn_kp = (1000000/10000);    //dir kp
-      motor_turn_left = dir_error * turn_kp;
-      motor_turn_right = dir_error * (-turn_kp);
       
-      printf("motor_turn_left");
+      printf("motor_turn_left:");
       printf("%d",motor_turn_left);
       printf("\n");
      
-      printf("motor_turn_right");
+      printf("motor_turn_right:");
       printf("%d", motor_turn_right);
       printf("\n");
-      
-      //in the end set motor_command_left and motor_command_right to desired values;   
-    system_mode=2;
+      */
+  
+}
 
-
-
-*/
+        
+        /*
+        
+        previous_dir_error = dir_error;
+        
+        if(dir_pid_mode == 'S'){
+          
+          left_bias_flag = 0;
+          right_bias_flag = 0;
+          
+          dir_error = g_u16_ccd_middle_pos - 126;  
+          turn_kp = (2910000/10000);    //dir kp
+          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/pre_set_si_time;
+        
+        }else if (dir_pid_mode == 'E'){
+          
+          if(previous_dir_error > 0 || left_bias_flag == 1){ // left bias
+               dir_error = g_u16_ccd_left_pos; 
+               printf("left bias");
+               left_bias_flag = 1;
+          } else if (previous_dir_error <0 || right_bias_flag == 1){ // right bias
+               dir_error = (250 - g_u16_ccd_right_pos)*(-1); 
+               printf("right bias");
+               right_bias_flag = 1;
+          }
+        
+          turn_kp = (2510000/10000);    //dir kp
+          motor_command_turn_delta = ((dir_error * turn_kp ) - motor_turn_left)/pre_set_si_time;
+          
+        }
+        */
