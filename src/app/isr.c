@@ -94,7 +94,7 @@ void encoder_counter(void){
      encoder_left    PTA8            exti pta        servo1
      encoder_right   PTA9            exti pta        servo2    */
     u8  n=0;
-    n=8;
+    n=6;
     if(PORTA_ISFR & (1<<n)) 
     {
       PORTA_ISFR  |= (1<<n);
@@ -105,7 +105,7 @@ void encoder_counter(void){
       }
     } 
     
-    n=9;
+    n=7;
     if(PORTA_ISFR & (1<<n))
     {
       PORTA_ISFR  |= (1<<n);
@@ -158,18 +158,18 @@ void pit3_system_loop(void){
                                                 // offset
       control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1045)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
-      //printf("\ncontrol tilt:%d",control_tilt);
+      printf("\ncontrol tilt:%d",control_tilt);
       //printf("\n%d",control_tilt);
       
                                // angle kp ~ 121.9811      //angle kd ~10.644
       // fine-tune kp start from : 142.6046         //fine-tune angle kd start from :9.595
       
-      // when speed = 150 -- kp: 179.6046 && kd:9.595
-      // when speed = 250 -- kp: 224.8946 && kd:11.999
-      // when speed = 275 -- kp: ??? && kd:???
-      // when speed = 300 -- kp: 247.5396 && kd: 13.201
+      // when speed = 150 -- kp: 179.6046 && kd: 9.595
+      // when speed = 250 -- kp: 224.8946 && kd: 11.999
+      // when speed = 300 -- kp: 247.5396 && kd: 9.916 (7.81V) 
+      // when speed = 600 -- kp: 597.1783 && kd: 10.309 (___V) 
       
-      motor_command_balance= ((control_tilt)*2475396/10000) - (control_omg*14121/1000);
+      motor_command_balance= ((control_tilt)*1796046/10000) - (control_omg*9595/1000);
         
     system_mode=2;
     break;
@@ -216,30 +216,30 @@ void pit3_system_loop(void){
        
         motor_command_speed+=motor_command_speed_delta;
         
-        //motor_command_left = motor_command_balance;
+        motor_command_left = motor_command_balance;
         //motor_command_left = motor_command_balance - motor_command_speed;
-        motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
+        //motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
         
-        //motor_command_right = motor_command_balance;
+        motor_command_right = motor_command_balance;
         //motor_command_right = motor_command_balance - motor_command_speed;
-        motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
+        //motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
         
         
         //set dir pins on both
           if (motor_command_left>0){
-            gpio_set(PORTB,23,0);
+            gpio_set(PORTD,7,0);
             leftDir=1;
           }else{
-            gpio_set(PORTB,23,1);
+            gpio_set(PORTD,7,1);
             leftDir=-1;
             motor_command_left=motor_command_left*-1;
           }
           
           if(motor_command_right>0){
-            gpio_set(PORTB,22,0);
+            gpio_set(PORTD,9,0);
             rightDir=1;
           }else{
-            gpio_set(PORTB,22,1);
+            gpio_set(PORTD,9,1);
             rightDir=-1;
             motor_command_right=motor_command_right*-1;
           }
@@ -249,6 +249,7 @@ void pit3_system_loop(void){
           //motor_command_right+=150;
           
           //saturation & timeout protection
+          
           if(motor_command_left>8000){
             motor_command_left=8000;
           }
@@ -257,12 +258,20 @@ void pit3_system_loop(void){
             motor_command_right=8000;
           }
           
-          //printf("\nmotor command left:%d",motor_command_left);
-                    
+          printf("\nmotor command left:%d",motor_command_left);
+          printf("\nmotor command right:%d",motor_command_right);
+          
           //excute motor pwm with PID
-
-          FTM_PWM_Duty(FTM0,CH3,motor_command_left);
-          FTM_PWM_Duty(FTM0,CH2,motor_command_right);
+          FTM_PWM_Duty(FTM1, CH0, motor_command_left); //speed down
+          FTM_PWM_Duty(FTM1, CH1, motor_command_right); //speed down          
+          
+    
+          //FTM_PWM_Duty(FTM1, CH0, 2000); 
+          //FTM_PWM_Duty(FTM1, CH1, 2000); 
+          
+         
+          
+          
           
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;
@@ -273,7 +282,7 @@ void pit3_system_loop(void){
   }
     system_loop_tick++;
     if( system_loop_tick == 3000){ //3000ms
-      control_car_speed = 300;   
+      control_car_speed = 150;   
     }
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;

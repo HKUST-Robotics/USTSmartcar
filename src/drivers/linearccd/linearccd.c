@@ -247,6 +247,8 @@ void output_last_sample_error_pos_message(){ //temp
 
 void output_algorithm_message(){ //temp
   
+  ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
+  
   if(detect_left_flag == 1 && detect_right_flag == 0){
     printf("Both side detected : STRAIGHT line");
   } else if(detect_left_flag == 1 && detect_right_flag == 0){ 

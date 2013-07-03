@@ -48,7 +48,10 @@ void motor_init(void);
 
 void main()
 {   
+
   uart_init(UART3, 115200); // For our flashed bluetooth
+  //uart_init(UART3, 9600); // For our flashed bluetooth
+  
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
@@ -135,25 +138,27 @@ void main()
         motor_init();
         
         printf("\nEverything Initialized alright\n");
-        delayms(3000);
+        delayms(1000);
         
         while(1)
         { 
           //printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
           //motor_test=100*(uart_getchar(UART3)-48);
           
+          FTM_PWM_Duty(FTM1,CH0,2000);
+          FTM_PWM_Duty(FTM1,CH1,2000);//left
+          
           printf("\n\f Input direction : 0 or 1");
           motor_test = uart_getchar(UART3)-48;
          
-          FTM_PWM_Duty(FTM0,CH2,200);//right 
-          FTM_PWM_Duty(FTM0,CH3,200);//left
+          
           
           if (motor_test){
-            gpio_set(PORTB,22,1);
-            gpio_set(PORTB,23,1);//this is left DIR
+            gpio_set(PORTD,9,1);
+            gpio_set(PORTD,7,1);//this is DIR
           }else{
-            gpio_set(PORTB,22,0);
-            gpio_set(PORTB,23,0);//this is DIR
+            gpio_set(PORTD,9,0);
+            gpio_set(PORTD,1,0);//this is DIR
           }
           
         }  
@@ -169,6 +174,13 @@ void main()
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
+        
+        gpio_set(PORTD,9,0); //dir
+        gpio_set(PORTD,7,0); //dir
+        
+        FTM_PWM_Duty(FTM1, CH0, 3000); //initital speed
+        FTM_PWM_Duty(FTM1, CH1, 3000); //initital speed               
+        
         ccd_interrupts_init();
         pit_init_ms(PIT3,1);
         //delayms(4000);
@@ -217,25 +229,37 @@ void ccd_all_pin_init(){
 
 void motor_init(void){
   
-  motor_deadzone_left=100;
-  motor_deadzone_right=100;
+  //motor_deadzone_left=100;
+  //motor_deadzone_right=100;
      /*connection config:
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
-     Motor right     PTB22           ftm0ch2        top??
-     Motor left      PTB23           ftm0ch3        top??
+     Motor right     PTD9           FTM1_CH1        top??
+     Motor left      PTD7           FTM1_CH0        top??
      */
-  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-10000 pwm values for duty
-  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-10000 pwm values for duty
+  //FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-10000 pwm values for duty
+  //FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-10000 pwm values for duty
   
-  gpio_init(PORTB,22,GPO,0);
-  gpio_init(PORTB,23,GPO,0);
+  //gpio_init(PORTB,22,GPO,0);
+  //gpio_init(PORTB,23,GPO,0);
+  
+  FTM_PWM_init(FTM1,CH0,10000,0);//motor takes 0-10000 pwm values for duty
+  FTM_PWM_init(FTM1,CH1,10000,0);//motor takes 0-10000 pwm values for duty
+ 
+  gpio_init(PORTD,9,GPO,0); // Right motor dir
+  gpio_init(PORTD,7,GPO,0); // Left motor dir
+  
+  printf("Before Interrupt");
   
   DisableInterrupts;
   
-  exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
-  exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
+  printf("Starting exti Interrupt");
+  
+  exti_init(PORTA,6,rising_up);    //inits left encoder interrupt capture
+  exti_init(PORTA,7,rising_up);    //inits right encoder interrupt capture
   
   EnableInterrupts;
+  
+  printf("Finishing exti Interrupt");
   
 }  
