@@ -28,8 +28,6 @@ typedef enum PITn
 void      pit_init(PITn,u32 cnt);                                                //初始化PITn，并设置定时时间(单位为bus时钟周期)
 #define   pit_init_ms(PITn,ms)          pit_init(PITn,ms * bus_clk_khz);         //初始化PITn，并设置定时时间(单位为 ms)
 
-//#define  pit_init_ms(PITn,ms)          pit_init(PITn,ms * core_clk_khz); 
-
 #define   PIT_Flag_Clear(PITn)          PIT_TFLG(PITn)|=PIT_TFLG_TIF_MASK        //清中断标志
 
 #endif  //_PIT_H_

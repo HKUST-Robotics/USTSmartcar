@@ -16,7 +16,7 @@ typedef struct
     char *loc;
 } PRINTK_INFO;
 
-int
+int 
 printk (PRINTK_INFO *, const char *, va_list);
 
 /********************************************************************/
@@ -70,15 +70,15 @@ printk_putc (int c, int *count, PRINTK_INFO *info)
 {
     switch (info->dest)
     {
-    case DEST_CONSOLE:
-        info->func((char)c);
-        break;
-    case DEST_STRING:
-        *(info->loc) = (unsigned char)c;
-        ++(info->loc);
-        break;
-    default:
-        break;
+        case DEST_CONSOLE:
+            info->func((char)c);
+            break;
+        case DEST_STRING:
+            *(info->loc) = (unsigned char)c;
+            ++(info->loc);
+            break;
+        default:
+            break;
     }
     *count += 1;
 }
@@ -87,8 +87,8 @@ printk_putc (int c, int *count, PRINTK_INFO *info)
 static int
 printk_mknumstr (char *numstr, void *nump, int neg, int radix)
 {
-    int a, b, c;
-    unsigned int ua, ub, uc;
+    int a,b,c;
+    unsigned int ua,ub,uc;
 
     int nlen;
     char *nstrp;
@@ -149,7 +149,7 @@ printk_mknumstr (char *numstr, void *nump, int neg, int radix)
             ++nlen;
         }
     }
-done:
+    done:
     return nlen;
 }
 
@@ -161,7 +161,7 @@ printk_pad_zero (int curlen, int field_width, int *count, PRINTK_INFO *info)
 
     for (i = curlen; i < field_width; i++)
     {
-        printk_putc('0', count, info);
+        printk_putc('0',count, info);
     }
 }
 
@@ -173,7 +173,7 @@ printk_pad_space (int curlen, int field_width, int *count, PRINTK_INFO *info)
 
     for (i = curlen; i < field_width; i++)
     {
-        printk_putc(' ', count, info);
+        printk_putc(' ',count, info);
     }
 }
 
@@ -255,26 +255,26 @@ printk (PRINTK_INFO *info, const char *fmt, va_list ap)
         {
             switch (/* c = */ *++p)
             {
-            case '-':
-                flags_used |= FLAGS_MINUS;
-                break;
-            case '+':
-                flags_used |= FLAGS_PLUS;
-                break;
-            case ' ':
-                flags_used |= FLAGS_SPACE;
-                break;
-            case '0':
-                flags_used |= FLAGS_ZERO;
-                break;
-            case '#':
-                flags_used |= FLAGS_POUND;
-                break;
-            default:
-                /* we've gone one char too far */
-                --p;
-                done = TRUE;
-                break;
+                case '-':
+                    flags_used |= FLAGS_MINUS;
+                    break;
+                case '+':
+                    flags_used |= FLAGS_PLUS;
+                    break;
+                case ' ':
+                    flags_used |= FLAGS_SPACE;
+                    break;
+                case '0':
+                    flags_used |= FLAGS_ZERO;
+                    break;
+                case '#':
+                    flags_used |= FLAGS_POUND;
+                    break;
+                default:
+                    /* we've gone one char too far */
+                    --p;
+                    done = TRUE;
+                    break;
             }
         }
 
@@ -287,23 +287,23 @@ printk (PRINTK_INFO *info, const char *fmt, va_list ap)
         {
             switch (c = *++p)
             {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                field_width = (field_width * 10) + (c - '0');
-                break;
-            default:
-                /* we've gone one char too far */
-                --p;
-                done = TRUE;
-                break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    field_width = (field_width * 10) + (c - '0');
+                    break;
+                default:
+                    /* we've gone one char too far */
+                    --p;
+                    done = TRUE;
+                    break;
             }
         }
 
@@ -323,26 +323,26 @@ printk (PRINTK_INFO *info, const char *fmt, va_list ap)
             {
                 switch (/* c = uncomment if used below */ *++p)
                 {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
 #if 0
-                    precision_width = (precision_width * 10) +
-                                      (c - '0');
+                        precision_width = (precision_width * 10) +
+                            (c - '0');
 #endif
-                    break;
-                default:
-                    /* we've gone one char too far */
-                    --p;
-                    done = TRUE;
-                    break;
+                        break;
+                    default:
+                        /* we've gone one char too far */
+                        --p;
+                        done = TRUE;
+                        break;
                 }
             }
         }
@@ -362,19 +362,19 @@ printk (PRINTK_INFO *info, const char *fmt, va_list ap)
         /* length_modifier = 0; */
         switch (/* c = */ *++p)
         {
-        case 'h':
-            /* length_modifier |= LENMOD_h; */
-            break;
-        case 'l':
-            /* length_modifier |= LENMOD_l; */
-            break;
-        case 'L':
-            /* length_modifier |= LENMOD_L; */
-            break;
-        default:
-            /* we've gone one char too far */
-            --p;
-            break;
+            case 'h':
+                /* length_modifier |= LENMOD_h; */
+                break;
+            case 'l':
+                /* length_modifier |= LENMOD_l; */
+                break;
+            case 'L':
+                /* length_modifier |= LENMOD_L; */
+                break;
+            default:
+                /* we've gone one char too far */
+                --p;
+                break;
         }
 
         /*
@@ -382,186 +382,186 @@ printk (PRINTK_INFO *info, const char *fmt, va_list ap)
          */
         switch (c = *++p)
         {
-        case 'd':
-        case 'i':
-            ival = (int)va_arg(ap, int);
-            vlen = printk_mknumstr(vstr, &ival, TRUE, 10);
-            vstrp = &vstr[vlen];
+            case 'd':
+            case 'i':
+                ival = (int)va_arg(ap, int);
+                vlen = printk_mknumstr(vstr,&ival,TRUE,10);
+                vstrp = &vstr[vlen];
 
-            if (ival < 0)
-            {
-                schar = '-';
-                ++vlen;
-            }
-            else
-            {
-                if (IS_FLAG_PLUS(flags_used))
+                if (ival < 0)
                 {
-                    schar = '+';
+                    schar = '-';
                     ++vlen;
                 }
                 else
                 {
-                    if (IS_FLAG_SPACE(flags_used))
+                    if (IS_FLAG_PLUS(flags_used))
                     {
-                        schar = ' ';
+                        schar = '+';
                         ++vlen;
                     }
                     else
                     {
-                        schar = 0;
+                        if (IS_FLAG_SPACE(flags_used))
+                        {
+                            schar = ' ';
+                            ++vlen;
+                        }
+                        else
+                        {
+                            schar = 0;
+                        }
                     }
                 }
-            }
-            dschar = FALSE;
-
-            /*
-             * do the ZERO pad.
-             */
-            if (IS_FLAG_ZERO(flags_used))
-            {
-                if (schar)
-                    printk_putc(schar, &count, info);
-                dschar = TRUE;
-
-                printk_pad_zero (vlen, field_width, &count, info);
-                vlen = field_width;
-            }
-            else
-            {
-                if (!IS_FLAG_MINUS(flags_used))
+                dschar = FALSE;
+            
+                /*
+                 * do the ZERO pad.
+                 */
+                if (IS_FLAG_ZERO(flags_used))
                 {
-                    printk_pad_space (vlen, field_width, &count, info);
-
                     if (schar)
                         printk_putc(schar, &count, info);
                     dschar = TRUE;
+            
+                    printk_pad_zero (vlen, field_width, &count, info);
+                    vlen = field_width;
                 }
-            }
-
-            /* the string was built in reverse order, now display in */
-            /* correct order */
-            if (!dschar && schar)
-            {
-                printk_putc(schar, &count, info);
-            }
-            goto cont_xd;
-
-        case 'x':
-        case 'X':
-            uval = (unsigned int)va_arg(ap, unsigned int);
-            vlen = printk_mknumstr(vstr, &uval, FALSE, 16);
-            vstrp = &vstr[vlen];
-
-            dschar = FALSE;
-            if (IS_FLAG_ZERO(flags_used))
-            {
-                if (IS_FLAG_POUND(flags_used))
+                else
                 {
-                    printk_putc('0', &count, info);
-                    printk_putc('x', &count, info);
-                    /*vlen += 2;*/
-                    dschar = TRUE;
-                }
-                printk_pad_zero (vlen, field_width, &count, info);
-                vlen = field_width;
-            }
-            else
-            {
-                if (!IS_FLAG_MINUS(flags_used))
-                {
-                    if (IS_FLAG_POUND(flags_used))
+                    if (!IS_FLAG_MINUS(flags_used))
                     {
-                        vlen += 2;
+                        printk_pad_space (vlen, field_width, &count, info);
+            
+                        if (schar)
+                            printk_putc(schar, &count, info);
+                        dschar = TRUE;
                     }
-                    printk_pad_space (vlen, field_width, &count, info);
+                }
+            
+                /* the string was built in reverse order, now display in */
+                /* correct order */
+                if (!dschar && schar)
+                {
+                    printk_putc(schar, &count, info);
+                }
+                goto cont_xd;
+
+            case 'x':
+            case 'X':
+                uval = (unsigned int)va_arg(ap, unsigned int);
+                vlen = printk_mknumstr(vstr,&uval,FALSE,16);
+                vstrp = &vstr[vlen];
+
+                dschar = FALSE;
+                if (IS_FLAG_ZERO(flags_used))
+                {
                     if (IS_FLAG_POUND(flags_used))
                     {
                         printk_putc('0', &count, info);
                         printk_putc('x', &count, info);
+                        /*vlen += 2;*/
                         dschar = TRUE;
                     }
+                    printk_pad_zero (vlen, field_width, &count, info);
+                    vlen = field_width;
                 }
-            }
-
-            if ((IS_FLAG_POUND(flags_used)) && !dschar)
-            {
-                printk_putc('0', &count, info);
-                printk_putc('x', &count, info);
-                vlen += 2;
-            }
-            goto cont_xd;
-
-        case 'o':
-            uval = (unsigned int)va_arg(ap, unsigned int);
-            vlen = printk_mknumstr(vstr, &uval, FALSE, 8);
-            goto cont_u;
-        case 'b':
-            uval = (unsigned int)va_arg(ap, unsigned int);
-            vlen = printk_mknumstr(vstr, &uval, FALSE, 2);
-            goto cont_u;
-        case 'p':
-            uval = (unsigned int)va_arg(ap, void *);
-            vlen = printk_mknumstr(vstr, &uval, FALSE, 16);
-            goto cont_u;
-        case 'u':
-            uval = (unsigned int)va_arg(ap, unsigned int);
-            vlen = printk_mknumstr(vstr, &uval, FALSE, 10);
-
-cont_u:
-            vstrp = &vstr[vlen];
-
-            if (IS_FLAG_ZERO(flags_used))
-            {
-                printk_pad_zero (vlen, field_width, &count, info);
-                vlen = field_width;
-            }
-            else
-            {
-                if (!IS_FLAG_MINUS(flags_used))
+                else
                 {
-                    printk_pad_space (vlen, field_width, &count, info);
+                    if (!IS_FLAG_MINUS(flags_used))
+                    {
+                        if (IS_FLAG_POUND(flags_used))
+                        {
+                            vlen += 2;
+                        }
+                        printk_pad_space (vlen, field_width, &count, info);
+                        if (IS_FLAG_POUND(flags_used))
+                        {
+                            printk_putc('0', &count, info);
+                            printk_putc('x', &count, info);
+                            dschar = TRUE;
+                        }
+                    }
                 }
-            }
 
-cont_xd:
-            while (*vstrp)
-                printk_putc(*vstrp--, &count, info);
-
-            if (IS_FLAG_MINUS(flags_used))
-            {
-                printk_pad_space (vlen, field_width, &count, info);
-            }
-            break;
-
-        case 'c':
-            cval = (char)va_arg(ap, unsigned int);
-            printk_putc(cval, &count, info);
-            break;
-        case 's':
-            sval = (char *)va_arg(ap, char *);
-            if (sval)
-            {
-                vlen = strlen(sval);
-                if (!IS_FLAG_MINUS(flags_used))
+                if ((IS_FLAG_POUND(flags_used)) && !dschar)
                 {
-                    printk_pad_space (vlen, field_width, &count, info);
+                    printk_putc('0', &count, info);
+                    printk_putc('x', &count, info);
+                    vlen += 2;
                 }
-                while (*sval)
-                    printk_putc(*sval++, &count, info);
-                if (IS_FLAG_MINUS(flags_used))
+                goto cont_xd;
+
+            case 'o':
+                uval = (unsigned int)va_arg(ap, unsigned int);
+                vlen = printk_mknumstr(vstr,&uval,FALSE,8);
+                goto cont_u;
+            case 'b':
+                uval = (unsigned int)va_arg(ap, unsigned int);
+                vlen = printk_mknumstr(vstr,&uval,FALSE,2);
+                goto cont_u;
+            case 'p':
+                uval = (unsigned int)va_arg(ap, void *);
+                vlen = printk_mknumstr(vstr,&uval,FALSE,16);
+                goto cont_u;
+            case 'u':
+                uval = (unsigned int)va_arg(ap, unsigned int);
+                vlen = printk_mknumstr(vstr,&uval,FALSE,10);
+
+                cont_u:
+                    vstrp = &vstr[vlen];
+
+                    if (IS_FLAG_ZERO(flags_used))
+                    {
+                        printk_pad_zero (vlen, field_width, &count, info);
+                        vlen = field_width;
+                    }
+                    else
+                    {
+                        if (!IS_FLAG_MINUS(flags_used))
+                        {
+                            printk_pad_space (vlen, field_width, &count, info);
+                        }
+                    }
+
+                cont_xd:
+                    while (*vstrp)
+                        printk_putc(*vstrp--, &count, info);
+
+                    if (IS_FLAG_MINUS(flags_used))
+                    {
+                        printk_pad_space (vlen, field_width, &count, info);
+                    }
+                break;
+
+            case 'c':
+                cval = (char)va_arg(ap, unsigned int);
+                printk_putc(cval,&count, info);
+                break;
+            case 's':
+                sval = (char *)va_arg(ap, char *);
+                if (sval)
                 {
-                    printk_pad_space (vlen, field_width, &count, info);
+                    vlen = strlen(sval);
+                    if (!IS_FLAG_MINUS(flags_used))
+                    {
+                        printk_pad_space (vlen, field_width, &count, info);
+                    }
+                    while (*sval)
+                        printk_putc(*sval++,&count, info);
+                    if (IS_FLAG_MINUS(flags_used))
+                    {
+                        printk_pad_space (vlen, field_width, &count, info);
+                    }
                 }
-            }
-            break;
-        case 'n':
-            ivalp = (int *)va_arg(ap, int *);
-            *ivalp = count;
-            break;
-        default:
-            printk_putc(c, &count, info);
-            break;
+                break;
+            case 'n':
+                ivalp = (int *)va_arg(ap, int *);
+                *ivalp = count;
+                break;
+            default:
+                printk_putc(c,&count, info);
+                break;
         }
     }
     return count;
@@ -572,9 +572,9 @@ cont_xd:
 int
 printf (const char *fmt, ...)
 {
-    return 1;     //报告发送成功
+  return 1;     //报告发送成功
 }
-#else
+#else 
 int
 printf (const char *fmt, ...)
 {
@@ -598,7 +598,7 @@ printf (const char *fmt, ...)
 }
 #endif
 
-/*******************************************************************
+/********************************************************************/
 int
 sprintf (char *s, const char *fmt, ...)
 {
@@ -606,7 +606,9 @@ sprintf (char *s, const char *fmt, ...)
     int rvalue = 0;
     PRINTK_INFO info;
 
-  
+    /*
+     * Initialize the pointer to the variable length argument list.
+     */
     if (s != 0)
     {
         info.dest = DEST_STRING;
@@ -617,6 +619,6 @@ sprintf (char *s, const char *fmt, ...)
         va_end(ap);
     }
     return rvalue;
-}*/
+}
 
 /********************************************************************/

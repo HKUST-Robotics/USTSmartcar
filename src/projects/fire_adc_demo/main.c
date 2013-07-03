@@ -1,14 +1,14 @@
-/******************** (C) COPYRIGHT 2011 偿碠Α秨祇 ********************
- * ゅン       main.c
- * 磞瓃         ADC家计锣传龟喷
+/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
+ * 文件名       ：main.c
+ * 描述         ：ADC模数转换实验
  *
- * 龟喷キ     偿kinetis秨祇狾
- * 畐セ       
- * 碠╰参     
+ * 实验平台     ：野火kinetis开发板
+ * 库版本       ：
+ * 嵌入系统     ：
  *
- *          偿碠Α秨祇
- * 瞊腳┍       http://firestm32.taobao.com
- * м砃や阶韭 http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
+ * 作者         ：野火嵌入式开发工作室
+ * 淘宝店       ：http://firestm32.taobao.com
+ * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
 **********************************************************************************/	
 
 
@@ -17,25 +17,25 @@
 
 
 /*************************************************************************
-*                             偿碠Α秨祇
-*                              ADC家计锣传龟喷代刚
+*                             野火嵌入式开发工作室
+*                              ADC模数转换实验测试
 *
-*  龟喷弧偿ADC家计锣传龟喷ノ﹃祇癳锣传挡狦
-*            偿﹃纐粄 UART1TX钡PTC4RX钡PTC3
-*            k60_fire.h柑﹚竡 printf ㄧ计块砞竚
+*  实验说明：野火ADC模数转换实验，用串口发送转换后结果。
+*            野火串口默认为： UART1，TX接PTC4，RX接PTC3
+*            k60_fire.h里定义了 printf 函数的输出设置：
 *                #define FIRE_PORT           UART1
 *                #define FIRE_BAUD           19200
 *
-*  龟喷巨硂柑ノ ADC1_SE4a ┮ ADC1_SE4a 临璶钡0~3.3V秸筿隔
-*            ADC1_SE4a 碞琌 PTE0 ,  adc.h ゅン柑Τ
-*            ゴ秨﹃も砞竚猧疭瞯 19200 
-*            ﹃絬竒筁MAX3232筿キ锣传TX钡PTC4RX钡PTC3
+*  实验操作：这里用 ADC1_SE4a ，所以 ADC1_SE4a 还要接一个0~3.3V的可调电路
+*            ADC1_SE4a 就是 PTE0 , 在 adc.h 文件里有表格
+*            打开串口助手，设置波特率为 19200 。
+*            串口线（经过MAX3232电平转换）：TX接PTC4，RX接PTC3
 *
-*  龟喷狦﹃も柑块獺
+*  实验效果：在串口助手里，可以看到输出如下信息：
 *
-*                    偿kinetisみ狾代刚祘
-*       ず繵瞯200MHz	羆絬繵瞯 66MHz
-*       flex繵瞯66MHz 	flash繵瞯28MHz
+*                    野火kinetis核心板测试程序
+*       内核频率：200MHz	总线频率 ：66MHz
+*       flex频率：66MHz 	flash频率：28MHz
 *
 *       Software Reset
 *
@@ -45,45 +45,45 @@
 *       512 kBytes of P-flash	P-flash only
 *       128 kBytes of RAM
 *
-*       AD锣传Ω挡狦:36983
-*       AD锣传Ωい挡狦:37143
-*       AD锣传ΩキА挡狦:36912
+*       AD转换一次的结果为:36983
+*       AD转换三次的中值结果为:37143
+*       AD转换十次的平均值结果为:36912
 *
 *
 *
-*  龟喷ヘ代刚 ADC 锣传挡狦
+*  实验目的：测试 ADC 转换的各个结果
 *
-*  э丁2012-2-29     代刚
+*  修改时间：2012-2-29     已测试
 *
-*  称    猔adc.h Τ ADC硄笵┮癸莱恨竲よ獽琩
-*            狦腶恨竲ê代穦跑てゑ耕
+*  备    注：adc.h 有 各个ADC通道所对应管脚的表格，方便查看
+*            如果悬空管脚，那测出的值会变化比较大
 *************************************************************************/
 void  main()
 {
-    u16 ADresult;                           //玂ADC锣传挡狦
+    u16 ADresult;                           //保存ADC转换结果
 
-    uart_init(UART1,19200);                 //﹍て﹃ノㄓ祇癳锣传计沮
+    uart_init(UART1,19200);                 //初始化串口，用来发送转换数据
 
-    adc_init(ADC1,SE4a);                    //﹍てADC1_SE4a ,眖adc.h柑碞ADC1_SE4a癸莱PTE0
+    adc_init(ADC1,SE4a);                    //初始化ADC1_SE4a ,从adc.h里的表格就可以看到ADC1_SE4a对应为PTE0
 
     while(1)
     {
-        /****** 弄Ω ******/
-        ADresult    =   ad_once(ADC1,SE4a,ADC_16bit);           //弄 ADC1_SE4a 16弘
-        printf("AD锣传Ω挡狦:%d\n\n",ADresult);
+        /****** 读取一次 ******/
+        ADresult    =   ad_once(ADC1,SE4a,ADC_16bit);           //读取 ADC1_SE4a ，16位精度
+        printf("AD转换一次的结果为:%d\n\n",ADresult);
 
-        time_delay_ms(500);                //┑500ms
+        time_delay_ms(500);                //延时500ms
 
-        /****** 弄Ωい ******/
-        ADresult    =   ad_mid(ADC1,SE4a,ADC_16bit);            //弄 ADC1_SE4a 16弘
-        printf("AD锣传Ωい挡狦:%d\n\n",ADresult);
+        /****** 读取三次，取中值 ******/
+        ADresult    =   ad_mid(ADC1,SE4a,ADC_16bit);            //读取 ADC1_SE4a ，16位精度
+        printf("AD转换三次的中值结果为:%d\n\n",ADresult);
 
-        time_delay_ms(500);                //┑500ms
+        time_delay_ms(500);                //延时500ms
 
-        /****** 弄ΩΩキА ******/
-        ADresult    =   ad_ave(ADC1,SE4a,ADC_16bit,10);         //弄 ADC1_SE4a 16弘
-        printf("AD锣传ΩキА挡狦:%d\n\n",ADresult);
+        /****** 读取十次次，取平均值 ******/
+        ADresult    =   ad_ave(ADC1,SE4a,ADC_16bit,10);         //读取 ADC1_SE4a ，16位精度
+        printf("AD转换十次的平均值结果为:%d\n\n",ADresult);
 
-        time_delay_ms(500);                //┑500ms
+        time_delay_ms(500);                //延时500ms
     }
 }

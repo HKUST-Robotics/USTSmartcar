@@ -1,235 +1,119 @@
-/*************************************************************************
-  main.c
-  HKUST Smartcar 2013 Sensor Group
-
-  Authoured by:
-  John Ching
-  Louis Mo
-  Yumi Chan
-
-  Hardware By:
-  Zyan Shao
-*************************************************************************/
-
 #include "common.h"
 #include "include.h"
-#include "stdlib.h"
 
-/*************************************************************************
-Global Varaible
-*************************************************************************/
 
-char g_char_mode=0;                 // debug and testing mode
-volatile u32 g_u32_systemclock=0;   // systemclock counter
+extern unsigned char data[ROW][COLUMN];
+/*-----------edge detection----------*/
 
-//these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
-volatile u32 g_u32encoder_lf=0;
-volatile u32 g_u32encoder_rt=0;
 
-volatile u32 g_u32encoder_lflast=0;
-volatile u32 g_u32encoder_rtlast=0;
+/*-----------area cal----------------*/
+#define MAX_LENGTH 25
+#define MIDDLE COLUMN/2
+int area_L = 0;
+int area_R = 0;
 
-volatile int motor_deadzone_left,motor_deadzone_right;
 
-volatile u32 balance_centerpoint_set=0;
-extern volatile int control_tilt;
+/*-----------servo-------------------*/
+#define MAX_TURN 110  //right
+#define MID_TURN 70
+#define MIN_TURN 30   //left
+float servo_kp = 4;
+float servo_kd = 3;
+float servo_error = 0;
+float servo_old_error = 0;
+float servo_output = 0;
 
-u16 motor_test=0;
 
-u8 todis[];//for sprintf usage
+float area_cal(int area_L, int area_R){
+	const float p_percent = 0.8;
+	const float area_percent = 0.2;
+	int i;
+	int left_pt;
+	int right_pt;
+	int firstline_mid = COLUMN/2;
+	int delta_p;
+//	int delta_p_square;
+	int delta_area;
+//	int old_central = COLUMN/2;
+	for(i = 0; i < MAX_LENGTH && data[i][firstline_mid] == 0; i++){
+		int j;
+		for(j = firstline_mid; j > 0 && data[i][j] == 0; j--)
+			;
+		left_pt = j;
+		for(j = firstline_mid; j < COLUMN-1 && data[i][j] == 0; j++)
+			;
+		right_pt = j;
+//		old_central = (left_pt + right_pt)/2;
+		if(i == 0){
+			firstline_mid = (left_pt + right_pt)/2;
+			delta_p = firstline_mid - COLUMN/2;
+		}
+		//if start, cal the delta_p
+		area_L += (firstline_mid - left_pt);
+		area_R += (right_pt - firstline_mid);
+	}
+	// if(delta_p > 0)
+	// 	delta_p_square = delta_p * delta_p;
+	// else
+	// 	delta_p_square = -delta_p * delta_p;
+	delta_area = area_R - area_L;
+	if(i == 0)
+		return 0;
+	else
+		return (delta_p * p_percent + delta_area/i * area_percent); 
+}
 
-/*************************************************************************
-Function header
-*************************************************************************/
-void ccd_interrupts_init(void);
-void ccd_all_pin_init(void);
-//move this into motor.h later
-void motor_init(void);
+void servo_pid(float input){
+	servo_error = input;
+	servo_output = servo_kp * servo_error + servo_kd * (servo_error - servo_old_error);
+	servo_old_error = servo_error;
+	return;
+}
 
-void main()
-{   
-  uart_init(UART3, 115200); // For our flashed bluetooth
-  
-  printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
-  while(1){
-    
-   printf("==============================================================\n");
-   printf("Please select mode:\n---------------------------\n");
-   printf("1:Accelerometer&gyro\n");
-   printf("2:LinearCCD\n");
-   printf("4:Encoder testing\n");
-   printf("6:Motor control test\n");
-   printf("7:SystemLoop Test\n");
-   
-   g_char_mode = '7';                 // Hard code mode = system loop
-   //g_char_mode = uart_getchar(UART3);
-   
-   delayms(500); 
+void initialization(void){
+ //--------motor PWM----------
+    gpio_init(PORTA,10,GPO, 1);
+    FTM_PWM_init (FTM1, CH1, 10000, 220);
  
-     switch (g_char_mode){
-      case '0':
-        //VR analog input
-        adc_init(ADC0,AD14);
-        
-        while(1){
-          delayms(500);
-          printf("\n%d",ad_once(ADC0,AD14,ADC_16bit));//vr value
-        }
-          
-      break;
-       
-      case '1':
-        uart_sendStr(UART3,"The mode now is 1: Accelerometer and Gyroscope");
-        
-        //accl_init();
-        adc_init(ADC1,AD6b);
-        adc_init(ADC1,AD7b);
-        adc_init(ADC0,AD14);
-        
-        balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
+ //   FTM_PWM_Duty(FTM1, CH1, 400);
 
-        printf("\nEverything Initialized alright\n");
-        
-        while(1)
-        { 
-          //printf("\n\f====================================");
-          control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,8)-3200)+(balance_centerpoint_set);
-          //printf("\nMain gyro%d",control_tilt);//theta
-          printf("\n%d",ad_once(ADC1,AD7b,ADC_12bit)-1940);//omega
-          delayms(50);
-        }
-     break;
-     
-     case '2':
-        uart_sendStr(UART3,"The mode now is 2: Linear CCD");
-        ccd_interrupts_init();
-        printf("\nEverything Initialized alright\n");
-        while(1)
-        { 
-            //ccd_sampling(1); // Longer SI CCD Sampling
-        }
-     break;
-        
-      case '4':
-        //temporary case for debuggine encoder libraries, move to encoder.h later
-        uart_sendStr(UART3,"The mode now is 4: encoder test");
-             
-        DisableInterrupts;
-        exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
-        exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
-             
-        pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
-     
-        EnableInterrupts;
-        printf("\nEverything Initialized alright\n");
-     
-        while(1){
-        
-        }
-          
-      break;
+ //--------servo PWM----------
+    FTM_PWM_init (FTM0, CH0, 50, MID_TURN);
+	//camera input
+    exti_init(PORTB,8, falling_down); //HS field, falling_down
+    exti_init(PORTB,9, rising_down);  //VS line, rising_down
+    gpio_init(PORTB,10,GPI, 1);       // GPIN for camera signal
+    //set_irq_priority(88, 1);line_duty);
+	
+    //set_irq_priority(89, 1);`
+    
+    //speed input        
+    //pit_init_ms(PIT0, 3);
+    //set_irq_priority(68,0);
 
-      case '6':
-        uart_sendStr(UART3,"The mode now is 6: Motor Control test");
-        //inits
-        motor_init();
-        
-        printf("\nEverything Initialized alright\n");
-        delayms(3000);
-        
-        while(1)
-        { 
-          //printf("\n\fInput 0-9 Motor Speed, Currently:%d",motor_test);
-          //motor_test=100*(uart_getchar(UART3)-48);
-          
-          printf("\n\f Input direction : 0 or 1");
-          motor_test = uart_getchar(UART3)-48;
-         
-          FTM_PWM_Duty(FTM0,CH2,200);//right 
-          FTM_PWM_Duty(FTM0,CH3,200);//left
-          
-          if (motor_test){
-            gpio_set(PORTB,22,1);
-            gpio_set(PORTB,23,1);//this is left DIR
-          }else{
-            gpio_set(PORTB,22,0);
-            gpio_set(PORTB,23,0);//this is DIR
-          }
-          
-        }  
-      break;
+    LED_init();
+    uart_init(UART3, 115200);     // UART initialise
 
-      case '7':
-        printf("\n The Mode is now 7: SystemLoop Test");
-        
-        adc_init(ADC1,AD6b);
-        adc_init(ADC1,AD7b);
-        adc_init(ADC0,AD14);
-        
-        balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
-        
-        motor_init();
-        pit_init_ms(PIT3,1);
-        ccd_interrupts_init();
-        delayms(4000);
-        
-        printf("\nEverything inited alright");
-        while(1){
-          //system loop runs
-        }
-        
-     break;
-      
-     default :
-     printf("\n\fYou entered:%c, Please enter a number from 1-7 to select a mode\n\f",g_char_mode);
-        
-    }
-   }
+    gpio_init(PORTE,6,GPI,HIGH);//sw2
+    gpio_init(PORTE,7,GPI,HIGH);//sw3
 }
 
-void ccd_interrupts_init(void){
-    DisableInterrupts;                                
-    ccd_all_pin_init(); // init ccd gpio  
-    pit_init(PIT0,10);  // Faster Clock, 2.5us period, 50% duty cycle
-    EnableInterrupts;			             
+void main(void)
+{
+	DisableInterrupts
+	initialization();
+	EnableInterrupts
+	while(1){
+		float input = area_cal(area_L, area_R);
+		if(input != 0){
+		
+		servo_pid(input);
+		if(servo_output > 40)
+			servo_output = 40;
+		if(servo_output < -40)
+			servo_output = -40;
+		FTM_PWM_Duty(FTM0, CH0, MID_TURN + servo_output);
+		
+		}
+	}
 }
-
-void ccd_all_pin_init(){
-  
- /****************** 1st Gen Main Board ******************/
-  //gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
-  //gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
-  //gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-  
- /****************** 2nd Gen Main Board ******************/
-   gpio_init(PORTB, 8, GPO, 1);    //PTB8 , SI
-   gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
-   gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
-   
-   LED_init(); // To test ccd sampling function is operating
-} 
-
-void motor_init(void){
-  
-  motor_deadzone_left=100;
-  motor_deadzone_right=100;
-     /*connection config:
-     Hardware        DIR             PWM             Physical location
-     ---------------+---------------+---------------+-----------------
-     Motor right     PTB22           ftm0ch2        top??
-     Motor left      PTB23           ftm0ch3        top??
-     */
-  FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-1000 pwm values for duty
-  FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-1000 pwm values for duty
-  
-  gpio_init(PORTB,22,GPO,0);
-  gpio_init(PORTB,23,GPO,0);
-  
-  DisableInterrupts;
-  
-  exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
-  exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
-  
-  EnableInterrupts;
-  
-}  

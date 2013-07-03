@@ -1,42 +1,42 @@
-/******************** (C) COPYRIGHT 2011 偿碠Α秨祇 ********************
- * ゅン       adc.c
- * 磞瓃         adc臱笆ㄧ计
+/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
+ * 文件名       ：adc.c
+ * 描述         ：adc驱动函数
  *
- * 龟喷キ     偿kinetis秨祇狾
- * 畐セ       
- * 碠╰参     
+ * 实验平台     ：野火kinetis开发板
+ * 库版本       ：
+ * 嵌入系统     ：
  *
- *          
- * 瞊腳┍       http://firestm32.taobao.com
- * м砃や阶韭 http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
+ * 作者         ：
+ * 淘宝店       ：http://firestm32.taobao.com
+ * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
 **********************************************************************************/	
 
 #include "common.h"
 #include "adc.h"
 
 
-tADC_Config Master_Adc_Config;          //赣挡篶砰惠璶ADC/PGA皌竚
+tADC_Config Master_Adc_Config;          //该结构体包含了需要的ADC/PGA配置
 
-volatile struct ADC_MemMap *ADCx[2]={ADC0_BASE_PTR,ADC1_BASE_PTR}; //﹚竡ㄢ皐计舱玂 ADCx 
+volatile struct ADC_MemMap *ADCx[2]={ADC0_BASE_PTR,ADC1_BASE_PTR}; //定义两个指针数组保存 ADCx 的地址
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿adc_init
-*  弧AD﹍てㄏ牧
-*  把计弧ADCn        家遏腹 ADC0 ADC1
-*  ㄧ计礚
-*  э丁2012-2-10
-*  称    猔把σ默厩ㄒ祘
+*  函数名称：adc_init
+*  功能说明：AD初始化，使能时钟
+*  参数说明：ADCn        模块号（ ADC0、 ADC1）
+*  函数返回：无
+*  修改时间：2012-2-10
+*  备    注：参考苏州大学的例程
 *************************************************************************/
 void adc_init(ADCn adcn,ADC_Ch ch)
 {
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //ㄏノ耞ē浪代ADCn_CHn琌タ盽
+    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //使用断言检测ADCn_CHn是否正常
 
     switch(adcn)
     {
     case ADC0:       /*   ADC0  */
-        SIM_SCGC6 |= (SIM_SCGC6_ADC0_MASK );        //秨币ADC0牧
+        SIM_SCGC6 |= (SIM_SCGC6_ADC0_MASK );        //开启ADC0时钟
         SIM_SOPT7 &= ~(SIM_SOPT7_ADC0ALTTRGEN_MASK  |SIM_SOPT7_ADC0PRETRGSEL_MASK);
         SIM_SOPT7 = SIM_SOPT7_ADC0TRGSEL(0);
 
@@ -118,23 +118,23 @@ void adc_init(ADCn adcn,ADC_Ch ch)
 
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿ad_once
-*  弧栋Ω隔家览秖AD
-*  把计弧ADCn        家遏腹 ADC0 ADC1
-*            ADC_Channel 硄笵腹
-*            ADC_nbit    弘 ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit 
-*  ㄧ计礚才腹挡狦
-*  э丁2012-2-10
-*  称    猔把σ默厩ㄒ祘B硄笵ぃ硁ン牟祇
+*  函数名称：ad_once
+*  功能说明：采集一次一路模拟量的AD值
+*  参数说明：ADCn        模块号（ ADC0、 ADC1）
+*            ADC_Channel 通道号
+*            ADC_nbit    精度（ ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit ）
+*  函数返回：无符号结果值
+*  修改时间：2012-2-10
+*  备    注：参考苏州大学的例程，B通道不能软件触发！！！！
 *************************************************************************/
-u16 ad_once(ADCn adcn,ADC_Ch ch,ADC_nbit bit)  //栋琘隔家览秖AD
+u16 ad_once(ADCn adcn,ADC_Ch ch,ADC_nbit bit)  //采集某路模拟量的AD值
 {
     u16 result = 0;
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //ㄏノ耞ē浪代ADCn_CHn琌タ盽
+    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //使用断言检测ADCn_CHn是否正常
 
-    adc_start(adcn, ch, bit);	  //币笆ADC锣传
+    adc_start(adcn, ch, bit);	  //启动ADC转换
 
     while (( ADC_SC1_REG(ADCx[adcn], 0 ) & ADC_SC1_COCO_MASK ) != ADC_SC1_COCO_MASK);
     result = ADC_R_REG(ADCx[adcn],0);
@@ -143,51 +143,51 @@ u16 ad_once(ADCn adcn,ADC_Ch ch,ADC_nbit bit)  //栋琘隔家览秖AD
 }
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿ad_mid
-*  弧栋Ω隔家览秖AD い
-*  把计弧ADCx        家遏腹 ADC0 ADC1
-*            ADC_Channel 硄笵腹
-*            ADC_nbit    弘 ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit 
-*  ㄧ计礚才腹挡狦
-*  э丁2012-2-10
-*  称    猔э默厩ㄒ祘
+*  函数名称：ad_mid
+*  功能说明：采集三次一路模拟量的AD值，返回 中值
+*  参数说明：ADCx        模块号（ ADC0、 ADC1）
+*            ADC_Channel 通道号
+*            ADC_nbit    精度（ ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit ）
+*  函数返回：无符号结果值
+*  修改时间：2012-2-10
+*  备    注：修改苏州大学的例程
 *************************************************************************/
 u16 ad_mid(ADCn adcn,ADC_Ch ch,ADC_nbit bit)
 {
     u16 i,j,k,tmp;
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //ㄏノ耞ē浪代ADCn_CHn琌タ盽
+    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //使用断言检测ADCn_CHn是否正常
 
-    //3ΩADC锣传
+    //3次ADC转换
     i = ad_once(adcn,ch,bit);
     j = ad_once(adcn,ch,bit);
     k = ad_once(adcn,ch,bit);
 
-    //い
-    tmp = i>j ? i:j;              //tmpㄢ程
+    //取中值
+    tmp = i>j ? i:j;              //tmp取两者最大值
     return k > tmp ?    tmp :  (   k>i  ?    k   :     i  );
     //                k>tmp>i             tmp>k>i   tmp>i>k
 }
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿ad_ave
-*  弧Ω妓キА
-*  把计弧ADCx        家遏腹 ADC0 ADC1
-*            ADC_Channel 硄笵腹
-*            ADC_nbit    弘 ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit 
-*            N           А耾猧Ω计(絛瞅:0~255)
-*  ㄧ计16礚才腹挡狦
-*  э丁2012-2-10
-*  称    猔э默厩ㄒ祘
+*  函数名称：ad_ave
+*  功能说明：多次采样，取平均值
+*  参数说明：ADCx        模块号（ ADC0、 ADC1）
+*            ADC_Channel 通道号
+*            ADC_nbit    精度（ ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit ）
+*            N           均值滤波次数(范围:0~255)
+*  函数返回：16位无符号结果值
+*  修改时间：2012-2-10
+*  备    注：修改苏州大学的例程
 *************************************************************************/
-u16 ad_ave(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N) //А耾猧
+u16 ad_ave(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N) //均值滤波
 {
     u32 tmp = 0;
     u8  i;
-    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //ㄏノ耞ē浪代ADCn_CHn琌タ盽
+    ASSERT( ((adcn == ADC0) && (ch>=AD8 && ch<=AD18)) || ((adcn == ADC1)&& (ch>=AD4a && ch<=AD17)) ) ;   //使用断言检测ADCn_CHn是否正常
 
     for(i = 0; i < N; i++)
         tmp += ad_once(adcn,ch,bit);
@@ -196,67 +196,67 @@ u16 ad_ave(ADCn adcn,ADC_Ch ch,ADC_nbit bit,u8 N) //А耾猧
 }
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿adc_start
-*  弧币笆adc硁ン妓B硄笵ぃノ硁ン牟祇
-*  把计弧ADCx        家遏腹 ADC0 ADC1
-*            ADC_Channel 硄笵腹
-*            ADC_nbit    弘 ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit 
-*  ㄧ计礚
-*  э丁2012-2-10
-*  称    猔э默厩ㄒ祘
+*  函数名称：adc_start
+*  功能说明：启动adc软件采样，B通道不能用于软件触发！！！！
+*  参数说明：ADCx        模块号（ ADC0、 ADC1）
+*            ADC_Channel 通道号
+*            ADC_nbit    精度（ ADC_8bit,ADC_12bit, ADC_10bit, ADC_16bit ）
+*  函数返回：无
+*  修改时间：2012-2-10
+*  备    注：修改苏州大学的例程
 *************************************************************************/
 void adc_start(ADCn adcn,ADC_Ch ch,ADC_nbit bit)
 {
 
     Master_Adc_Config.STATUS1A = AIEN_ON | DIFF_SINGLE | ADC_SC1_ADCH( ch );
 
-    //﹍てADC纐粄皌竚
+    //初始化ADC默认配置
     Master_Adc_Config.CONFIG1  = ADLPC_NORMAL
                                  | ADC_CFG1_ADIV(ADIV_4)
                                  | ADLSMP_LONG
                                  | ADC_CFG1_MODE(bit)
                                  | ADC_CFG1_ADICLK(ADICLK_BUS);
-    Master_Adc_Config.CONFIG2  = MUXSEL_ADCB    //MUXSEL_ADCB
+    Master_Adc_Config.CONFIG2  = MUXSEL_ADCA    //MUXSEL_ADCA
                                  | ADACKEN_DISABLED
                                  | ADHSC_HISPEED
                                  | ADC_CFG2_ADLSTS(ADLSTS_20) ;
 
-    Master_Adc_Config.COMPARE1 = 0x1234u ;                 //ヴ種
-    Master_Adc_Config.COMPARE2 = 0x5678u ;                 //ヴ種
+    Master_Adc_Config.COMPARE1 = 0x1234u ;                 //任意值
+    Master_Adc_Config.COMPARE2 = 0x5678u ;                 //任意值
 
-    adc_config_alt(ADCx[adcn], &Master_Adc_Config);       // 皌竚 ADCn
+    adc_config_alt(ADCx[adcn], &Master_Adc_Config);       // 配置 ADCn
 }
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿adc_stop
-*  弧氨ゎADC锣传
-*  把计弧ADCx        家遏腹 ADC0 ADC1
-*            ADC_Channel 硄笵腹
-*  ㄧ计礚
-*  э丁2012-2-10
-*  称    猔э默厩ㄒ祘
+*  函数名称：adc_stop
+*  功能说明：停止ADC转换
+*  参数说明：ADCx        模块号（ ADC0、 ADC1）
+*            ADC_Channel 通道号
+*  函数返回：无
+*  修改时间：2012-2-10
+*  备    注：修改苏州大学的例程
 *************************************************************************/
 void adc_stop(ADCn adcn)
 {
     Master_Adc_Config.STATUS1A = AIEN_ON | DIFF_SINGLE | ADC_SC1_ADCH(Module_disabled);
-    adc_config_alt(ADCx[adcn], &Master_Adc_Config);  // 皌竚ADC0
+    adc_config_alt(ADCx[adcn], &Master_Adc_Config);  // 配置ADC0
 }
 
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿adc_config_alt
-*  弧盢adc盚竟挡篶砰皌竚秈adc盚竟
-*  把计弧adcmap      adc膀盚竟ADC0_BASE_PTR,ADC1_BASE_PTR
-*            ADC_CfgPtr   盚竟挡篶砰
-*  ㄧ计礚
-*  э丁2012-2-10
-*  称    猔э﹛よ祘ㄒ祘
+*  函数名称：adc_config_alt
+*  功能说明：将adc寄存器结构体配置进adc寄存器
+*  参数说明：adcmap      adc基址寄存器地址（ADC0_BASE_PTR,ADC1_BASE_PTR）
+*            ADC_CfgPtr  存放 寄存器值的结构体
+*  函数返回：无
+*  修改时间：2012-2-10
+*  备    注：修改官方工程的例程
 *************************************************************************/
 void adc_config_alt(ADC_MemMapPtr adcmap, tADC_ConfigPtr ADC_CfgPtr)
 {

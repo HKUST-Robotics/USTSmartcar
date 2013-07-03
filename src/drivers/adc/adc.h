@@ -1,14 +1,14 @@
-/******************** (C) COPYRIGHT 2011 偿碠Α秨祇 ********************
- * ゅン       adc.h
- * 磞瓃         adc臱笆ㄧ计繷ゅン
+/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
+ * 文件名       ：adc.h
+ * 描述         ：adc驱动函数头文件
  *
- * 龟喷キ     偿kinetis秨祇狾
- * 畐セ       
- * 碠╰参     
+ * 实验平台     ：野火kinetis开发板
+ * 库版本       ：
+ * 嵌入系统     ：
  *
- *          偿碠Α秨祇
- * 瞊腳┍       http://firestm32.taobao.com
- * м砃や阶韭 http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
+ * 作者         ：野火嵌入式开发工作室
+ * 淘宝店       ：http://firestm32.taobao.com
+ * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
 **********************************************************************************/	
 
 
@@ -20,30 +20,30 @@
 #include "adc_cfg.h"
 
 
-typedef enum ADCn  //ADC狠
+typedef enum ADCn  //ADC端口
 {
   ADC0,
   ADC1
 }ADCn;
 
-//ADC硄笵
-//矗眶ノ钡ノ DP0  蠢 DAD0 ㄤ摸ΤЩ﹚竡#define DP0       DAD0
+//ADC通道
+//提醒，用的时候，可以直接用 DP0  代替 DAD0 ，其他的也类似，因为有个宏定义：#define DP0       DAD0
 typedef enum ADC_Ch
 {
             //SC1n[DIFF]= 0
-            //  ------ADC0------偿秨祇狾捣糷----       ------ADC1------偿秨祇狾捣糷----
+            //  ------ADC0------野火开发板丝印层----       ------ADC1------野火开发板丝印层----
   DAD0=0,   //	    ADC0_DP0				                    ADC1_DP0
   DAD1=1,   //	    ADC0_DP1				                    ADC1_DP1
   DAD2=2,   //	    PGA0_DP					                    PGA1_DP
   DAD3=3,   //	    ADC0_DP3				                    ADC1_DP3
 
-  //ADCx_CFG2[MUXSEL] ∕﹚ ADCx_SEn 硄笵 a ┪ b.
-  AD4a=4,   //	    玂痙					                    ADC1_SE4a   -- PTE0
-  AD5a=5,   //	    玂痙					                    ADC1_SE5a   -- PTE1
-  AD6a=6,   //	    玂痙					                    ADC1_SE6a   -- PTE2
-  AD7a=7,   //	    玂痙					                    ADC1_SE7a   -- PTE3
+  //ADCx_CFG2[MUXSEL] 位决定 ADCx_SEn 通道为 a 或 b.
+  AD4a=4,   //	    保留					                    ADC1_SE4a   -- PTE0
+  AD5a=5,   //	    保留					                    ADC1_SE5a   -- PTE1
+  AD6a=6,   //	    保留					                    ADC1_SE6a   -- PTE2
+  AD7a=7,   //	    保留					                    ADC1_SE7a   -- PTE3
 
-  //琌 4567
+  //也是 4、5、6、7
   AD4b=AD4a, //	    ADC0_SE4b	-- PTC2			                ADC1_SE4b   -- PTC8
   AD5b=AD5a, //	    ADC0_SE5b	-- PTD1			                ADC1_SE5b   -- PTC9
   AD6b=AD6a, //	    ADC0_SE6b	-- PTD5			                ADC1_SE6b   -- PTC10
@@ -62,20 +62,20 @@ typedef enum ADC_Ch
   AD18=18,  //	    ADC0_SE18 	-- PTE25		                VREF Output
   AD19=19,  //	    ADC0_DM0				                    ADC1_DM0
   AD20=20,  //	    ADC0_DM1				                    ADC1_DM1
-  AD21=21,  //				        	                        玂痙
+  AD21=21,  //				        	                        保留
   AD22=22,  //				
   AD23=23,  //	    DAC0_OUT(12-bit) -- DAC0_OUT		        DAC1_OUT(12-bit)
-  AD24=24,  //	    玂痙					玂痙
-  AD25=25,  //	    玂痙					玂痙
+  AD24=24,  //	    保留					保留
+  AD25=25,  //	    保留					保留
   AD26=26,  //	    Temperature Sensor (S.E)		            Temperature Sensor (S.E)
   AD27=27,  //	    Bandgap (S.E)				                Bandgap (S.E)
-  AD28=28,  //	    玂痙					                    玂痙
+  AD28=28,  //	    保留					                    保留
   AD29=29,  //	    VREFH (S.E)				                    VREFH (S.E)
   AD30=30,  //	    VREFL					                    VREFL
-  AD31=31   //	    窽ノADC0				                    窽ノADC1
+  AD31=31   //	    禁用ADC0				                    禁用ADC1
 }ADC_Ch;
 
-//弘计
+//精度位数
 typedef enum ADC_nbit
 {
   ADC_8bit   =0x00,
@@ -85,19 +85,19 @@ typedef enum ADC_nbit
 }ADC_nbit;
 
 
-//场ㄧ计钡羘
-extern void     adc_init  (ADCn,ADC_Ch);               //AD﹍て
-extern u16      ad_once   (ADCn,ADC_Ch,ADC_nbit);      //栋Ω隔家览秖AD
+//外部函数接口声明
+extern void     adc_init  (ADCn,ADC_Ch);               //AD初始化
+extern u16      ad_once   (ADCn,ADC_Ch,ADC_nbit);      //采集一次一路模拟量的AD值
 
-extern u16      ad_mid    (ADCn,ADC_Ch,ADC_nbit);      //い耾猧挡狦
-extern u16      ad_ave    (ADCn,ADC_Ch,ADC_nbit,u8 N); //А耾猧挡狦
+extern u16      ad_mid    (ADCn,ADC_Ch,ADC_nbit);      //中值滤波后的结果
+extern u16      ad_ave    (ADCn,ADC_Ch,ADC_nbit,u8 N); //均值滤波后的结果
 
-extern void     adc_start (ADCn,ADC_Ch,ADC_nbit);      //秨﹍adc锣传
-extern void     adc_stop  (ADCn);                      //氨ゎADC锣传
+extern void     adc_start (ADCn,ADC_Ch,ADC_nbit);      //开始adc转换
+extern void     adc_stop  (ADCn);                      //停止ADC转换
 
 
-//ず场ㄧ计羘
-static void adc_config_alt(ADC_MemMapPtr adcmap, tADC_ConfigPtr ADC_CfgPtr);//盢adc盚竟挡篶砰皌竚秈adc盚竟
+//内部函数声明
+static void adc_config_alt(ADC_MemMapPtr adcmap, tADC_ConfigPtr ADC_CfgPtr);//将adc寄存器结构体配置进adc寄存器
 
 
 #endif /* __ADC16_H__ */

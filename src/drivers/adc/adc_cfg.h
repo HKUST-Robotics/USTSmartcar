@@ -1,14 +1,14 @@
-/******************** (C) COPYRIGHT 2011 偿碠Α秨祇 ********************
- * ゅン       adc_cfg.c
- * 磞瓃         adcЩ﹚竡皌竚繷ゅン
+/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
+ * 文件名       ：adc_cfg.c
+ * 描述         ：adc的宏定义配置头文件
  *
- * 龟喷キ     偿kinetis秨祇狾
- * 畐セ       
- * 碠╰参     
+ * 实验平台     ：野火kinetis开发板
+ * 库版本       ：
+ * 嵌入系统     ：
  *
- *          
- * 瞊腳┍       http://firestm32.taobao.com
- * м砃や阶韭 http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
+ * 作者         ：
+ * 淘宝店       ：http://firestm32.taobao.com
+ * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
 **********************************************************************************/	
 
 
@@ -43,36 +43,36 @@
 #define COCO_NOT          0x00
 
 // ADC interrupts: enabled, or disabled.
-// ADC い耞: ㄏ┪窽ゎ
+// ADC 中断: 使能或者禁止
 #define AIEN_ON           ADC_SC1_AIEN_MASK
 #define AIEN_OFF          0x00
 
 // Differential or Single ended ADC input
-//琩だ┪虫狠ADC块
+//查分或者单端ADC输入
 #define DIFF_SINGLE       0x00
 #define DIFF_DIFFERENTIAL ADC_SC1_DIFF_MASK
 
 //// ADCCFG1
 
 // Power setting of ADC
-//ADC筿方砞竚
+//ADC电源设置
 #define ADLPC_LOW         ADC_CFG1_ADLPC_MASK
 #define ADLPC_NORMAL      0x00
 
 // Clock divisor
-//牧だ繵
+//时钟分频
 #define ADIV_1            0x00
 #define ADIV_2            0x01
 #define ADIV_4            0x02
 #define ADIV_8            0x03
 
 // Long samle time, or Short sample time
-// 妓丁┪祏妓丁
+// 长采样时间或者短采样时间
 #define ADLSMP_LONG       ADC_CFG1_ADLSMP_MASK
 #define ADLSMP_SHORT      0x00
 
 // How many bits for the conversion?  8, 12, 10, or 16 (single ended).
-// 锣传弘 8, 12, 10, ┪ 16 (虫狠).
+// 转换精度 8, 12, 10, 或者 16 (单端).
 #define MODE_8            0x00
 #define MODE_12           0x01
 #define MODE_10           0x02
@@ -80,7 +80,7 @@
 
 // ADC Input Clock Source choice? Bus clock, Bus clock/2, "altclk", or the
 //                                ADC's own asynchronous clock for less noise
-//ADC块牧方匡拒 羆絬羆絬/2〃altclk¨┪ADCō钵˙牧搭ぶ靖羘
+//ADC输入时钟源选择 总线，总线/2，”altclk“或者ADC自身异步时钟以减少噪声
 #define ADICLK_BUS        0x00
 #define ADICLK_BUS_2      0x01
 #define ADICLK_ALTCLK     0x02
@@ -89,22 +89,22 @@
 //// ADCCFG2
 
 
-// 匡拒硄笵A硄笵B
+// 选择通道A，通道B
 #define MUXSEL_ADCB       ADC_CFG2_MUXSEL_MASK
 #define MUXSEL_ADCA       0x00
 
 // Ansync clock output enable: enable, or disable the output of it
-// 钵˙牧块ㄏㄏ┪窽ゎ块
+// 异步时钟输出使能：使能，或者禁止输出
 #define ADACKEN_ENABLED   ADC_CFG2_ADACKEN_MASK
 #define ADACKEN_DISABLED  0x00
 
 // High speed or low speed conversion mode
-// 蔼硉硉锣传丁
+// 高速低速转换时间
 #define ADHSC_HISPEED     ADC_CFG2_ADHSC_MASK
 #define ADHSC_NORMAL      0x00
 
 // Long Sample Time selector: 20, 12, 6, or 2 extra clocks for a longer sample time
-// 妓丁匡拒20,12,6┪2肂牧癸妓丁
+// 长采样时间选择：20,12,6或者2个额外的时钟对于长采样时间
 #define ADLSTS_20          0x00
 #define ADLSTS_12          0x01
 #define ADLSTS_6           0x02
@@ -113,33 +113,33 @@
 ////ADCSC2
 
 // Read-only status bit indicating conversion status
-// 弄篈琌锣传篈
+// 只读状态位只是转换状态
 #define ADACT_ACTIVE       ADC_SC2_ADACT_MASK
 #define ADACT_INACTIVE     0x00
 
 // Trigger for starting conversion: Hardware trigger, or software trigger.
 // For using PDB, the Hardware trigger option is selected.
-// 牟祇秨﹍锣传:祑ン牟祇硁ン牟祇
+// 触发开始转换:硬件触发，软件触发
 #define ADTRG_HW           ADC_SC2_ADTRG_MASK
 #define ADTRG_SW           0x00
 
 // ADC Compare Function Enable: Disabled, or Enabled.
-//ADCゑ耕ㄏ窽ゎ┪ㄏ
+//ADC比较功能使能：禁止或者使能
 #define ACFE_DISABLED      0x00
 #define ACFE_ENABLED       ADC_SC2_ACFE_MASK
 
 // Compare Function Greater Than Enable: Greater, or Less.
-// ゑ耕ゑ耕ㄏ┪
+// 比较功能大于比较使能：大于或者小于
 #define ACFGT_GREATER      ADC_SC2_ACFGT_MASK
 #define ACFGT_LESS         0x00
 
 // Compare Function Range Enable: Enabled or Disabled.
-// ゑ耕絛瞅ㄏㄏ┪窽ゎ
+// 比较功能范围使能：使能或者禁止
 #define ACREN_ENABLED      ADC_SC2_ACREN_MASK
 #define ACREN_DISABLED     0x00
 
 // DMA enable: enabled or disabled.
-// DMAㄏㄏ┪窽ゎ
+// DMA使能：使能或者禁止
 #define DMAEN_ENABLED      ADC_SC2_DMAEN_MASK
 #define DMAEN_DISABLED     0x00
 
@@ -147,7 +147,7 @@
 // (***not*** the PGA which uses VREFO only).
 // VREFH and VREFL (0) , or VREFO (1).
 
-//ADC锣传筿溃把σ匡拒
+//ADC转换的电压参考选择
 #define REFSEL_EXT         0x00
 #define REFSEL_ALT         0x01
 #define REFSEL_RES         0x02     /* reserved */
@@ -156,33 +156,33 @@
 ////ADCSC3
 
 // Calibration begin or off
-// 秨﹍┪闽超
+// 校准开始或者关闭
 #define CAL_BEGIN          ADC_SC3_CAL_MASK
 #define CAL_OFF            0x00
 
 // Status indicating Calibration failed, or normal success
-// ボア毖Θ篈
+// 指示校准失败成功的状态
 #define CALF_FAIL          ADC_SC3_CALF_MASK
 #define CALF_NORMAL        0x00
 
 // ADC to continously convert, or do a sinle conversion
-// ADC硈尿锣传┪Ω锣传
+// ADC连续转换或者一次转换
 #define ADCO_CONTINUOUS    ADC_SC3_ADCO_MASK
 #define ADCO_SINGLE        0x00
 
 // Averaging enabled in the ADC, or not.
-// キА妓ㄏ┪窽ゎ
+// 平均采样使能或者禁止
 #define AVGE_ENABLED       ADC_SC3_AVGE_MASK
 #define AVGE_DISABLED      0x00
 
 // How many to average prior to "interrupting" the MCU?  4, 8, 16, or 32
-// MCU玻ネい耞玡キАΩ计4,8,16┪32
+// MCU产生中断前的平均次数4,8,16，或者32
 #define AVGS_4             0x00
 #define AVGS_8             0x01
 #define AVGS_16            0x02
 #define AVGS_32            0x03
 
-///////////////////////////////PGA场だ默厩⊿Τ/////////////////////////////////////
+///////////////////////////////PGA部分，苏州大学的没有的/////////////////////////////////////
 ////PGA
 
 // PGA enabled or not?
@@ -210,16 +210,16 @@
 /////////// The above values fit into the structure below to select ADC/PGA
 /////////// configuration desired:
 
-//AD锣传皌竚挡篶砰
+//AD转换的配置结构体
 typedef struct adc_cfg {
-  uint8_t  CONFIG1;         // ADC configuration register 1     皌竚盚竟1
-  uint8_t  CONFIG2;         // Configuration register 2         皌竚盚竟2
-  uint16_t COMPARE1;        // Compare value registers 1        ゑ耕盚竟1
-  uint16_t COMPARE2;        // Compare value registers 2        ゑ耕盚竟2
-  uint8_t  STATUS2;         // Status and control register 2    篈北盚竟2
+  uint8_t  CONFIG1;         // ADC configuration register 1     配置寄存器1
+  uint8_t  CONFIG2;         // Configuration register 2         配置寄存器2
+  uint16_t COMPARE1;        // Compare value registers 1        比较值寄存器1
+  uint16_t COMPARE2;        // Compare value registers 2        比较值寄存器2
+  uint8_t  STATUS2;         // Status and control register 2    状态控制寄存器2
   uint8_t  STATUS3;         // Status and control register 3
-  uint8_t  STATUS1A;        // ADC status and control registers 1 A硄笵
-  uint8_t  STATUS1B;        // ADC status and control registers 1 B硄笵
+  uint8_t  STATUS1A;        // ADC status and control registers 1 A通道
+  uint8_t  STATUS1B;        // ADC status and control registers 1 B通道
   uint32_t PGA;             // ADC PGA register
   } *tADC_ConfigPtr, tADC_Config ;
 
@@ -251,14 +251,14 @@ uint8_t   CLM0;
 
 
 
-///////////////////////////默厩睰////////////////////////////////////
+///////////////////////////以下为苏州大学添加的////////////////////////////////////
 #define ADC1_CHANA    26
 
 
-#define ADC0_DLYA     0x2000                                // ADC0 牟祇A┑筐
-#define ADC0_DLYB     0x4000                                // ADC0 牟祇B┑筐
-#define ADC1_DLYA     0x6000                                // ADC1 牟祇A┑筐
-#define ADC1_DLYB     0x7fff                                // ADC1 牟祇B┑筐
+#define ADC0_DLYA     0x2000                                // ADC0 触发A延迟
+#define ADC0_DLYB     0x4000                                // ADC0 触发B延迟
+#define ADC1_DLYA     0x6000                                // ADC1 触发A延迟
+#define ADC1_DLYB     0x7fff                                // ADC1 触发B延迟
 
 
 #define ADC0A_DONE   0x01
@@ -266,9 +266,9 @@ uint8_t   CLM0;
 #define ADC1A_DONE   0x04
 #define ADC1B_DONE   0x08
 
-/////////////////////////默厩睰////////////////////////////////
+/////////////////////////以上为苏州大学添加的////////////////////////////////
 
-/*       ADCDAC PGA 硄笵Щ﹚竡        */
+/*       ADC　DAC PGA 通道宏定义        */
 #define DP0       DAD0 			//	ADC0				ADC1
 #define DP1       DAD1 			//	ADC0				ADC1
 #define DP        DAD2 			//	PGA0				PGA1
@@ -295,9 +295,9 @@ uint8_t   CLM0;
 #define DM0       AD19 			//	ADC0				ADC1
 #define DM1       AD20 			//	ADC0				ADC1 			
 #define OUT       AD23 			//	DAC0				DAC1
-#define Temperaturensor  AD26 		//  ず场放肚稰竟                 ず场放肚稰竟
-#define Bandgap   AD27 			//  盿回筿溃把σ                    盿回筿溃把σ
-#define Module_disabled    AD31         //   窽ノ家遏
+#define Temperaturensor  AD26 		//  内部温度传感器                 内部温度传感器
+#define Bandgap   AD27 			//  带隙电压参考                    带隙电压参考
+#define Module_disabled    AD31         //   禁用模块
 
 
 

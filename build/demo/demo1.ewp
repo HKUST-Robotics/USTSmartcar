@@ -1911,7 +1911,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>MK60DN512Zxxx10	Freescale MK60DN512Zxxx10</state>
+          <state>MK60DX256Zxxx10	Freescale MK60DX256Zxxx10</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -2107,28 +2107,11 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\src\common</state>
-          <state>$PROJ_DIR$\..\..\src\cpu</state>
+          <state>$PROJ_DIR$\..\..\src\common </state>
+          <state>$PROJ_DIR$\..\..\src\cpu </state>
           <state>$PROJ_DIR$\..\..\src\cpu\headers</state>
           <state>$PROJ_DIR$\..\..\src\app</state>
           <state>$PROJ_DIR$\..\..\src\drivers</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\accl</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\adc</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\AT24C02</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\exti</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\delay</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\FTM</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\gpio</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\i2c</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\linearccd</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\LED </state>
-          <state>$PROJ_DIR$\..\..\src\drivers\lptmr</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\mcg </state>
-          <state>$PROJ_DIR$\..\..\src\drivers\PIT</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\pmc</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\rtc</state>
-          <state>$PROJ_DIR$\..\..\src\drivers\uart </state>
-          <state>$PROJ_DIR$\..\..\src\drivers\wdog </state>
           <state>$PROJ_DIR$\..\..\src\platforms</state>
         </option>
         <option>
@@ -2494,7 +2477,7 @@
         </option>
         <option>
           <name>IlinkMapFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogFile</name>
@@ -2747,9 +2730,6 @@
   <group>
     <name>app</name>
     <file>
-      <name>$PROJ_DIR$\..\..\src\app\common.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\src\app\include.h</name>
     </file>
     <file>
@@ -2858,21 +2838,6 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\accl\accl.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\accl\accl.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\adc\adc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\adc\adc.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\adc\adc_cfg.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\src\drivers\delay\delay.c</name>
     </file>
     <file>
@@ -2903,22 +2868,7 @@
       <name>$PROJ_DIR$\..\..\src\drivers\gpio\gpio_cfg.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\i2c\i2c_cfg.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\src\drivers\LED\LED.C</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\linearccd\linearccd.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\src\drivers\linearccd\linearccd.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\src\drivers\lptmr\lptmr.c</name>

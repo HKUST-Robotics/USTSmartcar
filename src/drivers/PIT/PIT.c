@@ -1,51 +1,51 @@
-/******************** (C) COPYRIGHT 2011 偿碠Α秨祇 ********************
- * ゅン       PIT.c
- * 磞瓃         PIT㏄戳い耞璸竟﹚い耞
- * 称猔         
+/******************** (C) COPYRIGHT 2011 野火嵌入式开发工作室 ********************
+ * 文件名       ：PIT.c
+ * 描述         ：PIT周期中断计时器，定时中断
+ * 备注         ：
  *
- * 龟喷キ     偿kinetis秨祇狾
- * 畐セ       
- * 碠╰参     
+ * 实验平台     ：野火kinetis开发板
+ * 库版本       ：
+ * 嵌入系统     ：
  *
- *          
- * 瞊腳┍       http://firestm32.taobao.com
- * м砃や阶韭 http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
+ * 作者         ：
+ * 淘宝店       ：http://firestm32.taobao.com
+ * 技术支持论坛 ：http://www.ourdev.cn/bbs/bbs_list.jsp?bbs_id=1008
 **********************************************************************************/	
 
 
 #include "common.h"
-#include  "PIT.h"     //㏄戳い耞璸竟
+#include  "PIT.h"     //周期中断计时器
 
 /*************************************************************************
-*                             偿碠Α秨祇
+*                             野火嵌入式开发工作室
 *
-*  ㄧ计嘿pit_init
-*  弧PITn﹚い耞
-*  把计弧PITn        家遏腹PIT0~PIT3
-             cnt         ┑丁(虫bus牧㏄戳)
-*  ㄧ计礚
-*  э丁2012-1-24
-*  称    猔
+*  函数名称：pit_init
+*  功能说明：PITn定时中断
+*  参数说明：PITn        模块号（PIT0~PIT3）
+             cnt         延时时间(单位为bus时钟周期)
+*  函数返回：无
+*  修改时间：2012-1-24
+*  备    注：
 *************************************************************************/
 void pit_init(PITn pitn,u32 cnt)
 {
-    //PIT ノ琌 Bus Clock 羆絬繵瞯
-    //犯璸计 = 羆絬繵瞯 * 丁
+    //PIT 用的是 Bus Clock 总线频率
+    //溢出计数 = 总线频率 * 时间
 
-    /* 秨币牧*/
-    SIM_SCGC6       |=SIM_SCGC6_PIT_MASK;                             //ㄏPIT牧
+    /* 开启时钟*/
+    SIM_SCGC6       |=SIM_SCGC6_PIT_MASK;                             //使能PIT时钟
 
-    /* PIT家遏北 PIT Module Control Register (PIT_MCR) */
-    PIT_MCR         &=~(PIT_MCR_MDIS_MASK | PIT_MCR_FRZ_MASK );       //ㄏPIT﹚竟牧 秸刚家Α膥尿笲︽
+    /* PIT模块控制 PIT Module Control Register (PIT_MCR) */
+    PIT_MCR         &=~(PIT_MCR_MDIS_MASK | PIT_MCR_FRZ_MASK );       //使能PIT定时器时钟 ，调试模式下继续运行
 
-    /* ﹚竟更砞竚 Timer Load Value Register (PIT_LDVALn) */
-    PIT_LDVAL(pitn)  =cnt;                                           //砞竚犯い耞丁
+    /* 定时器加载值设置 Timer Load Value Register (PIT_LDVALn) */
+    PIT_LDVAL(pitn)  =cnt;                                           //设置溢出中断时间
 
-    //﹚丁TIF 竚 1 糶1碞穦睲0
-    PIT_Flag_Clear(pitn);                                             //睲い耞夹в
+    //定时时间到了后，TIF 置 1 。写1的时候就会清0
+    PIT_Flag_Clear(pitn);                                             //清中断标志位
 
-    /* ﹚竟北盚竟 Timer Control Register (PIT_TCTRL0) */
-    PIT_TCTRL(pitn) |=( PIT_TCTRL_TEN_MASK | PIT_TCTRL_TIE_MASK );    //ㄏ PITn﹚竟,秨PITnい耞
+    /* 定时器控制寄存器 Timer Control Register (PIT_TCTRL0) */
+    PIT_TCTRL(pitn) |=( PIT_TCTRL_TEN_MASK | PIT_TCTRL_TIE_MASK );    //使能 PITn定时器,并开PITn中断
 
-    enable_irq(pitn+68);			                                  //秨钡Μま竲IRQい耞
+    enable_irq(pitn+68);			                                  //开接收引脚的IRQ中断
 }

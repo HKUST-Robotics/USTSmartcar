@@ -4,7 +4,20 @@
 #include "common.h"
 #include "gpio.h"
 
-//LEDs on latest mainboard
+#if 0
+//配置开发板的LED硬件
+#define   LED_PORT      PORTD     //LED所在的端口
+typedef enum LEDn
+{
+  LED0    =      12,              //对应的引脚号
+  LED1    =      13,
+  LED2    =      14,
+  LED3    =      15
+}LEDn;
+
+#else
+
+//配置开发板的LED硬件
 #define   LED_PORT      PORTE     //LED所在的端口
 typedef enum LEDn
 {
@@ -13,13 +26,14 @@ typedef enum LEDn
   LED2    =      26,
   LED3    =      27
 }LEDn;
+#endif
 
 
 //LED亮灭状态宏定义
 typedef enum LED_status
 {
-  LED_ON  =   0,         //灯亮(对应低电平) Low = on
-  LED_OFF =   1           //灯暗(对应高电平) Pull High is LED off
+  LED_ON  =   0,         //灯亮(对应低电平)
+  LED_OFF =   1           //灯暗(对应高电平)
 }LED_status;
 
 
