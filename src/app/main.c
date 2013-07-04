@@ -3,6 +3,8 @@
 
 
 extern unsigned char data[ROW][COLUMN];
+extern unsigned char p_counter;
+
 /*-----------edge detection----------*/
 
 
@@ -18,13 +20,13 @@ int area_R = 0;
 #define MID_TURN 70
 #define MIN_TURN 30   //left
 float servo_kp = 4;
-float servo_kd = 3;
+float servo_kd = 9 ;
 float servo_error = 0;
 float servo_old_error = 0;
 float servo_output = 0;
 
 
-float area_cal(int area_L, int area_R){
+float area_cal(int area_L, int area_R, int *length){
 	const float p_percent = 0.8;
 	const float area_percent = 0.2;
 	int i;
@@ -57,6 +59,7 @@ float area_cal(int area_L, int area_R){
 	// else
 	// 	delta_p_square = -delta_p * delta_p;
 	delta_area = area_R - area_L;
+        *length = i;
 	if(i == 0)
 		return 0;
 	else
@@ -70,10 +73,49 @@ void servo_pid(float input){
 	return;
 }
 
+void print(int length){
+	if(p_counter%5 == 0){
+		p_counter = 1;
+
+	    DisableInterrupts;
+		for(int i = 0; i < ROW; i++)
+		{
+			int counter=0;
+			if(data[i][0] == 0) 
+				printf("0 ");
+			for (int j = 0; j < COLUMN; j++)
+			{
+				if(data[i][j-counter] == data[i][j])
+					counter++;
+				else
+				{
+					printf("%d ", counter);
+					counter = 1;
+				}
+			}
+			printf("%d ", counter);
+			printf("\n");
+		}
+		EnableInterrupts;
+		printf("\"s = %d; L = %d\"", (int)servo_error, length);
+/*		
+		printf("(");
+                for(int i  = 0; i < ROW && i != -1; i++)
+                {
+                  if(i>0) printf(",");
+                  printf("%d", midline[i]);
+                }
+			printf(")");
+*/			
+//      printf("\"%d\"", mid_line_sum / ROW);
+			printf("#");	
+		}
+}
+
 void initialization(void){
  //--------motor PWM----------
     gpio_init(PORTA,10,GPO, 1);
-    FTM_PWM_init (FTM1, CH1, 10000, 220);
+    FTM_PWM_init (FTM1, CH1, 10000, 230);
  
  //   FTM_PWM_Duty(FTM1, CH1, 400);
 
@@ -104,15 +146,16 @@ void main(void)
 	initialization();
 	EnableInterrupts
 	while(1){
-		float input = area_cal(area_L, area_R);
-		if(input != 0){
-		
+          int length;
+		float input = area_cal(area_L, area_R, &length);
+		if(input != 0){	
 		servo_pid(input);
 		if(servo_output > 40)
 			servo_output = 40;
 		if(servo_output < -40)
 			servo_output = -40;
 		FTM_PWM_Duty(FTM0, CH0, MID_TURN + servo_output);
+		print(length);
 		
 		}
 	}
