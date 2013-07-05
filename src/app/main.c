@@ -223,8 +223,7 @@ void ccd_all_pin_init(){
    //gpio_init(PORTD, 10, GPO, 1);   
    //gpio_init(PORTD, 9, GPO, 1);   
    
-   
-   //LED_init(); // To test ccd sampling function is operating
+   LED_init(); // To test ccd sampling function is operating
 } 
 
 void motor_init(void){
@@ -249,17 +248,10 @@ void motor_init(void){
   gpio_init(PORTD,9,GPO,0); // Right motor dir
   gpio_init(PORTD,7,GPO,0); // Left motor dir
   
-  printf("Before Interrupt");
-  
   DisableInterrupts;
-  
-  printf("Starting exti Interrupt");
   
   exti_init(PORTA,6,rising_up);    //inits left encoder interrupt capture
   exti_init(PORTA,7,rising_up);    //inits right encoder interrupt capture
   
   EnableInterrupts;
-  
-  printf("Finishing exti Interrupt");
-  
 }  

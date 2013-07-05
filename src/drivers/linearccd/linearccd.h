@@ -34,6 +34,9 @@ void ccd_output_sample_to_UART(char array[]);
 void ccd_shift_sample_to_manageable_position(char array[]);
 // shift sample position
 
+void ccd_scan_all_white_or_all_black_sample(char array[]);
+// scan while or black sample
+
 void ccd_scan_dummy_sample_result(char array[]);
 // scan the array value
 
@@ -43,6 +46,9 @@ void ccd_print(char array[]);
 /*********** CCD Direction PID decision ************/
 void ccd_recongize_left_right_edge_and_return_dir_error(char array[]);
 // algorithm 2: return dir error
+
+void calculate_two_edge_middle_distance(char array[]);
+// return edge distance
 
 void ccd_detect_current_left_right_edge_and_filter_middle_noise(char array[]);
 // algorithm 1: detect left and right edge for each sample and filter middle noise

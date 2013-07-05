@@ -3,35 +3,12 @@
 #include "linearccd.h"
 
 /*********** CCD startup variables ************/
-extern volatile int g_int_ccd_operation_state; // ccd operation state
 volatile int g_int_ccd_si_counter=0;
-int pre_set_si_time = 3;
+extern volatile int g_int_ccd_operation_state; // ccd operation state
+int pre_set_si_time=3;
 
 /*********** CCD related sample result & array ************/
 extern char g_char_ar_ccd_current_pixel[256];        // current sample
-
-
-extern char g_char_ar_ccd_previous_pixel[256];       // previous sample
-extern char g_char_ar_ccd_benchmark_one[256];        // benchmark 1
-extern char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
-
-/*********** CCD track decision related variables ***********/
-int g_int_ccd_benchmark_counter=0;                   // benchmark counter  
-int g_int_ccd_preset_benchmark_time=100;             // adjustable start benchmark time
-int g_int_ccd_benchmark_state=1;                     // default active 
-
-/************* Variables for direction PID : algorthm 1 *************/
-//extern char dir_pid_mode;
-//volatile int dir_error=0;
-//extern volatile int previous_dir_error;
-//extern u16 g_u16_ccd_middle_pos;
-//int left_bias_flag=0;
-//int right_bias_flag=0;
-
-/*********** CCD edge decision related variable ************/
-extern volatile u16 g_u16_ccd_left_pos;               // dynamic left edge scan
-extern volatile u16 g_u16_ccd_right_pos;             // dynamic right edge scan
-
 
 /************* Variables for control PID *************/
 volatile int control_omg=0, control_tilt=0;
@@ -41,7 +18,7 @@ volatile int motor_command_balance=0;
 volatile int speed_error=0;
 volatile int speed_offset=10; //adjustable value
 volatile int leftDir,rightDir=0;
-volatile int offset_speed=500;
+//volatile int offset_speed=500;
 
 /************* Variables for speed/position PID *************/
 volatile int speed_p,speed_i;
@@ -58,6 +35,9 @@ extern int current_dir_error;
 volatile int motor_command_turn_delta=0;
 void temp_ccd_output_debug_message_function(); //temporary
 u16 turn_kp=0;
+extern int current_edge_middle_distance;
+extern int previous_edge_middle_distance;
+int ccd_distance_value_before_upslope=0;
 
 /************* Variables for motor *************/
 extern volatile int g_u32encoder_lf;
@@ -66,10 +46,15 @@ extern volatile int motor_deadzone_left,motor_deadzone_right;
 extern u32 balance_centerpoint_set;
 volatile u8 motor_pid_counter=0;  //for the motor command loop
 
-/************* system loop counter*************/
+/************* system loop counter *************/
 u8 system_mode=0;
 int system_flag=0;
 u32 system_loop_tick=0;
+
+/************* Variables for slope case*************/
+int slope_state=0;
+int state_1_middle_distance=0;
+int slope_check_flag=0;
 
 void PIT0_IRQHandler(void){
   PIT_Flag_Clear(PIT0);       
@@ -109,12 +94,11 @@ void encoder_counter(void){
     if(PORTA_ISFR & (1<<n))
     {
       PORTA_ISFR  |= (1<<n);
-    
       if(rightDir==1){
         g_u32encoder_rt++; 
       }else{
        g_u32encoder_rt--; 
-     }
+      }
     }
 }
 
@@ -142,17 +126,9 @@ void pit3_system_loop(void){
         turn_kp = (291500/10000);    //dir kp
 
         motor_command_turn_delta = ((current_dir_arc_value_error * turn_kp ) - motor_turn_left)/pre_set_si_time;
+
+        //temp_ccd_output_debug_message_function();
         
-        /*
-        printf("\n current_dir_arc_value_error is: ");
-        printf("%d",current_dir_arc_value_error);
-        
-        
-        printf("\n motor_command_turn_delta  is: ");
-        printf("%d",motor_command_turn_delta );
-        
-        temp_ccd_output_debug_message_function();
-        */
       }
       
       motor_turn_left+=motor_command_turn_delta;
@@ -176,7 +152,6 @@ void pit3_system_loop(void){
       // when speed = 150 -- kp: 179.6046 && kd: 9.595 (8.10V)
       // when speed = 300 -- kp: 247.5396 && kd: 9.916 (1st: 7.81V, 2nd: 7.76V)
       // when speed = 400 -- kp: 292.8296 && kd: 10.130 (7.70V)
-      
       motor_command_balance= ((control_tilt)*2625396/10000) - (control_omg*9916/1000);
         
     system_mode=2;
@@ -197,20 +172,48 @@ void pit3_system_loop(void){
           //clears current encoder
           g_u32encoder_lf=g_u32encoder_rt=0;
           
+          
           /*
-          printf("car_speed is : ");
-          printf("%d",car_speed);
-          printf("\n");
+          if(car_speed>850){            //going downhill
+            speed_control_integral=-17500;
+            gpio_set(PORTE,24,0);
+            gpio_set(PORTE,25,0);
+            gpio_set(PORTE,26,0);
+          }*/
           
-          if(car_speed>900){
-            //going downhill
-            control_car_speed=-100;
-          }else{
-            control_car_speed=275;
-          }
-           */ 
+      /************ slope case handling ************/
+     //printf("\nslope state is : %d",slope_state);
+     //printf("\nspeed_control_integral is : %d",speed_control_integral);
+     
+     //printf("\nccd_distance_value_before_upslope is : %d", ccd_distance_value_before_upslope);
+     //printf("\nstate_1_middle_distance is : %d",state_1_middle_distance);
+     
+     
+     if( slope_check_flag == 1){ //5000ms
+        gpio_set(PORTE,25,0);
+            if(slope_state == 0){
+              if( speed_control_integral > 50000){
+                ccd_distance_value_before_upslope = current_edge_middle_distance;
+                slope_state = 1;
+                gpio_set(PORTE,26,0);
+              }
+            } else if(slope_state == 1){
+            
+              printf("\n%d",car_speed);  
+              
+              
+            state_1_middle_distance = (current_edge_middle_distance - ccd_distance_value_before_upslope);
+              if(state_1_middle_distance >= 20){
+               slope_state = 2; 
+               gpio_set(PORTE,24,0);
+               gpio_set(PORTE,26,1);
+              } 
+            }else if(slope_state == 2){
+               printf("\n%d",car_speed);  
+            }      
+    }
+          //printf("\n%d",speed_control_integral);
           
-          //control_car_speed = 40;
           speed_error = speed_offset + control_car_speed-car_speed; //optimal speed offset ~10
                       
           speed_p=speed_error*298000/10000;//speed kp ~29.8
@@ -272,7 +275,6 @@ void pit3_system_loop(void){
           FTM_PWM_Duty(FTM1, CH0, motor_command_left); //speed down
           FTM_PWM_Duty(FTM1, CH1, motor_command_right); //speed down          
           
-          
       //saves current encoder count to last count
       //g_u32encoder_lflast=g_u32encoder_lf;
       //g_u32encoder_rtlast=g_u32encoder_rt; 
@@ -281,15 +283,19 @@ void pit3_system_loop(void){
     break;
   }
     system_loop_tick++;
-    if( system_loop_tick == 3000){ //3000ms
+    if( system_loop_tick == 2000){ //3000ms
       control_car_speed = 300;   
     }
+    
+    if( system_loop_tick == 5000){ //5000ms
+      slope_check_flag = 1;
+    }
+    
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
 }
 
 void temp_ccd_output_debug_message_function(){
-  
   ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
   //ccd_output_edge_to_UART();
 }

@@ -28,29 +28,35 @@ char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
 char g_char_ar_ccd_benchmark_one[256];        // benchmark
 char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
-/*********** CCD edge decision related variable ************/
-u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
-u16 g_u16_ccd_right_pos=250;             // dynamic right edge scan
-u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
-
 /************* Variables for direction PID : algorthm 2 *************/
 int current_mid_error_pos=0;
 int last_sample_error_pos=0;
 
-int first_start_up_flag=1;
 int left_start_length=100;
 int right_start_length=100;
 
 int current_dir_error=0;
-int last_sample_dir_error=125;
+int last_sample_dir_error=124;
 
 int current_dir_arc_value_error=0;
 
-int detect_left_flag = 0;
-int detect_right_flag = 0;
+int detect_left_flag=0;
+int detect_right_flag=0;
 
 void output_algorithm_message(); //temp
 void output_last_sample_error_pos_message(); //temp
+
+int current_1st_left_edge=249;
+int current_1st_right_edge=0;
+
+int current_edge_middle_distance=0;
+int previous_edge_middle_distance=0;
+
+int decreace_trend_counter=0;
+
+/************ Special case variable ************/
+int all_white_smaple_flag=0;
+int all_black_smaple_flag=0;
 
 /*********** CCD basic library ************/
 void ccd_sampling(char array[], int state){  
@@ -97,16 +103,10 @@ void ccd_finish_one_sampling(char array[]){
      if(g_u16_ccd_sample_clock == 255){
           g_int_SI_state_flag = 0;          // SI Flag off
           g_int_sampling_state_flag = 0;    // Sampling flag off
-        
           ccd_shift_sample_to_manageable_position(array);
-          ccd_scan_dummy_sample_result(array);     
-          
-          if(g_int_trash_sample_flag == 1){
-          // do nth
-          }else{
+          ccd_scan_all_white_or_all_black_sample(array);
           //ccd_output_sample_to_UART(array);
           g_int_ccd_operation_state = 0;
-          }
      }       
 }
 
@@ -118,46 +118,55 @@ void ccd_output_sample_to_UART(char array[]){
   
 void ccd_shift_sample_to_manageable_position(char array[]){
       u16 i; 
-      for( i = 0 ; i < 252 ; i++){
-      array[i] = array[i+2];
+      for( i = 0 ; i < 250 ; i++){
+        array[i] = array[i+2];
       }
       
+      array[250] = 'X';
+      array[251] = 'X';
       array[252] = 'X';
       array[253] = 'X';
       array[254] = 'X';
       array[255] = 'X';
 }
 
-void ccd_scan_dummy_sample_result(char array[]){
-      u16 i; 
-      u16 dummy = 0;
-      g_int_trash_sample_flag = 0; // reset trash flag
-      
-      for( i = 0 ; i < 256 ; i++){
+void ccd_scan_all_white_or_all_black_sample(char array[]){
+  u16 i;
+  u16 white_counter=0;
+  u16 black_counter=0;
+  
+  all_white_smaple_flag= 0;
+  all_black_smaple_flag= 0;
+  
+  for( i = 0 ; i < 250 ; i++){
         if(array[i] == 'o'){
-          dummy++; }
-      }
-      
-      if(dummy == 255){              // if dummy sample detect
-        g_int_trash_sample_flag = 1; // trash flag ON
-      }
+          white_counter++; 
+        }else if(array[i] == 'W'){
+          black_counter++; 
+        }
+  }
+  
+  if(white_counter == 250){
+    all_white_smaple_flag = 1;
+  } else if (black_counter == 250){
+    all_black_smaple_flag = 1;
+  }
 }
 
 void ccd_print(char array[]){
       u16 i;  
-      for( i = 0 ; i < 252 ; i++){
+      for( i = 0 ; i < 250 ; i++){
         uart_putchar(UART3,array[i]); // print sample to UART
       }
 }
 
 /*********** CCD Direction PID decision ************/
-
 void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     
   volatile int i;
   
-  int current_1st_left_edge=250;
-  int current_1st_right_edge=0;
+  current_1st_left_edge=249;
+  current_1st_right_edge=0;
   
   int detect_left_flag = 0;
   int detect_right_flag = 0;
@@ -170,70 +179,76 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     }
   }
   
-  for( i = last_sample_error_pos ; i < 251 ; i++){  // scan from last_sample_error_pos to right edge
+  for( i = last_sample_error_pos ; i < 250 ; i++){  // scan from last_sample_error_pos to right edge
     if(array[i] == 'W'){
       current_1st_right_edge = i;
       detect_right_flag = 1;
-      i = 250;
+      i = 249;
     }
   }
-  
-  /*
-  if(first_start_up_flag == 0){
-      left_start_length = 125 - current_1st_left_edge;
-      right_start_length = current_1st_right_edge - 125;
-      first_start_up_flag = 1;
-     
-      printf("left_start_length is: ");
-      printf("%d",left_start_length);
-      printf("\n");
-      
-      printf("left_start_length is: ");
-      printf("%d",left_start_length);
-      printf("\n");
-  }
-  */
   
   /* -|||--------------------------------|||- */
   if(detect_left_flag == 1 && detect_right_flag == 1){
     current_mid_error_pos = (current_1st_left_edge + current_1st_right_edge) / 2;
   }
   
-    
   /* -|||--------------------------------|||-  
      ------------|||-------------------------
      ----------------------|||--------------- */
   else if(detect_left_flag == 1 && detect_right_flag == 0){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
-    if( current_1st_left_edge == 251){
-      current_mid_error_pos = 125;
+    if( current_1st_left_edge == 249){
+      current_mid_error_pos = 124;
     }
   }
   
-     /* -|||-------------------------------|||- 
+   /* -|||-------------------------------|||- 
       --------------------------|||---------- 
       -----------------|||------------------- */
   else if(detect_left_flag == 0 && detect_right_flag == 1){
     current_mid_error_pos = current_1st_right_edge - left_start_length;
     if(current_1st_right_edge == 0){
-      current_mid_error_pos = 125;
+      current_mid_error_pos = 124;
     }
   }
-    /* ---------------------------------------- */
+  
+   /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = 125;
+    current_mid_error_pos = 124;
   }
   
-  current_dir_error = (current_mid_error_pos - 125);
+   /* ---------------------------------------- 
+                       or
+      |||||||||||||||||||||||||||||||||||||||| (all white / all black) */
+  if(all_white_smaple_flag == 1 || all_black_smaple_flag == 1){
+    current_mid_error_pos = 124;
+  }
+  
+  current_dir_error = (current_mid_error_pos - 124);
   current_dir_arc_value_error = atan(current_dir_error*(0.005291005))*1000;
   
   //output_last_sample_error_pos_message();
   
-  if(first_start_up_flag == 1){
-    last_sample_error_pos = current_mid_error_pos;
-  }
+  last_sample_error_pos = current_mid_error_pos;
   
+  calculate_two_edge_middle_distance(array);
+  
+  //ccd_output_sample_to_UART(array);
   //output_algorithm_message();
+}
+
+void calculate_two_edge_middle_distance(char array[]){
+  
+  //printf("\ncurrent_1st_right_edge: %d", current_1st_right_edge);
+  //printf("\ncurrent_1st_left_edge: %d", current_1st_left_edge);
+  
+  current_edge_middle_distance = current_1st_right_edge - current_1st_left_edge;
+  
+  //printf("\nprevious_edge_middle_distance: %d",previous_edge_middle_distance);
+  //printf("\ncurrent_edge_middle_distance: %d",current_edge_middle_distance);
+
+  //compare_distance = current_edge_middle_distance - previous_edge_middle_distance;  
+  //previous_edge_middle_distance = current_edge_middle_distance;
 }
 
 
@@ -259,7 +274,6 @@ void output_algorithm_message(){ //temp
     printf("NO EDGE detected");
   }
     
-
   printf("****** ******\n");
   /*
   printf("current_1st_left_edge is: ");
@@ -286,10 +300,46 @@ void output_algorithm_message(){ //temp
   printf("%d",current_dir_arc_value_error);
   printf("\n");
   
-  
   printf("****** ******\n");
-
 }
+  
+
+/* dummy code
+void ccd_scan_dummy_sample_result(char array[]){
+      u16 i; 
+      u16 dummy = 0;
+      g_int_trash_sample_flag = 0; // reset trash flag
+      
+      for( i = 0 ; i < 256 ; i++){
+        if(array[i] == 'o'){
+          dummy++; }
+      }
+      
+      if(dummy == 255){              // if dummy sample detect
+        g_int_trash_sample_flag = 1; // trash flag ON
+      }
+}
+
+  if(first_start_up_flag == 0){
+      left_start_length = 125 - current_1st_left_edge;
+      right_start_length = current_1st_right_edge - 125;
+      first_start_up_flag = 1;
+     
+      printf("left_start_length is: ");
+      printf("%d",left_start_length);
+      printf("\n");
+      
+      printf("left_start_length is: ");
+      printf("%d",left_start_length);
+      printf("\n");
+  }
+
+
+*********** CCD edge decision related variable ***********
+u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
+u16 g_u16_ccd_right_pos=250;             // dynamic right edge scan
+u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
+
 
 void ccd_output_edge_to_UART(){
      uart_sendStr(UART3,"\n");
@@ -303,4 +353,5 @@ void ccd_output_edge_to_UART(){
      uart_sendStr(UART3,"\n");
 }
 
-  
+
+*/
