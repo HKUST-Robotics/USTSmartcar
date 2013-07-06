@@ -24,21 +24,20 @@ int g_int_ccd_operation_state=0;
 
 /*********** CCD related sample result & array ************/
 char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
-char g_char_ar_ccd_previous_pixel[256];       // previous pixel array
-char g_char_ar_ccd_benchmark_one[256];        // benchmark
-char g_char_ar_ccd_benchmark_reuse[256];      // reuseable benchmark
 
 /************* Variables for direction PID : algorthm 2 *************/
 int current_mid_error_pos=0;
 int last_sample_error_pos=0;
 
-int left_start_length=100;
-int right_start_length=100;
+#define left_start_length 100;
+#define right_start_length 100;
+
+//int left_start_length=100;
+//int right_start_length=100;
 
 int current_dir_error=0;
-int last_sample_dir_error=124;
-
 int current_dir_arc_value_error=0;
+int last_sample_dir_error=124;
 
 int detect_left_flag=0;
 int detect_right_flag=0;
@@ -52,9 +51,7 @@ int current_1st_right_edge=0;
 int current_edge_middle_distance=0;
 int previous_edge_middle_distance=0;
 
-int decreace_trend_counter=0;
-
-/************ Special case variable ************/
+/************ Special track case variable ************/
 int all_white_smaple_flag=0;
 int all_black_smaple_flag=0;
 
@@ -71,7 +68,7 @@ void ccd_sampling(char array[], int state){
 }
 
 void ccd_clock_turn(){
-    gpio_turn(PORTB, 9); // Gen 2 main board Clock
+    gpio_turn(PORTB, 9); // Gen 3 main board Clock
 }
 
 void ccd_trigger_SI(){
@@ -79,7 +76,7 @@ void ccd_trigger_SI(){
                g_int_SI_state_flag = 1;              // SI Flag on
                g_int_sampling_state_flag = 1;        // sampling Flag on
                g_u16_ccd_sample_clock = 0;
-               gpio_set(PORTB, 8, 1);                // Gen 2 main board SI rising edge
+               gpio_set(PORTB, 8, 1);                // Gen 3 main board SI rising edge
     }
 }
 
@@ -134,7 +131,6 @@ void ccd_scan_all_white_or_all_black_sample(char array[]){
   u16 i;
   u16 white_counter=0;
   u16 black_counter=0;
-  
   all_white_smaple_flag= 0;
   all_black_smaple_flag= 0;
   
@@ -164,12 +160,10 @@ void ccd_print(char array[]){
 void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     
   volatile int i;
-  
-  current_1st_left_edge=249;
-  current_1st_right_edge=0;
-  
   int detect_left_flag = 0;
   int detect_right_flag = 0;
+  current_1st_left_edge=249;
+  current_1st_right_edge=0;
   
   for( i = last_sample_error_pos ; i > 0 ; i--){ // scan from last_sample_error_pos to left edge
     if(array[i] == 'W'){
@@ -238,11 +232,10 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
 }
 
 void calculate_two_edge_middle_distance(char array[]){
+  current_edge_middle_distance = current_1st_right_edge - current_1st_left_edge;
   
   //printf("\ncurrent_1st_right_edge: %d", current_1st_right_edge);
   //printf("\ncurrent_1st_left_edge: %d", current_1st_left_edge);
-  
-  current_edge_middle_distance = current_1st_right_edge - current_1st_left_edge;
   
   //printf("\nprevious_edge_middle_distance: %d",previous_edge_middle_distance);
   //printf("\ncurrent_edge_middle_distance: %d",current_edge_middle_distance);
@@ -302,56 +295,3 @@ void output_algorithm_message(){ //temp
   
   printf("****** ******\n");
 }
-  
-
-/* dummy code
-void ccd_scan_dummy_sample_result(char array[]){
-      u16 i; 
-      u16 dummy = 0;
-      g_int_trash_sample_flag = 0; // reset trash flag
-      
-      for( i = 0 ; i < 256 ; i++){
-        if(array[i] == 'o'){
-          dummy++; }
-      }
-      
-      if(dummy == 255){              // if dummy sample detect
-        g_int_trash_sample_flag = 1; // trash flag ON
-      }
-}
-
-  if(first_start_up_flag == 0){
-      left_start_length = 125 - current_1st_left_edge;
-      right_start_length = current_1st_right_edge - 125;
-      first_start_up_flag = 1;
-     
-      printf("left_start_length is: ");
-      printf("%d",left_start_length);
-      printf("\n");
-      
-      printf("left_start_length is: ");
-      printf("%d",left_start_length);
-      printf("\n");
-  }
-
-
-*********** CCD edge decision related variable ***********
-u16 g_u16_ccd_left_pos=0;                // dynamic left edge scan
-u16 g_u16_ccd_right_pos=250;             // dynamic right edge scan
-u16 g_u16_ccd_middle_pos=0;              // dynamic middle point 
-
-
-void ccd_output_edge_to_UART(){
-     uart_sendStr(UART3,"\n");
-     uart_sendStr(UART3,"\n");
-     uart_sendStr(UART3,"Left edge detect position: ");
-     printf("%d", g_u16_ccd_left_pos);
-     uart_sendStr(UART3,"\n");
-     
-     uart_sendStr(UART3,"Right edge detect position: ");
-     printf("%d", g_u16_ccd_right_pos);
-     uart_sendStr(UART3,"\n");
-}
-
-
-*/
