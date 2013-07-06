@@ -20,7 +20,7 @@ Global Varaible
 *************************************************************************/
 
 char g_char_mode=0;                 // debug and testing mode
-volatile u32 g_u32_systemclock=0;   // systemclock counter
+//volatile u32 g_u32_systemclock=0;   // systemclock counter
 
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
 volatile int g_u32encoder_lf=0;
