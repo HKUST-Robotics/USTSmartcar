@@ -28,11 +28,11 @@ speed = 600 -- kp: 368.4096 && kd: 10.558 (7.936V)
 speed = 700 -- kp: 403.6996 && kd: 10.94  (7.948V)
 */
 
-#define balance_kp 4036996
+#define balance_kp 3684096
 #define balance_kp_out_of 10000
 
-#define balance_kd 10940
-#define balance_kd_out_of 1000
+#define balance_kd 105580
+#define balance_kd_out_of 10000
 
 #define speed_kp 298000
 #define speed_kp_out_of 10000
@@ -310,7 +310,7 @@ void pit3_system_loop(void){
    /************ ticks related handling ************/
     system_loop_tick++;
     if( system_loop_tick == 2000){ //2000ms
-      control_car_speed = 700;   
+      control_car_speed = 600;   
     }
     
     if( system_loop_tick == 5000){ //5000ms
