@@ -51,6 +51,8 @@ void main()
 
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our flashed bluetooth
+ 
+  
   
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
@@ -247,6 +249,9 @@ void motor_init(void){
  
   gpio_init(PORTD,9,GPO,0); // Right motor dir
   gpio_init(PORTD,7,GPO,0); // Left motor dir
+  
+  gpio_init(PORTC,4,GPI_UP,1);//encoder rt dir
+  gpio_init(PORTC,5,GPI_UP,1);//encoder lt dir
   
   DisableInterrupts;
   

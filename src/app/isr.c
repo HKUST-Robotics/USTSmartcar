@@ -25,7 +25,7 @@ speed = 150 -- kp: 179.6046 && kd: 9.595  (8.10V)
 speed = 300 -- kp: 262.5396 && kd: 9.916  (7.76 ~ 8.00V )
 speed = 450 -- kp: 315.4746 && kd: 10.237 (7.967V)
 speed = 600 -- kp: 368.4096 && kd: 10.558 (7.936V)
-speed = 700 -- kp: 403.6996 && kd: 10.94  (7.948V)
+speed = 700 -- kp: 403.6996 && kd: 10.94  (7.948V) // not reliable
 */
 
 #define balance_kp 3684096
@@ -55,7 +55,7 @@ volatile int motor_command_turn_delta=0;
 extern int current_edge_middle_distance;
 int ccd_distance_value_before_upslope=0;
 void temp_ccd_output_debug_message_function(); //temporary
-#define turn_kp 150500
+#define turn_kp 130500
 #define turn_kp_out_of 10000
 
 /************* Variables for motor *************/
@@ -104,7 +104,8 @@ void encoder_counter(void){
     if(PORTA_ISFR & (1<<n)) 
     {
       PORTA_ISFR  |= (1<<n);
-      if(leftDir==1){
+      
+      if(GPIO_GET_1bit(PORTC,5)==1){
         g_u32encoder_lf++;
       }else{
         g_u32encoder_lf--;
@@ -115,7 +116,7 @@ void encoder_counter(void){
     if(PORTA_ISFR & (1<<n))
     {
       PORTA_ISFR  |= (1<<n);
-      if(rightDir==1){
+      if(GPIO_GET_1bit(PORTC,4)==0){
         g_u32encoder_rt++; 
       }else{
        g_u32encoder_rt--; 
@@ -150,9 +151,8 @@ void pit3_system_loop(void){
       if(motor_pid_counter<33){
         // do nth
         }else{
-        motor_command_turn_delta = ((current_dir_arc_value_error * turn_kp/turn_kp_out_of ) - motor_turn_left)/33;
+        motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of  - motor_turn_left)/33;
       }
-      
       
       motor_turn_left+=motor_command_turn_delta;
       motor_turn_right-=motor_command_turn_delta;      
@@ -167,7 +167,7 @@ void pit3_system_loop(void){
       //printf("\ncontrol tilt:%d",control_tilt);
       //printf("\n%d",control_tilt);
                                      
-      motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - (control_omg*balance_kd/balance_kd_out_of);
+      motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
         
     system_mode=2;
     break;
@@ -182,7 +182,7 @@ void pit3_system_loop(void){
           
           //stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
-          
+          printf("\nCarspeed:%d",car_speed);
         /************ clears current encoder ************/
           g_u32encoder_lf=g_u32encoder_rt=0;          
           
@@ -194,7 +194,6 @@ void pit3_system_loop(void){
             gpio_set(PORTE,26,0);
           }*/
           
-        /************ slope case handling ************/
        //printf("\nslope state is : %d",slope_state);
        //printf("\nspeed_control_integral is : %d",speed_control_integral);
        
@@ -203,7 +202,8 @@ void pit3_system_loop(void){
        
        //printf("\ncurrent_edge_middle_distance is: %d", current_edge_middle_distance ); 
        
-          
+     
+     /************ slope case handling ************/     
      if( slope_startup_flag == 1){ //5000ms
         gpio_set(PORTE,25,0);
             if(slope_state == 0){

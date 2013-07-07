@@ -36,7 +36,7 @@ void gpio_init (PORTx portx, u8 n,GPIO_CFG cfg,u8 data)
     ASSERT( (n < 32u)  && (data < 2u) );           //使用断言检查输入、电平 是否为1bit
 
     //选择功能脚 PORTx_PCRx ，每个端口都有个寄存器 PORTx_PCRx
-    PORT_PCR_REG(PORTX[portx],n)=(0|PORT_PCR_MUX(1)/*|cfg*/);
+    PORT_PCR_REG(PORTX[portx],n)=(0|PORT_PCR_MUX(1)|cfg);
 
     //端口方向控制输入还是输出
     if( ( (cfg&0x01) == GPI) || (cfg == GPI_UP) ||     (cfg == GPI_UP_PF)      )

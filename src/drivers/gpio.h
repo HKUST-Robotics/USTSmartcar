@@ -34,7 +34,7 @@ typedef enum GPIO_CFG
     GPO         =1,                           //定义管脚输出方向
 
     GPI_DOWN    =0x02,                        //输入下拉              PORTx_PCRn需要PE=1，PS=0
-    GPI_UP      =0x03,                        //输入上拉              PORTx_PCRn需要PE=1，PS=1
+    GPI_UP      =0x03,                        //输入上拉              PORTx_PCRn 需要PE=1，PS=1
     GPI_PF      =0x10,                        //输入，带无源滤波器,滤波范围：10 MHz ~ 30 MHz 。不支持高速接口（>=2MHz）  0b10000           Passive Filter Enable
     GPI_DOWN_PF =GPI_DOWN | GPI_PF ,          //输入下拉，带无源滤波器
     GPI_UP_PF   =GPI_UP   | GPI_PF ,          //输入上拉，带无源滤波器

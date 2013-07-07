@@ -43,7 +43,6 @@ int detect_left_flag=0;
 int detect_right_flag=0;
 
 void output_algorithm_message(); //temp
-void output_last_sample_error_pos_message(); //temp
 
 int current_1st_left_edge=249;
 int current_1st_right_edge=0;
@@ -160,8 +159,8 @@ void ccd_print(char array[]){
 void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     
   volatile int i;
-  int detect_left_flag = 0;
-  int detect_right_flag = 0;
+  detect_left_flag = 0;
+  detect_right_flag = 0;
   current_1st_left_edge=249;
   current_1st_right_edge=0;
   
@@ -216,18 +215,17 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
       |||||||||||||||||||||||||||||||||||||||| (all white / all black) */
   if(all_white_smaple_flag == 1 || all_black_smaple_flag == 1){
     current_mid_error_pos = 124;
+    //printf("\n*** All white or all black cases ***");
   }
   
   current_dir_error = (current_mid_error_pos - 124);
   current_dir_arc_value_error = atan(current_dir_error*(0.005291005))*1000;
   
-  //output_last_sample_error_pos_message();
-  
+  //printf("\n****** ******\n");
+  //printf("\nlast_sample_error_pos is : %d", last_sample_error_pos);
   last_sample_error_pos = current_mid_error_pos;
   
   calculate_two_edge_middle_distance(array);
-  
-  //ccd_output_sample_to_UART(array);
   //output_algorithm_message();
 }
 
@@ -244,20 +242,15 @@ void calculate_two_edge_middle_distance(char array[]){
   //previous_edge_middle_distance = current_edge_middle_distance;
 }
 
-
-void output_last_sample_error_pos_message(){ //temp
-  printf("\n");
-  printf("*** ***\n");
-  printf("last_sample_error_pos is: ");
-  printf("%d",last_sample_error_pos);
-  printf("\n");
-}
-
 void output_algorithm_message(){ //temp
+  
+  printf("\ncurrent_mid_error_pos is: %d", current_mid_error_pos);
+  printf("\n****** ******\n");
   
   ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
   
-  if(detect_left_flag == 1 && detect_right_flag == 0){
+  printf("\n\n****** ******\n");
+  if(detect_left_flag == 1 && detect_right_flag == 1){
     printf("Both side detected : STRAIGHT line");
   } else if(detect_left_flag == 1 && detect_right_flag == 0){ 
     printf("Left side detected : ONE-EDGE");
@@ -265,33 +258,15 @@ void output_algorithm_message(){ //temp
     printf("Right side detected : ONE-EDGE");
   } else if(detect_left_flag == 0 && detect_right_flag == 0){
     printf("NO EDGE detected");
-  }
+  } 
     
-  printf("****** ******\n");
-  /*
-  printf("current_1st_left_edge is: ");
-  printf("%d",current_1st_left_edge);
-  printf("\n");
+  printf("\n****** ******");
+
+  printf("\ncurrent_1st_right_edge: %d", current_1st_right_edge);
+  printf("\ncurrent_1st_left_edge: %d", current_1st_left_edge);
   
-  printf("current_1st_right_edge is: ");
-  printf("%d",current_1st_right_edge);
-  printf("\n");
-  */
-  printf("****** ******\n");
+  printf("\n****** ******");
   
-  printf("current_mid_error_pos is: ");
-  printf("%d",current_mid_error_pos);
-  printf("\n");
-  
-  printf("****** ******\n");
-  
-  printf("current_dir_error is: ");
-  printf("%d",current_dir_error);
-  printf("\n");
-  
-  printf("current_dir_arc_value_error is: ");
-  printf("%d",current_dir_arc_value_error);
-  printf("\n");
-  
-  printf("****** ******\n");
+  printf("\ncurrent_dir_error is: %d", current_dir_error);
+  printf("\ncurrent_dir_arc_value_error is: %d", current_dir_arc_value_error);
 }
