@@ -118,8 +118,8 @@ void main()
         uart_sendStr(UART3,"The mode now is 4: encoder test");
              
         DisableInterrupts;
-        exti_init(PORTA,8,rising_up);    //inits left encoder interrupt capture
-        exti_init(PORTA,9,rising_up);    //inits right encoder interrupt capture
+        exti_init(PORTA,6,rising_up);    //inits left encoder interrupt capture
+        exti_init(PORTA,7,rising_up);    //inits right encoder interrupt capture
              
         pit_init_ms(PIT1,500);                 //periodic interrupt every 500ms
      
