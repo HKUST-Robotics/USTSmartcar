@@ -26,7 +26,7 @@ int g_int_ccd_operation_state=0;
 char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 
 /************* Variables for direction PID : algorthm 2 *************/
-int current_mid_error_pos=0;
+int current_mid_error_pos=124;
 int last_sample_error_pos=0;
 
 #define left_start_length 100;
@@ -190,9 +190,11 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
      ----------------------|||--------------- */
   else if(detect_left_flag == 1 && detect_right_flag == 0){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
+    
     if( current_1st_left_edge == 249){
       current_mid_error_pos = 124;
     }
+    
   }
   
    /* -|||-------------------------------|||- 
@@ -200,6 +202,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
       -----------------|||------------------- */
   else if(detect_left_flag == 0 && detect_right_flag == 1){
     current_mid_error_pos = current_1st_right_edge - left_start_length;
+    
     if(current_1st_right_edge == 0){
       current_mid_error_pos = 124;
     }
@@ -207,14 +210,14 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = 124;
+    //current_mid_error_pos = 124;
   }
   
    /* ---------------------------------------- 
                        or
       |||||||||||||||||||||||||||||||||||||||| (all white / all black) */
   if(all_white_smaple_flag == 1 || all_black_smaple_flag == 1){
-    current_mid_error_pos = 124;
+    //current_mid_error_pos = 124;
     //printf("\n*** All white or all black cases ***");
   }
   
