@@ -6,7 +6,9 @@
 volatile int g_int_ccd_si_counter=0;
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 int pre_set_si_time=3;                         // si active time: e.g. 3 means 3ms * 3 system loop = 9ms
-int ccd_debug_flag=0;                          // 0: off, 1: on
+int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
+int ccd_print_flag=0;                          // 0: off, 1: on
+int ccd_compressed_print_flag=0;               // 0: off, 1: on
 
 /*********** CCD related sample result & array ************/
 extern char g_char_ar_ccd_current_pixel[256];  // current sample
@@ -142,9 +144,18 @@ void pit3_system_loop(void){
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
         ccd_recongize_left_right_edge_and_return_dir_error(g_char_ar_ccd_current_pixel);        
                 
-        if(ccd_debug_flag == 1){
+        if(ccd_debug_print_all_message_flag == 1){ // print out all ccd message to UART
           temp_ccd_output_debug_message_function();  
         }
+        
+        if(ccd_print_flag == 1){                   // print out 250 pixle raw data 
+          ccd_print(g_char_ar_ccd_current_pixel);
+        }
+        
+        if(ccd_compressed_print_flag == 1){        // print out compressed ccd message to UART
+          ccd_compressed_print(g_char_ar_ccd_current_pixel);
+        }
+        
       }
       
       
@@ -164,11 +175,9 @@ void pit3_system_loop(void){
                                                 // offset
       control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1225)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
-      //printf("\ncontrol tilt:%d",control_tilt);
-      //printf("\n%d",control_tilt);
-                                     
       motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
-        
+      //printf("\ncontrol tilt:%d",control_tilt);
+      
     system_mode=2;
     break;
     
@@ -182,28 +191,11 @@ void pit3_system_loop(void){
           
           //stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
-          printf("\nCarspeed:%d",car_speed);
+          //printf("\nCarspeed:%d",car_speed);
         /************ clears current encoder ************/
           g_u32encoder_lf=g_u32encoder_rt=0;          
           
-          /*
-          if(car_speed>850){            //going downhill
-            speed_control_integral=-17500;
-            gpio_set(PORTE,24,0);
-            gpio_set(PORTE,25,0);
-            gpio_set(PORTE,26,0);
-          }*/
-          
-       //printf("\nslope state is : %d",slope_state);
-       //printf("\nspeed_control_integral is : %d",speed_control_integral);
-       
-       //printf("\nccd_distance_value_before_upslope is : %d", ccd_distance_value_before_upslope);
-       //printf("\nstate_1_middle_distance is : %d",state_1_middle_distance);
-       
-       //printf("\ncurrent_edge_middle_distance is: %d", current_edge_middle_distance ); 
-       
-     
-     /************ slope case handling ************/     
+       /************ slope case handling ************/     
      if( slope_startup_flag == 1){ //5000ms
         gpio_set(PORTE,25,0);
             if(slope_state == 0){
@@ -230,19 +222,9 @@ void pit3_system_loop(void){
                   gpio_set(PORTE,26,1);
                 }
               }              
-               
-              //printf("\n%d",car_speed); 
-              
-              /*state_1_middle_distance = (current_edge_middle_distance - ccd_distance_value_before_upslope);
-              if(state_1_middle_distance >= 20){
-               slope_state = 2; 
-               gpio_set(PORTE,24,0);
-               gpio_set(PORTE,26,1);
-              } 
-              */
               
             }else if(slope_state == 2){
-               //printf("\n%d",car_speed);  
+              
             }      
     }
           
@@ -322,5 +304,5 @@ void pit3_system_loop(void){
 }
 
 void temp_ccd_output_debug_message_function(){
-  ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
+  output_algorithm_message();
 }

@@ -27,7 +27,7 @@ char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 
 /************* Variables for direction PID : algorthm 2 *************/
 int current_mid_error_pos=124;
-int last_sample_error_pos=0;
+int last_sample_error_pos=124;
 
 #define left_start_length 100;
 #define right_start_length 100;
@@ -151,8 +151,18 @@ void ccd_scan_all_white_or_all_black_sample(char array[]){
 void ccd_print(char array[]){
       u16 i;  
       for( i = 0 ; i < 250 ; i++){
-        uart_putchar(UART3,array[i]); // print sample to UART
+        //uart_putchar(UART3,array[i]); // print sample to UART
+        printf("%c",array[i]); // print sample to UART
       }
+       printf("\n");
+}
+
+void ccd_compressed_print(char array[]){
+      u16 i;  
+      for( i = 0 ; i < 250 ; i+=4){
+        printf("%c",array[i]); // print sample to UART
+      }
+      printf("\n");
 }
 
 /*********** CCD Direction PID decision ************/
@@ -190,10 +200,10 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
      ----------------------|||--------------- */
   else if(detect_left_flag == 1 && detect_right_flag == 0){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
-    
+    /*
     if( current_1st_left_edge == 249){
       current_mid_error_pos = 124;
-    }
+    }*/
     
   }
   
@@ -202,15 +212,15 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
       -----------------|||------------------- */
   else if(detect_left_flag == 0 && detect_right_flag == 1){
     current_mid_error_pos = current_1st_right_edge - left_start_length;
-    
+    /*
     if(current_1st_right_edge == 0){
       current_mid_error_pos = 124;
-    }
+    }*/
   }
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    //current_mid_error_pos = 124;
+    current_mid_error_pos = 124;
   }
   
    /* ---------------------------------------- 
@@ -234,15 +244,6 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
 
 void calculate_two_edge_middle_distance(char array[]){
   current_edge_middle_distance = current_1st_right_edge - current_1st_left_edge;
-  
-  //printf("\ncurrent_1st_right_edge: %d", current_1st_right_edge);
-  //printf("\ncurrent_1st_left_edge: %d", current_1st_left_edge);
-  
-  //printf("\nprevious_edge_middle_distance: %d",previous_edge_middle_distance);
-  //printf("\ncurrent_edge_middle_distance: %d",current_edge_middle_distance);
-
-  //compare_distance = current_edge_middle_distance - previous_edge_middle_distance;  
-  //previous_edge_middle_distance = current_edge_middle_distance;
 }
 
 void output_algorithm_message(){ //temp
@@ -251,6 +252,8 @@ void output_algorithm_message(){ //temp
   printf("\n****** ******\n");
   
   ccd_output_sample_to_UART(g_char_ar_ccd_current_pixel);
+  //ccd_compressed_print(g_char_ar_ccd_current_pixel);
+  //ccd_print(g_char_ar_ccd_current_pixel);
   
   printf("\n\n****** ******\n");
   if(detect_left_flag == 1 && detect_right_flag == 1){
@@ -263,12 +266,12 @@ void output_algorithm_message(){ //temp
     printf("NO EDGE detected");
   } 
     
-  printf("\n****** ******");
+  printf("\n****** LEFT & RIGHT edge position ******");
 
   printf("\ncurrent_1st_right_edge: %d", current_1st_right_edge);
   printf("\ncurrent_1st_left_edge: %d", current_1st_left_edge);
   
-  printf("\n****** ******");
+  printf("\n****** DIR ERROR ******");
   
   printf("\ncurrent_dir_error is: %d", current_dir_error);
   printf("\ncurrent_dir_arc_value_error is: %d", current_dir_arc_value_error);

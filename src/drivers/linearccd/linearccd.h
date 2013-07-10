@@ -40,6 +40,9 @@ void ccd_scan_all_white_or_all_black_sample(char array[]);
 void ccd_print(char array[]); 
 // function prints out sample array to bluetooth
 
+void ccd_compressed_print(char array[]);
+// prints out compressed sample to bluetooth
+
 /*********** CCD Direction PID decision ************/
 void ccd_recongize_left_right_edge_and_return_dir_error(char array[]);
 // algorithm 2: analyze ccd sample and return dir error to system loop

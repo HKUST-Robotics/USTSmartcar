@@ -15,12 +15,8 @@
 #include "include.h"
 #include "stdlib.h"
 
-/*************************************************************************
-Global Varaible
-*************************************************************************/
-
+/************ Global Varaible ************/
 char g_char_mode=0;                 // debug and testing mode
-//volatile u32 g_u32_systemclock=0;   // systemclock counter
 
 //these two increment when pulse is received from encoder, zeroed when timed cycle PIT1 comes around
 volatile int g_u32encoder_lf=0;
@@ -36,15 +32,12 @@ extern volatile int control_tilt;
 
 u16 motor_test=0;
 
-u8 todis[];//for sprintf usage
+//u8 todis[];//for sprintf usage
 
-/*************************************************************************
-Function header
-*************************************************************************/
+/************ Function header ************/
 void ccd_interrupts_init(void);
 void ccd_all_pin_init(void);
-//move this into motor.h later
-void motor_init(void);
+void motor_init(void);  //move this into motor.h later
 
 void main()
 {   
@@ -52,9 +45,6 @@ void main()
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our flashed bluetooth
  
-  
-  
-  
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
     
