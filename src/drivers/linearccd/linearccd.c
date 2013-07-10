@@ -13,6 +13,12 @@ Edited by John Ching
 #include  "linearccd.h"
 #include  "math.h"
 
+
+/*********** CCD startup variables ************/
+#define left_start_length 10;
+#define right_start_length 10;
+int ccd_mid_pos = 132;
+
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
 
@@ -29,11 +35,6 @@ char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 int current_mid_error_pos=124;
 int last_sample_error_pos=124;
 
-#define left_start_length 100;
-#define right_start_length 100;
-
-//int left_start_length=100;
-//int right_start_length=100;
 
 int current_dir_error=0;
 int current_dir_arc_value_error=0;
@@ -220,7 +221,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = 124;
+    current_mid_error_pos = ccd_mid_pos;
   }
   
    /* ---------------------------------------- 
@@ -231,7 +232,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     //printf("\n*** All white or all black cases ***");
   }
   
-  current_dir_error = (current_mid_error_pos - 124);
+  current_dir_error = (current_mid_error_pos - ccd_mid_pos);
   current_dir_arc_value_error = atan(current_dir_error*(0.005291005))*1000;
   
   //printf("\n****** ******\n");
