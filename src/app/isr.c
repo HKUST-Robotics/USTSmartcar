@@ -57,7 +57,7 @@ volatile int motor_command_turn_delta=0;
 extern int current_edge_middle_distance;
 int ccd_distance_value_before_upslope=0;
 void temp_ccd_output_debug_message_function(); //temporary
-#define turn_kp 130500
+#define turn_kp 120500
 #define turn_kp_out_of 10000
 
 /************* Variables for motor *************/
