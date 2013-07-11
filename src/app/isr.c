@@ -9,12 +9,13 @@ int ccd_compressed_print_flag=0;               // 0: off, 1: on
 int only_balance_pid_mode=0;                   // 0: off, 1: on
 
 /*********** startup PID values ************/
-int speed_array[3]      = {300    , 900    , 0};
-int balance_kp_array[3] = {3154746, 4025000, 0};
-int balance_kd_array[3] = {99160  , 123600 , 0};
-int speed_kp_array[3]   = {297000 , 297000 , 0};
-int speed_ki_array[3]   = {49500  , 49500  , 0};
-int turn_kp_array[3]    = {120500 , 120500 , 0};
+int speed_array[3]          = {300    , 900    , 0};
+int balance_kp_array[3]     = {3154746, 4025000, 0};
+int balance_kd_array[3]     = {99160  , 123600 , 0};
+int balance_offset_array[3] = {1253   , 1253   , 0};
+int speed_kp_array[3]       = {297000 , 297000 , 0};
+int speed_ki_array[3]       = {49500  , 49500  , 0};
+int turn_kp_array[3]        = {120500 , 120500 , 0};
 int run_speed_mode = 0; // vaild input : 0 , 1 , 2
 
 /*********** initialize balance PID ************/
@@ -24,7 +25,7 @@ int balance_kp = 0;
 int balance_kd = 0;
 #define balance_kd_out_of 10000
 
-#define balance_offset 1342
+int balance_offset = 0;
 
 /*********** initialize speed PID ************/
 int speed_kp = 0;
@@ -80,9 +81,10 @@ extern volatile int motor_deadzone_left,motor_deadzone_right;
 extern u32 balance_centerpoint_set;
 volatile u8 motor_pid_counter=0;  //for the motor command loop
 
-/************* system loop counter *************/
+/************* Variables for system *************/
 u8 system_mode=0;
 u32 system_loop_tick=0;
+int end_of_track_flag=0;
 
 void PIT0_IRQHandler(void){
   PIT_Flag_Clear(PIT0);       
@@ -172,14 +174,14 @@ void pit3_system_loop(void){
       
       motor_turn_left+=motor_command_turn_delta;
       motor_turn_right-=motor_command_turn_delta;
-      
+     
     system_mode=1;
     break;
     
     /****** Case 1: get gyro & accl values + balance pid ~140us ******/
     case 1:
                                                 // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset)+(balance_centerpoint_set/10);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset);//+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
       //printf("\ncontrol tilt:%d",control_tilt);
@@ -257,10 +259,14 @@ void pit3_system_loop(void){
             motor_command_right=8000;
           }
            
-        /************ excute motor pwm with PID ************/   
+        /************ excute motor pwm with PID ************/  
+        if(end_of_track_flag == 0){
           FTM_PWM_Duty(FTM1, CH0, motor_command_left); 
           FTM_PWM_Duty(FTM1, CH1, motor_command_right);          
-          
+        } else if (end_of_track_flag == 1){
+          FTM_PWM_Duty(FTM1, CH0, 0); 
+          FTM_PWM_Duty(FTM1, CH1, 0); 
+        }
           //saves current encoder count to last count
           //g_u32encoder_lflast=g_u32encoder_lf;
           //g_u32encoder_rtlast=g_u32encoder_rt; 
@@ -277,18 +283,24 @@ void pit3_system_loop(void){
   
     if( system_loop_tick == 2000){ //inital startup time , 2000ms
             
+      /*** balance ***/
       balance_kp = balance_kp_array[run_speed_mode];      
       balance_kd = balance_kd_array[run_speed_mode];
-        
+      balance_offset = balance_offset_array[run_speed_mode];
+      
+      /*** speed ***/
       speed_kp =  speed_kp_array[run_speed_mode];    
       speed_ki =  speed_ki_array[run_speed_mode];
-        
+       
+      /*** turn***/
       turn_kp = turn_kp_array[run_speed_mode];    
+      
+      /*** speed ***/
       control_car_speed = speed_array[run_speed_mode]; 
       
-      gpio_set(PORTE,27,1);
+      gpio_set(PORTE,27,1);  /*** initial time end ***/
    
-    } else if ( system_loop_tick < 2000){
+    } else if ( system_loop_tick < 2000){ /*** Speed selection ***/
       
           /* SW physical position
             -----
@@ -316,6 +328,17 @@ void pit3_system_loop(void){
         }
         
         gpio_set(PORTE,27,0);
+        control_car_speed = 0;
+        
+    }
+    
+    
+    if( system_loop_tick >= 10000){ // 10000ms
+      
+        if (gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 23) == 1){
+           printf("end of track\n"); 
+           end_of_track_flag = 1;
+         }
     }
        
     PIT_Flag_Clear(PIT3);

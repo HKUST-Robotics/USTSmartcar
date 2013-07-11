@@ -35,14 +35,15 @@ u16 motor_test=0;
 /************ Function header ************/
 void ccd_interrupts_init(void);
 void ccd_all_pin_init(void);
-void motor_init(void);  //move this into motor.h later
+void motor_init(void); 
+void light_sensor_init();
 
 void main()
 {   
 
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our flashed bluetooth
- 
+  
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
     
@@ -211,8 +212,16 @@ void ccd_all_pin_init(){
    
    LED_init(); // To test ccd sampling function is operating
    
-   gpio_set(PORTE,26,0);
+   light_sensor_init();
+   
+   gpio_set(PORTE,26,0); // defatul speed mode = 0
 } 
+
+void light_sensor_init(){
+   gpio_init(PORTB, 21, GPO, 1);    //PTB21 , Right
+   gpio_init(PORTB, 22, GPO, 1);    //PTB22 , Middle
+   gpio_init(PORTB, 23, GPI, 1);    //PTB23 , Left
+}
 
 void motor_init(void){
   

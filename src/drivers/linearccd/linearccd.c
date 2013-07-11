@@ -16,9 +16,13 @@ Edited by John Ching
 extern int encoder_turn_error;
 
 /*********** CCD startup variables ************/
-#define left_start_length 10;
-#define right_start_length 10;
-int ccd_mid_pos = 138;
+
+/*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
+#define left_start_length 110;  
+#define right_start_length 110; 
+
+/*** 中心位 Variable，愈大愈接近Left edge，愈細愈接近Right edge ***/
+int ccd_mid_pos = 135;         
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
@@ -257,6 +261,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
 void calculate_two_edge_middle_distance(char array[]){
   current_edge_middle_distance = current_1st_right_edge - current_1st_left_edge;
 }
+
 
 void output_algorithm_message(){ //temp
   
