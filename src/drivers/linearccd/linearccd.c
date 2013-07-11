@@ -13,11 +13,12 @@ Edited by John Ching
 #include  "linearccd.h"
 #include  "math.h"
 
+extern int encoder_turn_error;
 
 /*********** CCD startup variables ************/
 #define left_start_length 10;
 #define right_start_length 10;
-int ccd_mid_pos = 132;
+int ccd_mid_pos = 138;
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
@@ -88,6 +89,12 @@ void ccd_detect_track(char array[]){
    // if CCD receives white (2nd gen)
         array[g_u16_ccd_sample_clock] = 'o';
    }
+  /*
+  u16 i;
+  for(i = 0 ; i < 255; i++){
+    array[i] = 'o';
+  }
+  */
 }
 
 void ccd_SI_failing_edge_condition(){
@@ -194,6 +201,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   /* -|||--------------------------------|||- */
   if(detect_left_flag == 1 && detect_right_flag == 1){
     current_mid_error_pos = (current_1st_left_edge + current_1st_right_edge) / 2;
+    encoder_turn_error = 0;
   }
   
   /* -|||--------------------------------|||-  
@@ -201,6 +209,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
      ----------------------|||--------------- */
   else if(detect_left_flag == 1 && detect_right_flag == 0){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
+    encoder_turn_error = 0;
     /*
     if( current_1st_left_edge == 249){
       current_mid_error_pos = 124;
@@ -213,6 +222,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
       -----------------|||------------------- */
   else if(detect_left_flag == 0 && detect_right_flag == 1){
     current_mid_error_pos = current_1st_right_edge - left_start_length;
+    encoder_turn_error = 0;
     /*
     if(current_1st_right_edge == 0){
       current_mid_error_pos = 124;
@@ -221,7 +231,9 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = ccd_mid_pos;
+    current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100);
+    //printf("\nall white error encoder:%d", current_mid_error_pos);
+    //encoder_turn_error
   }
   
    /* ---------------------------------------- 
@@ -237,8 +249,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
   //printf("\n****** ******\n");
   //printf("\nlast_sample_error_pos is : %d", last_sample_error_pos);
-  last_sample_error_pos = current_mid_error_pos;
-  
+  last_sample_error_pos = current_mid_error_pos;  
   calculate_two_edge_middle_distance(array);
   //output_algorithm_message();
 }

@@ -30,17 +30,19 @@ speed = 600 -- kp: 368.4096 && kd: 10.558 (7.936V)
 speed = 700 -- kp: 403.6996 && kd: 10.94  (7.948V) // not reliable
 */
 
-#define balance_kp 3684096
+#define balance_kp 4025000
 #define balance_kp_out_of 10000
 
-#define balance_kd 105580
+#define balance_kd 123600
 #define balance_kd_out_of 10000
 
-#define speed_kp 298000
+#define speed_kp 297000
 #define speed_kp_out_of 10000
 
 #define speed_ki 49500
 #define speed_ki_out_of 10000
+
+#define balance_offset 1342
 
 /************* Variables for speed/position PID *************/
 volatile int speed_p,speed_i;
@@ -59,6 +61,10 @@ int ccd_distance_value_before_upslope=0;
 void temp_ccd_output_debug_message_function(); //temporary
 #define turn_kp 120500
 #define turn_kp_out_of 10000
+
+/************* Variables for direction PID : all white encoder hold*************/
+volatile int encoder_turn_error=0;
+
 
 /************* Variables for motor *************/
 extern volatile int g_u32encoder_lf;
@@ -173,7 +179,7 @@ void pit3_system_loop(void){
     /****** Case 1: get gyro & accl values + balance pid ~140us ******/
     case 1:
                                                 // offset
-      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-1225)+(balance_centerpoint_set/10);
+      control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset)+(balance_centerpoint_set/10);
       control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
       motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
       //printf("\ncontrol tilt:%d",control_tilt);
@@ -191,42 +197,11 @@ void pit3_system_loop(void){
           
           //stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
+          encoder_turn_error+=g_u32encoder_rt-g_u32encoder_lf;
+          
           //printf("\nCarspeed:%d",car_speed);
         /************ clears current encoder ************/
           g_u32encoder_lf=g_u32encoder_rt=0;          
-          
-       /************ slope case handling ************/     
-     if( slope_startup_flag == 1){ //5000ms
-        gpio_set(PORTE,25,0);
-            if(slope_state == 0){
-              if( speed_control_integral > 50000){
-                ccd_distance_value_before_upslope = current_edge_middle_distance;
-                slope_state = 1;
-                gpio_set(PORTE,26,0);
-              }
-            } else if(slope_state == 1){
-              
-              // by detecting continuous 0 to check state 2
-              if(current_edge_middle_distance == 0){
-                state_2_similarity_counter++;
-              }
-              
-              if(state_2_similarity_counter > 10){
-                state_2_reday_happen_flag = 1;
-              }
-              
-              if(state_2_reday_happen_flag == 1){
-                if(current_edge_middle_distance > 0){
-                  slope_state = 2; 
-                  gpio_set(PORTE,24,0);
-                  gpio_set(PORTE,26,1);
-                }
-              }              
-              
-            }else if(slope_state == 2){
-              
-            }      
-    }
           
           //printf("\n%d",speed_control_integral);
           
@@ -242,8 +217,9 @@ void pit3_system_loop(void){
         motor_command_speed+=motor_command_speed_delta;
         
         motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
+        //motor_command_left = motor_command_balance;
         motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
-        
+        //motor_command_right = motor_command_balance;
         /************ set dir pins on both ************/
           if (motor_command_left>0){
             gpio_set(PORTD,7,0);
@@ -292,7 +268,7 @@ void pit3_system_loop(void){
    /************ ticks related handling ************/
     system_loop_tick++;
     if( system_loop_tick == 2000){ //2000ms
-      control_car_speed = 600;   
+      control_car_speed = 900;   
     }
     
     if( system_loop_tick == 5000){ //5000ms
