@@ -32,8 +32,6 @@ extern volatile int control_tilt;
 
 u16 motor_test=0;
 
-//u8 todis[];//for sprintf usage
-
 /************ Function header ************/
 void ccd_interrupts_init(void);
 void ccd_all_pin_init(void);
@@ -202,18 +200,14 @@ void ccd_interrupts_init(void){
 
 void ccd_all_pin_init(){
   
- /****************** 1st Gen Main Board ******************/
-  //gpio_init(PORTB, 18, GPO, 1);  //PTB18 , Clock / CLK
-  //gpio_init(PORTB, 19, GPO, 1);  //PTC19 , SI
-  //gpio_init(PORTA, 11, GPI, 1);  //PTA11 , AO
-  
  /****************** 2nd Gen Main Board ******************/
    gpio_init(PORTB, 8, GPO, 1);    //PTB8 , SI
    gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
    gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
    
-   //gpio_init(PORTD, 10, GPO, 1);   
-   //gpio_init(PORTD, 9, GPO, 1);   
+   gpio_init(PORTE,6,GPI,0); // SW2
+   gpio_init(PORTE,8,GPI,0); // SW4
+   gpio_init(PORTE,9,GPI,0); // SW5
    
    LED_init(); // To test ccd sampling function is operating
 } 
@@ -222,18 +216,13 @@ void motor_init(void){
   
   //motor_deadzone_left=100;
   //motor_deadzone_right=100;
-     /*connection config:
+     
+  /*connection config:
      Hardware        DIR             PWM             Physical location
      ---------------+---------------+---------------+-----------------
      Motor right     PTD9           FTM1_CH1        top??
-     Motor left      PTD7           FTM1_CH0        top??
-     */
-  //FTM_PWM_init(FTM0,CH2,10000,0);//motor takes 0-10000 pwm values for duty
-  //FTM_PWM_init(FTM0,CH3,10000,0);//motor takes 0-10000 pwm values for duty
-  
-  //gpio_init(PORTB,22,GPO,0);
-  //gpio_init(PORTB,23,GPO,0);
-  
+     Motor left      PTD7           FTM1_CH0        top?? */
+     
   FTM_PWM_init(FTM1,CH0,10000,0);//motor takes 0-10000 pwm values for duty
   FTM_PWM_init(FTM1,CH1,10000,0);//motor takes 0-10000 pwm values for duty
  

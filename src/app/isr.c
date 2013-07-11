@@ -2,13 +2,45 @@
 #include "include.h"
 #include "linearccd.h"
 
+/*********** system debug mode/flag ************/
+int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
+int ccd_print_flag=0;                          // 0: off, 1: on
+int ccd_compressed_print_flag=0;               // 0: off, 1: on
+int only_balance_pid_mode=0;                   // 0: off, 1: on
+
+/*********** startup PID values ************/
+int speed_array[3]      = {300    , 900    , 0};
+int balance_kp_array[3] = {3154746, 4025000, 0};
+int balance_kd_array[3] = {99160  , 123600 , 0};
+int speed_kp_array[3]   = {297000 , 297000 , 0};
+int speed_ki_array[3]   = {49500  , 49500  , 0};
+int turn_kp_array[3]    = {120500 , 120500 , 0};
+int run_speed_mode = 0; // vaild input : 0 , 1 , 2
+
+/*********** initialize balance PID ************/
+int balance_kp = 0;
+#define balance_kp_out_of 10000
+
+int balance_kd = 0;
+#define balance_kd_out_of 10000
+
+#define balance_offset 1342
+
+/*********** initialize speed PID ************/
+int speed_kp = 0;
+#define speed_kp_out_of 10000
+
+int speed_ki = 0;
+#define speed_ki_out_of 10000
+
+/*********** initialize turn PID ************/
+int turn_kp = 0;
+#define turn_kp_out_of 10000
+
 /*********** CCD startup variables ************/
 volatile int g_int_ccd_si_counter=0;
 extern volatile int g_int_ccd_operation_state; // ccd operation state
 int pre_set_si_time=3;                         // si active time: e.g. 3 means 3ms * 3 system loop = 9ms
-int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
-int ccd_print_flag=0;                          // 0: off, 1: on
-int ccd_compressed_print_flag=0;               // 0: off, 1: on
 
 /*********** CCD related sample result & array ************/
 extern char g_char_ar_ccd_current_pixel[256];  // current sample
@@ -22,28 +54,6 @@ volatile int speed_error=0;
 volatile int speed_offset=10; //adjustable value
 volatile int leftDir,rightDir=0;
 
-/****** reliable balance data point *****
-speed = 150 -- kp: 179.6046 && kd: 9.595  (8.10V)
-speed = 300 -- kp: 262.5396 && kd: 9.916  (7.76 ~ 8.00V )
-speed = 450 -- kp: 315.4746 && kd: 10.237 (7.967V)
-speed = 600 -- kp: 368.4096 && kd: 10.558 (7.936V)
-speed = 700 -- kp: 403.6996 && kd: 10.94  (7.948V) // not reliable
-*/
-
-#define balance_kp 4025000
-#define balance_kp_out_of 10000
-
-#define balance_kd 123600
-#define balance_kd_out_of 10000
-
-#define speed_kp 297000
-#define speed_kp_out_of 10000
-
-#define speed_ki 49500
-#define speed_ki_out_of 10000
-
-#define balance_offset 1342
-
 /************* Variables for speed/position PID *************/
 volatile int speed_p,speed_i;
 volatile int car_speed;
@@ -52,19 +62,16 @@ volatile int motor_command_speed_delta=0;
 volatile int speed_control_integral=0;
 volatile int control_car_speed=0; //adjustable value, increase car speed
 
-/************* Variables for direction PID : algorthm 2 *************/
+/************* Variables for direction PID : algorithm 2 *************/
 extern int current_dir_arc_value_error;
 extern int current_dir_error;
 volatile int motor_command_turn_delta=0;
 extern int current_edge_middle_distance;
 int ccd_distance_value_before_upslope=0;
 void temp_ccd_output_debug_message_function(); //temporary
-#define turn_kp 120500
-#define turn_kp_out_of 10000
 
-/************* Variables for direction PID : all white encoder hold*************/
+/************* Variables for direction PID : all white encoder hold *************/
 volatile int encoder_turn_error=0;
-
 
 /************* Variables for motor *************/
 extern volatile int g_u32encoder_lf;
@@ -76,13 +83,6 @@ volatile u8 motor_pid_counter=0;  //for the motor command loop
 /************* system loop counter *************/
 u8 system_mode=0;
 u32 system_loop_tick=0;
-
-/************* Variables for slope case *************/
-int slope_state=0;
-int slope_startup_flag=0;
-int state_1_middle_distance=0;
-int state_2_similarity_counter=0;
-int state_2_reday_happen_flag=0;
 
 void PIT0_IRQHandler(void){
   PIT_Flag_Clear(PIT0);       
@@ -132,24 +132,24 @@ void encoder_counter(void){
     }
 }
 
-
 /****** main system control loop, runs every 1ms, each case runs every 3 ms ******/
 void pit3_system_loop(void){
   DisableInterrupts;   
   
   switch (system_mode){
     
-    /****** Case 0: get ccd values and calculate turning command from ccd ~410us******/
+    /****** Case 0: get ccd values and calculate turning command from ccd ~410us ******/
     case 0:
       
       if( g_int_ccd_si_counter < pre_set_si_time){
-      g_int_ccd_si_counter++;
+        g_int_ccd_si_counter++;
       }else if(g_int_ccd_operation_state == 0){        
         g_int_ccd_si_counter = 0;         
         ccd_trigger_SI();        
         ccd_sampling(g_char_ar_ccd_current_pixel , 1);
         ccd_recongize_left_right_edge_and_return_dir_error(g_char_ar_ccd_current_pixel);        
                 
+        /****** ccd dubug ******/
         if(ccd_debug_print_all_message_flag == 1){ // print out all ccd message to UART
           temp_ccd_output_debug_message_function();  
         }
@@ -164,7 +164,6 @@ void pit3_system_loop(void){
         
       }
       
-      
       if(motor_pid_counter<33){
         // do nth
         }else{
@@ -172,7 +171,8 @@ void pit3_system_loop(void){
       }
       
       motor_turn_left+=motor_command_turn_delta;
-      motor_turn_right-=motor_command_turn_delta;      
+      motor_turn_right-=motor_command_turn_delta;
+      
     system_mode=1;
     break;
     
@@ -190,20 +190,20 @@ void pit3_system_loop(void){
     /****** Case 2: output motor ~3.8-5us ******/
     case 2:
   
-        if(motor_pid_counter<33){ //updated from 20 to 33
+        if(motor_pid_counter<33){ 
           motor_pid_counter++;
         }else{
           motor_pid_counter=0;
           
-          //stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID          
+          /****** stuff here happens every 33*3ms=99ms, used for calculating and capturing encoder motor PID ******/          
           car_speed=g_u32encoder_lf+g_u32encoder_rt;
           encoder_turn_error+=g_u32encoder_rt-g_u32encoder_lf;
           
-          //printf("\nCarspeed:%d",car_speed);
-        /************ clears current encoder ************/
-          g_u32encoder_lf=g_u32encoder_rt=0;          
-          
+          //printf("\nCarspeed:%d",car_speed);          
           //printf("\n%d",speed_control_integral);
+          
+         /************ clears current encoder ************/
+          g_u32encoder_lf=g_u32encoder_rt=0;   
           
           speed_error = speed_offset + control_car_speed - car_speed; //optimal speed offset ~10
                       
@@ -216,10 +216,14 @@ void pit3_system_loop(void){
        
         motor_command_speed+=motor_command_speed_delta;
         
-        motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
-        //motor_command_left = motor_command_balance;
-        motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
-        //motor_command_right = motor_command_balance;
+        if(only_balance_pid_mode == 0){          
+          motor_command_left = motor_command_balance - motor_command_speed + motor_turn_left;
+          motor_command_right = motor_command_balance - motor_command_speed + motor_turn_right;
+        } else {
+          motor_command_right = motor_command_balance;        
+          motor_command_left = motor_command_balance;
+        }
+      
         /************ set dir pins on both ************/
           if (motor_command_left>0){
             gpio_set(PORTD,7,0);
@@ -267,14 +271,40 @@ void pit3_system_loop(void){
      
    /************ ticks related handling ************/
     system_loop_tick++;
-    if( system_loop_tick == 2000){ //2000ms
-      control_car_speed = 900;   
-    }
+  
+    if( system_loop_tick == 2000){ //inital startup time , 2000ms
+            
+          /* SW physical position
+            -----
+            |3|4|
+            |2|1|
+            ----- */    
+      
+      if (gpio_get(PORTE, 8) == 0){ // when 3 press
+        run_speed_mode = 0;
+      }
+      else if (gpio_get(PORTE, 9) == 0){ //when 4 press
+        run_speed_mode = 1;
+      }
+      else if (gpio_get(PORTE, 6) == 0){  //when 1 press
+        run_speed_mode = 2;
+        
+      }
+      else{
+        run_speed_mode = 0;
+      }
     
-    if( system_loop_tick == 5000){ //5000ms
-      slope_startup_flag = 1;
-    }
+      balance_kp = balance_kp_array[run_speed_mode];      
+      balance_kd = balance_kd_array[run_speed_mode];
+        
+      speed_kp =  speed_kp_array[run_speed_mode];    
+      speed_ki =  speed_ki_array[run_speed_mode];
+        
+      turn_kp = turn_kp_array[run_speed_mode];    
+      control_car_speed = speed_array[run_speed_mode];  
     
+    }
+       
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
 }
