@@ -210,6 +210,8 @@ void ccd_all_pin_init(){
    gpio_init(PORTE,9,GPI,0); // SW5
    
    LED_init(); // To test ccd sampling function is operating
+   
+   gpio_set(PORTE,26,0);
 } 
 
 void motor_init(void){

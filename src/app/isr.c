@@ -272,28 +272,11 @@ void pit3_system_loop(void){
    /************ ticks related handling ************/
     system_loop_tick++;
   
+  
+
+  
     if( system_loop_tick == 2000){ //inital startup time , 2000ms
             
-          /* SW physical position
-            -----
-            |3|4|
-            |2|1|
-            ----- */    
-      
-      if (gpio_get(PORTE, 8) == 0){ // when 3 press
-        run_speed_mode = 0;
-      }
-      else if (gpio_get(PORTE, 9) == 0){ //when 4 press
-        run_speed_mode = 1;
-      }
-      else if (gpio_get(PORTE, 6) == 0){  //when 1 press
-        run_speed_mode = 2;
-        
-      }
-      else{
-        run_speed_mode = 0;
-      }
-    
       balance_kp = balance_kp_array[run_speed_mode];      
       balance_kd = balance_kd_array[run_speed_mode];
         
@@ -301,8 +284,38 @@ void pit3_system_loop(void){
       speed_ki =  speed_ki_array[run_speed_mode];
         
       turn_kp = turn_kp_array[run_speed_mode];    
-      control_car_speed = speed_array[run_speed_mode];  
-    
+      control_car_speed = speed_array[run_speed_mode]; 
+      
+      gpio_set(PORTE,27,1);
+   
+    } else if ( system_loop_tick < 2000){
+      
+          /* SW physical position
+            -----
+            |3|4|
+            |2|1|
+            ----- */    
+
+        if (gpio_get(PORTE, 8) == 0){ // when 3 press
+          run_speed_mode = 0;
+          gpio_set(PORTE,24,1);
+          gpio_set(PORTE,25,1);
+          gpio_set(PORTE,26,0);
+        }
+        else if (gpio_get(PORTE, 9) == 0){ //when 4 press
+          run_speed_mode = 1;
+          gpio_set(PORTE,24,0);
+          gpio_set(PORTE,25,1);
+          gpio_set(PORTE,26,1);
+        }
+        else if (gpio_get(PORTE, 6) == 0){  //when 1 press
+          run_speed_mode = 2;
+          gpio_set(PORTE,24,1);
+          gpio_set(PORTE,25,0);
+          gpio_set(PORTE,26,1);
+        }
+        
+        gpio_set(PORTE,27,0);
     }
        
     PIT_Flag_Clear(PIT3);
