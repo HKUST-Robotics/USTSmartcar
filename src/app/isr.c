@@ -278,9 +278,6 @@ void pit3_system_loop(void){
    /************ ticks related handling ************/
     system_loop_tick++;
   
-  
-
-  
     if( system_loop_tick == 2000){ //inital startup time , 2000ms
             
       /*** balance ***/
@@ -332,15 +329,15 @@ void pit3_system_loop(void){
         
     }
     
-    
     if( system_loop_tick >= 10000){ // 10000ms
       
-        if (gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 23) == 1){
-           printf("end of track\n"); 
-           end_of_track_flag = 1;
-         }
+      if(gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 22) == 0 && gpio_get(PORTB, 23) == 1){
+             //printf("end of track\n"); 
+             end_of_track_flag = 1;
+      }
     }
-       
+    
+    
     PIT_Flag_Clear(PIT3);
     EnableInterrupts;
 }
