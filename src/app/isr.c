@@ -90,7 +90,9 @@ volatile u8 motor_pid_counter=0;  //for the motor command loop
 /************* Variables for system *************/
 u8 system_mode=0;
 u32 system_loop_tick=0;
+int end_of_track_wait_flag=0;
 int end_of_track_flag=0;
+int track_end_time_counter=0;
 int mode_selection_start_time_end = 2000;
 
 void PIT0_IRQHandler(void){
@@ -338,8 +340,16 @@ void pit3_system_loop(void){
     
     if( system_loop_tick >= (mode_selection_start_time_end+18000)){ /*** 20000ms ***/
       if(gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 22) == 0 && gpio_get(PORTB, 23) == 1){
-          end_of_track_flag = 1;
+          end_of_track_wait_flag = 1;
       }
+    }
+    
+    if( end_of_track_wait_flag == 1){
+       track_end_time_counter++;
+    }
+    
+    if (track_end_time_counter == 1200){
+       end_of_track_flag = 1;
     }
     
     
