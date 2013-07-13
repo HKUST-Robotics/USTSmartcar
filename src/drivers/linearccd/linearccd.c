@@ -13,16 +13,15 @@ Edited by John Ching
 #include  "linearccd.h"
 #include  "math.h"
 
-extern int encoder_turn_error;
-
-/*********** CCD startup variables ************/
-
 /*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
-#define left_start_length 45;  
-#define right_start_length 45; 
+//#define left_start_length 45;  
+//#define right_start_length 45; 
+
+int left_start_length  = 45;
+int right_start_length = 45;
 
 /*** 中心位 Variable，愈大愈接近Left edge，愈細愈接近Right edge ***/
-int ccd_mid_pos = 128;         
+int ccd_mid_pos = 130;         
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
@@ -40,7 +39,6 @@ char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 int current_mid_error_pos=124;
 int last_sample_error_pos=124;
 
-
 int current_dir_error=0;
 int current_dir_arc_value_error=0;
 int last_sample_dir_error=124;
@@ -55,6 +53,8 @@ int current_1st_right_edge=0;
 
 int current_edge_middle_distance=0;
 int previous_edge_middle_distance=0;
+
+extern int encoder_turn_error;
 
 /************ Special track case variable ************/
 int all_white_smaple_flag=0;

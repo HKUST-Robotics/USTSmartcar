@@ -35,14 +35,14 @@ u16 motor_test=0;
 /************ Function header ************/
 void ccd_interrupts_init(void);
 void ccd_all_pin_init(void);
-void motor_init(void); 
 void light_sensor_init();
+void motor_init(void); 
 
 void main()
 {   
 
   uart_init(UART3, 115200); // For our flashed bluetooth
-  //uart_init(UART3, 9600); // For our flashed bluetooth
+  //uart_init(UART3, 9600); // For our non-flashed bluetooth
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
@@ -55,7 +55,7 @@ void main()
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
-   delayms(2500);
+   delayms(250);
    g_char_mode = '7';                 // Hard code mode = system loop
    //g_char_mode = uart_getchar(UART3);
  
@@ -174,7 +174,6 @@ void main()
         
         ccd_interrupts_init();
         pit_init_ms(PIT3,1);
-        //delayms(4000);
         
         printf("\nEverything inited alright");
         
