@@ -10,16 +10,16 @@ int only_balance_pid_mode=0;                   // 0: off, 1: on
 
 /*********** startup PID values ************/
 int speed_array[3]              = {300    , 900    , 0};
-int balance_kp_array[3]         = {2414746, 1521150, 0};
-int balance_kd_array[3]         = {99160  , 45160 , 0};
-int balance_offset_array[3]     = {1162   , 1173   , 0};
+int balance_kp_array[3]         = {2414746, 2654746, 0};
+int balance_kd_array[3]         = {99160  , 99160 , 0};
+int balance_offset_array[3]     = {1162   , 1162   , 0};
 int speed_kp_array[3]           = {297000 , 297000 , 0};
 int speed_ki_array[3]           = {49500  , 49500  , 0};
-int turn_kp_array[3]            = {120500 , 94250 , 0};
-int left_start_length_array[3]  = {25     , 30     , 0};
-int right_start_length_array[3] = {25     , 30     , 0};
-int ccd_mid_pos_array[3]        = {130    , 130    , 0};
-int run_speed_mode = 0; // vaild input : 0 , 1 , 2
+int turn_kp_array[3]            = {120500 , 95450 , 0};
+int left_start_length_array[3]  = {25     , 19     , 0};
+int right_start_length_array[3] = {25     , 19    , 0};
+int ccd_mid_pos_array[3]        = {128    , 128    , 0};
+int run_speed_mode = 1; // vaild input : 0 , 1 , 2
 
 /*********** initialize balance PID ************/
 int balance_kp = 0;
@@ -309,34 +309,75 @@ void pit3_system_loop(void){
         }
         
         gpio_set(PORTE,27,0);
-        //only_balance_pid_mode = 1;
     } else if( system_loop_tick == mode_selection_start_time_end){ /*** inital startup time , 2000ms ***/
-            
-      /*** balance ***/
-      balance_kp = balance_kp_array[run_speed_mode];      
-      balance_kd = balance_kd_array[run_speed_mode];
-      balance_offset = balance_offset_array[run_speed_mode];
-      
-      /*** speed ***/
-      speed_kp =  speed_kp_array[run_speed_mode];    
-      speed_ki =  speed_ki_array[run_speed_mode];
-       
-      /*** turn***/
-      turn_kp = turn_kp_array[run_speed_mode];    
-      
-      /*** vehicle respect to track position ***/
-      //left_start_length = left_start_length_array[run_speed_mode];
-      //right_start_length = right_start_length_array[run_speed_mode];
-      ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
-      //only_balance_pid_mode = 0;
+ 
       gpio_set(PORTE,27,1);  /*** initial time end ***/
-   
-    }
+      
+      if(speed_array[run_speed_mode] > 500){
+          
+          /*** set speed ***/
+          control_car_speed = 0;
+          
+          /*** balance ***/
+          balance_kp = balance_kp_array[0];      
+          balance_kd = balance_kd_array[0];
+          balance_offset = balance_offset_array[0];
+          
+          /*** speed ***/
+          speed_kp =  speed_kp_array[0];    
+          speed_ki =  speed_ki_array[0];
+           
+          /*** turn***/
+          turn_kp = turn_kp_array[0]; 
+          
+          /*** vehicle respect to track position ***/
+          //left_start_length = left_start_length_array[run_speed_mode];
+          //right_start_length = right_start_length_array[run_speed_mode];
+          ccd_mid_pos = ccd_mid_pos_array[0];
+      } else {
+        
+          /*** set speed ***/
+          control_car_speed = 0;
+          
+          /*** balance ***/
+          balance_kp = balance_kp_array[run_speed_mode];      
+          balance_kd = balance_kd_array[run_speed_mode];
+          balance_offset = balance_offset_array[run_speed_mode];
+          
+          /*** speed ***/
+          speed_kp =  speed_kp_array[run_speed_mode];    
+          speed_ki =  speed_ki_array[run_speed_mode];
+           
+          /*** turn***/
+          turn_kp = turn_kp_array[run_speed_mode]; 
+          
+          /*** vehicle respect to track position ***/
+          ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
+        }
+      }
     
+        
     if( system_loop_tick == (mode_selection_start_time_end+6000)){ /*** 8000ms ***/
-      /*** speed ***/
-      control_car_speed = speed_array[run_speed_mode]; 
+          
+          /*** set speed ***/
+          control_car_speed = speed_array[run_speed_mode];
+          
+          /*** balance ***/
+          balance_kp = balance_kp_array[run_speed_mode];      
+          balance_kd = balance_kd_array[run_speed_mode];
+          balance_offset = balance_offset_array[run_speed_mode];
+          
+          /*** speed ***/
+          speed_kp =  speed_kp_array[run_speed_mode];    
+          speed_ki =  speed_ki_array[run_speed_mode];
+           
+          /*** turn***/
+          turn_kp = turn_kp_array[run_speed_mode]; 
+          
+          /*** vehicle respect to track position ***/
+          ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
     }
+
     
     if( system_loop_tick >= (mode_selection_start_time_end+18000)){ /*** 20000ms ***/
       if(gpio_get(PORTB, 21) == 1 && gpio_get(PORTB, 22) == 0 && gpio_get(PORTB, 23) == 1){
