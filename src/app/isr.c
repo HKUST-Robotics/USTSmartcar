@@ -10,15 +10,15 @@ int only_balance_pid_mode=0;                   // 0: off, 1: on
 
 /*********** startup PID values ************/
 int speed_array[3]              = {300    , 900    , 0};
-int balance_kp_array[3]         = {3154746, 4025000, 0};
-int balance_kd_array[3]         = {99160  , 123600 , 0};
+int balance_kp_array[3]         = {2414746, 1521150, 0};
+int balance_kd_array[3]         = {99160  , 45160 , 0};
 int balance_offset_array[3]     = {1162   , 1173   , 0};
 int speed_kp_array[3]           = {297000 , 297000 , 0};
 int speed_ki_array[3]           = {49500  , 49500  , 0};
-int turn_kp_array[3]            = {120500 , 120500 , 0};
-int left_start_length_array[3]  = {45     , 45     , 0};
-int right_start_length_array[3] = {45     , 45     , 0};
-int ccd_mid_pos_array[3]        = {130    , 128    , 0};
+int turn_kp_array[3]            = {120500 , 94250 , 0};
+int left_start_length_array[3]  = {25     , 30     , 0};
+int right_start_length_array[3] = {25     , 30     , 0};
+int ccd_mid_pos_array[3]        = {130    , 130    , 0};
 int run_speed_mode = 0; // vaild input : 0 , 1 , 2
 
 /*********** initialize balance PID ************/
@@ -309,7 +309,7 @@ void pit3_system_loop(void){
         }
         
         gpio_set(PORTE,27,0);
-        only_balance_pid_mode = 1;
+        //only_balance_pid_mode = 1;
     } else if( system_loop_tick == mode_selection_start_time_end){ /*** inital startup time , 2000ms ***/
             
       /*** balance ***/
@@ -328,7 +328,7 @@ void pit3_system_loop(void){
       //left_start_length = left_start_length_array[run_speed_mode];
       //right_start_length = right_start_length_array[run_speed_mode];
       ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
-      only_balance_pid_mode = 0;
+      //only_balance_pid_mode = 0;
       gpio_set(PORTE,27,1);  /*** initial time end ***/
    
     }
