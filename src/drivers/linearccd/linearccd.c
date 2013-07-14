@@ -38,6 +38,7 @@ char g_char_ar_ccd_current_pixel[256];        // 1-line pixel array
 /************* Variables for direction PID : algorthm 2 *************/
 int current_mid_error_pos=124;
 int last_sample_error_pos=124;
+int previous_mid_error_pos=124;
 
 int current_dir_error=0;
 int current_dir_arc_value_error=0;
@@ -240,19 +241,22 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     //encoder_turn_error
   }
   
-   /* ---------------------------------------- 
-                       or
-      |||||||||||||||||||||||||||||||||||||||| (all white / all black) */
-  if(all_white_smaple_flag == 1 || all_black_smaple_flag == 1){
-    //current_mid_error_pos = 124;
-    //printf("\n*** All white or all black cases ***");
+   /* |||||||||||||||||||||||||||||||||||||||| (all black) */
+  if(all_black_smaple_flag == 1){
+    current_mid_error_pos = previous_mid_error_pos;
+    //printf("\n*** CURRENT mid_error_pos has been replaced by PREVIOUS mid_error_pos ***");
   }
   
   current_dir_error = (current_mid_error_pos - ccd_mid_pos);
   current_dir_arc_value_error = atan(current_dir_error*(0.005291005))*1000;
+ 
   
-  //printf("\n****** ******\n");
-  //printf("\nlast_sample_error_pos is : %d", last_sample_error_pos);
+  //printf("\nprevious_mid_error_pos is : %d", previous_mid_error_pos);
+  
+  previous_mid_error_pos = current_mid_error_pos;
+  
+  //printf("\ncurrent_mid_error_pos is : %d", current_mid_error_pos);
+  
   last_sample_error_pos = current_mid_error_pos;  
   calculate_two_edge_middle_distance(array);
   //output_algorithm_message();

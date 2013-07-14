@@ -11,13 +11,15 @@ int only_balance_pid_mode=0;                   // 0: off, 1: on
 /*********** startup PID values ************/
 int speed_array[3]              = {300    , 900    , 0};
 int balance_kp_array[3]         = {2414746, 2654746, 0};
-int balance_kd_array[3]         = {99160  , 99160 , 0};
-int balance_offset_array[3]     = {1162   , 1162   , 0};
+int balance_kd_array[3]         = {99160  , 120000  , 0};
+int balance_offset_array[3]     = {1207   , 1207   , 0};
 int speed_kp_array[3]           = {297000 , 297000 , 0};
 int speed_ki_array[3]           = {49500  , 49500  , 0};
-int turn_kp_array[3]            = {120500 , 95450 , 0};
-int left_start_length_array[3]  = {25     , 19     , 0};
-int right_start_length_array[3] = {25     , 19    , 0};
+int turn_kp_array[3]            = {120500 , 91800 , 0};
+int turn_kd_array[3]            = {100000 , 15000 , 0}; // mode 1 is orginal 12475
+int turn_offset_array[3]        = {1215   , 1215   , 0};
+int left_start_length_array[3]  = {25     , 37     , 0}; // mode 0 to be edit to 45
+int right_start_length_array[3] = {25     , 37     , 0}; // mode 0 to be edit to 45
 int ccd_mid_pos_array[3]        = {128    , 128    , 0};
 int run_speed_mode = 1; // vaild input : 0 , 1 , 2
 
@@ -40,6 +42,13 @@ int speed_ki = 0;
 /*********** initialize turn PID ************/
 int turn_kp = 0;
 #define turn_kp_out_of 10000
+
+int turn_kd = 0;
+#define turn_kd_out_of 10000
+
+int turn_offset = 0;
+int gyro_turn = 0;
+
 extern int left_start_length;
 extern int right_start_length;
 extern int ccd_mid_pos;
@@ -152,6 +161,8 @@ void pit3_system_loop(void){
     /****** Case 0: get ccd values and calculate turning command from ccd ~410us ******/
     case 0:
       
+      gyro_turn=ad_ave(ADC1,AD6b,ADC_12bit,20)-turn_offset;
+      
       if( g_int_ccd_si_counter < pre_set_si_time){
         g_int_ccd_si_counter++;
       }else if(g_int_ccd_operation_state == 0){        
@@ -178,7 +189,7 @@ void pit3_system_loop(void){
       if(motor_pid_counter<33){
         // do nth
         }else{
-        motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of  - motor_turn_left)/33;
+        motor_command_turn_delta = ((current_dir_arc_value_error)* turn_kp/turn_kp_out_of + gyro_turn * turn_kd/turn_kd_out_of - motor_turn_left)/33;
       }
       
       motor_turn_left+=motor_command_turn_delta;
@@ -230,6 +241,9 @@ void pit3_system_loop(void){
           motor_command_right = motor_command_balance;        
           motor_command_left = motor_command_balance;
         }
+        
+        //motor_command_left = motor_turn_left;
+        //motor_command_right = motor_turn_right; 
       
         /************ set dir pins on both ************/
           if (motor_command_left>0){
@@ -329,10 +343,12 @@ void pit3_system_loop(void){
            
           /*** turn***/
           turn_kp = turn_kp_array[0]; 
+          turn_kd = turn_kd_array[0]; 
+          turn_offset = turn_offset_array[0];
           
           /*** vehicle respect to track position ***/
-          //left_start_length = left_start_length_array[run_speed_mode];
-          //right_start_length = right_start_length_array[run_speed_mode];
+          left_start_length = left_start_length_array[0];
+          right_start_length = right_start_length_array[0];
           ccd_mid_pos = ccd_mid_pos_array[0];
       } else {
         
@@ -350,14 +366,19 @@ void pit3_system_loop(void){
            
           /*** turn***/
           turn_kp = turn_kp_array[run_speed_mode]; 
+          turn_kd = turn_kd_array[run_speed_mode];
+          turn_offset = turn_offset_array[run_speed_mode];
           
           /*** vehicle respect to track position ***/
+          left_start_length = left_start_length_array[run_speed_mode];
+          right_start_length = right_start_length_array[run_speed_mode];
           ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
         }
       }
     
         
-    if( system_loop_tick == (mode_selection_start_time_end+6000)){ /*** 8000ms ***/
+    if( system_loop_tick == (mode_selection_start_time_end+6000)){ /*** 8000ms ***/ 
+      // to be edit back to 6000 after tuning balance
           
           /*** set speed ***/
           control_car_speed = speed_array[run_speed_mode];
@@ -373,8 +394,12 @@ void pit3_system_loop(void){
            
           /*** turn***/
           turn_kp = turn_kp_array[run_speed_mode]; 
+          turn_kd = turn_kd_array[run_speed_mode];
+          turn_offset = turn_offset_array[run_speed_mode];
           
           /*** vehicle respect to track position ***/
+          left_start_length = left_start_length_array[run_speed_mode];
+          right_start_length = right_start_length_array[run_speed_mode];
           ccd_mid_pos = ccd_mid_pos_array[run_speed_mode];
     }
 
