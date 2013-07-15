@@ -9,19 +9,19 @@ int ccd_compressed_print_flag=0;               // 0: off, 1: on
 int only_balance_pid_mode=0;                   // 0: off, 1: on
 
 /*********** startup PID values ************/
-int speed_array[3]              = {300    , 900    , 0};
-int balance_kp_array[3]         = {2414746, 2654746, 0};
-int balance_kd_array[3]         = {99160  , 120000  , 0};
-int balance_offset_array[3]     = {1207   , 1207   , 0};
-int speed_kp_array[3]           = {297000 , 297000 , 0};
-int speed_ki_array[3]           = {49500  , 49500  , 0};
-int turn_kp_array[3]            = {120500 , 91800 , 0};
-int turn_kd_array[3]            = {100000 , 15000 , 0}; // mode 1 is orginal 12475
-int turn_offset_array[3]        = {1215   , 1215   , 0};
-int left_start_length_array[3]  = {25     , 37     , 0}; // mode 0 to be edit to 45
-int right_start_length_array[3] = {25     , 37     , 0}; // mode 0 to be edit to 45
-int ccd_mid_pos_array[3]        = {128    , 128    , 0};
-int run_speed_mode = 1; // vaild input : 0 , 1 , 2
+int speed_array[3]              = {300    , 900    , 600};
+int balance_kp_array[3]         = {2414746, 2725000, 2700000};
+int balance_kd_array[3]         = {99160  , 119160 , 94160};
+int balance_offset_array[3]     = {1177   , 1177   , 1177};
+int speed_kp_array[3]           = {297000 , 297000 , 297000};
+int speed_ki_array[3]           = {49500  , 49500  , 49500};
+int turn_kp_array[3]            = {120500 , 91800  , 120500};
+int turn_kd_array[3]            = {100000 , 7500   , 100000}; // mode 1 is orginal 12475 (tested not work now)
+int turn_offset_array[3]        = {1230   , 1230   , 1230}; //·U²Ó·U¥k¡A·U¤j·U¥ª
+int left_start_length_array[3]  = {25     , 37     , 31}; // mode 0 to be edit to 45
+int right_start_length_array[3] = {25     , 37     , 31}; // mode 0 to be edit to 45
+int ccd_mid_pos_array[3]        = {128    , 128    , 128};
+int run_speed_mode = 2; // vaild input : 0 , 1 , 2
 
 /*********** initialize balance PID ************/
 int balance_kp = 0;

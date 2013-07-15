@@ -215,10 +215,10 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   else if(detect_left_flag == 1 && detect_right_flag == 0){
     current_mid_error_pos = current_1st_left_edge + right_start_length;
     encoder_turn_error = 0;
-    /*
+    
     if( current_1st_left_edge == 249){
       current_mid_error_pos = 124;
-    }*/
+    }
     
   }
   
@@ -228,10 +228,10 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   else if(detect_left_flag == 0 && detect_right_flag == 1){
     current_mid_error_pos = current_1st_right_edge - left_start_length;
     encoder_turn_error = 0;
-    /*
+    
     if(current_1st_right_edge == 0){
       current_mid_error_pos = 124;
-    }*/
+    }
   }
   
    /* ---------------------------------------- (no middle noise) */ 
