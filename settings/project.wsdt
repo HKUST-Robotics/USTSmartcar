@@ -39,7 +39,7 @@
       
       
       
-    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\main.c</Filename><XPos>0</XPos><YPos>10</YPos><SelStart>3904</SelStart><SelEnd>3967</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\isr.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>1169</SelStart><SelEnd>1169</SelEnd></Tab><ActiveTab>1</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.c</Filename><XPos>0</XPos><YPos>180</YPos><SelStart>4793</SelStart><SelEnd>4843</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.h</Filename><XPos>0</XPos><YPos>8</YPos><SelStart>1035</SelStart><SelEnd>1035</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\main.c</Filename><XPos>0</XPos><YPos>10</YPos><SelStart>3904</SelStart><SelEnd>3967</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\app\isr.c</Filename><XPos>0</XPos><YPos>9</YPos><SelStart>1280</SelStart><SelEnd>1280</SelEnd></Tab><ActiveTab>1</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.c</Filename><XPos>0</XPos><YPos>180</YPos><SelStart>4793</SelStart><SelEnd>4843</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\src\drivers\linearccd\linearccd.h</Filename><XPos>0</XPos><YPos>8</YPos><SelStart>1035</SelStart><SelEnd>1035</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
     <Positions>
       
       
