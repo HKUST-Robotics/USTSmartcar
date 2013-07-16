@@ -235,8 +235,8 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = previous_mid_error_pos;
-    //current_mid_error_pos = ccd_mid_pos;//+(encoder_turn_error*35/100);
+    //current_mid_error_pos = previous_mid_error_pos;
+    current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100); // John added
     //printf("\nall white error encoder:%d", current_mid_error_pos);
     //encoder_turn_error
   }
@@ -248,7 +248,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   }
   
   current_dir_error = (current_mid_error_pos - ccd_mid_pos);
-  current_dir_arc_value_error = atan(current_dir_error*(0.005291005))*1000;
+  current_dir_arc_value_error = atan(current_dir_error*(0.00698080279))*1000;
  
   
   //printf("\nprevious_mid_error_pos is : %d", previous_mid_error_pos);

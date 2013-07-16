@@ -15,13 +15,13 @@ int balance_kd_array[5]         = {99160  , 107560 , 119160  , 128100  , 0};
 int balance_offset_array[5]     = {1195   , 1195   , 1195    , 1195    , 0};
 int speed_kp_array[5]           = {297000 , 297000 , 297000  , 297000  , 0};
 int speed_ki_array[5]           = {53000  , 53000  , 53000   , 53000   , 0};  // mode 0 : 49500, mode 3 : 60000
-int turn_kp_array[5]            = {120500 , 120500 , 110500  , 115000  , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , mode 3 : 98800
-int turn_kd_array[5]            = {100000 , 100000 , 100000  , 100      , 0}; 
-int turn_offset_array[5]        = {1300   , 1300   , 1200    , 1210    , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
+int turn_kp_array[5]            = {120500 , 92500  , 72600   , 115000  , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , mode 3 : 98800 mode 1 : 120500
+int turn_kd_array[5]            = {100000 , 42500  , 35000   , 100     , 0}; 
+int turn_offset_array[5]        = {1250   , 1250   , 1300    , 1300    , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
 int left_start_length_array[5]  = {25     , 31     , 37      , 10      , 0};    
 int right_start_length_array[5] = {25     , 31     , 37      , 10      , 0};    
 int ccd_mid_pos_array[5]        = {128    , 128    , 128     , 128     , 128};
-int run_speed_mode = 2;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int run_speed_mode = 1;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
 int max_available_mode = 3;
 int smooth_interval_jump_time = 100;      /*** Variable for setting mode to mode interval time ***/
 int stand_and_dont_move_start_time = 4000;   /*** Variable for setting hold time in start area ***/
