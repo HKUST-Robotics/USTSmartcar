@@ -6,22 +6,25 @@
 int ccd_debug_print_all_message_flag=0;        // 0: off, 1: on
 int ccd_print_flag=0;                          // 0: off, 1: on
 int ccd_compressed_print_flag=0;               // 0: off, 1: on
-int only_balance_pid_mode=0;                   // 0: off, 1: on
+int only_balance_pid_mode=1;                   // 0: off, 1: on
 int only_balance_and_control_pid_mode=0;       // 0: off, 1: on
 /*********** startup PID values ************/
 int speed_array[5]              = {300    , 600    , 900     , 1200    , 1500};
-int balance_kp_array[5]         = {2414746, 2700000, 2725000 , 2978000 , 0};
-int balance_kd_array[5]         = {99160  , 94160  , 119160  , 128060  , 0};
-int balance_offset_array[5]     = {1155   , 1155   , 1155    , 1155    , 0};
+int balance_kp_array[5]         = {2414746, 2700000, 2725000 , 2977450 , 0};
+int balance_kd_array[5]         = {99160  , 94160  , 119160  , 128100  , 0};
+int balance_offset_array[5]     = {1205   , 1205   , 1205    , 1205    , 0};
 int speed_kp_array[5]           = {297000 , 297000 , 297000  , 297000  , 0};
 int speed_ki_array[5]           = {49500  , 49500  , 49500   , 49500   , 0};
 int turn_kp_array[5]            = {120500 , 120500 , 91800   , 98800   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣
-int turn_kd_array[5]            = {100000 , 100000 , 7500    , 100     , 0};  // mode 1 is orginal 12475 (tested not work now)
+int turn_kd_array[5]            = {100000 , 100000 , 7500    , 100     , 0}; 
 int turn_offset_array[5]        = {1158   , 1158   , 1158    , 1158    , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
 int left_start_length_array[5]  = {25     , 31     , 37      , 38      , 0};    
 int right_start_length_array[5] = {25     , 31     , 37      , 38      , 0};    
 int ccd_mid_pos_array[5]        = {128    , 128    , 128     , 128     , 128};
-int run_speed_mode = 0;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 3: 1500***/
+int run_speed_mode = 3;         /*** vaild input : 0 - 4; Refer mode 0: 300 ; mode 1: 600 ; mode 2: 900 ; mode 3: 1200 ; mode 4: 1500***/
+int max_available_mode = 3;
+int smooth_interval_jump_time   = 1000;      /*** Variable for setting mode to mode interval time ***/
+int stand_and_dont_move_start_time = 4000;   /*** Variable for setting hold time in start area ***/
 
 /*********** initialize balance PID ************/
 int balance_kp = 0;
@@ -83,12 +86,10 @@ volatile u8 motor_pid_counter=0;  //for the motor command loop
 /************* Variables for system *************/
 int system_mode=0;
 u32 system_loop_tick=0;
-int mode_selection_start_time_end = 2000;  /*** Variable for setting user press time ***/
 int start_up_press_flag=0;
 int start_up_press_lock_counter=0;
 int startup_smooth_counter = 0;
-int smooth_interval_jump_time = 1000;      /*** Variable for setting mode to mode interval time ***/
-int stand_and_dont_move_start_time = 4000; /*** Variable for setting hold time in start area ***/
+int mode_selection_start_time_end = 2000;  /*** Variable for setting user press time ***/
 int end_of_track_wait_flag=0;
 int end_of_track_flag=0;
 int track_end_time_counter=0;
@@ -279,6 +280,9 @@ void pit3_system_loop(void){
         if (gpio_get(PORTE, 8) == 0){ // when 3 press
           if(start_up_press_flag == 0){
             run_speed_mode = run_speed_mode + 1;
+            if( run_speed_mode > max_available_mode ){
+              run_speed_mode = 0;
+            }
             start_up_press_flag = 1;
           }
         }
