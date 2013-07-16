@@ -14,9 +14,6 @@ Edited by John Ching
 #include  "math.h"
 
 /*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
-//#define left_start_length 45;  
-//#define right_start_length 45; 
-
 int left_start_length  = 45;
 int right_start_length = 45;
 
@@ -206,6 +203,8 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   /* -|||--------------------------------|||- */
   if(detect_left_flag == 1 && detect_right_flag == 1){
     current_mid_error_pos = (current_1st_left_edge + current_1st_right_edge) / 2;
+    left_start_length = current_mid_error_pos - current_1st_left_edge;
+    right_start_length = current_mid_error_pos + current_1st_right_edge;
     encoder_turn_error = 0;
   }
   
@@ -236,7 +235,8 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   
    /* ---------------------------------------- (no middle noise) */ 
   else if(detect_left_flag == 0 && detect_right_flag == 0){
-    current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100);
+    current_mid_error_pos = previous_mid_error_pos;
+    //current_mid_error_pos = ccd_mid_pos;//+(encoder_turn_error*35/100);
     //printf("\nall white error encoder:%d", current_mid_error_pos);
     //encoder_turn_error
   }
