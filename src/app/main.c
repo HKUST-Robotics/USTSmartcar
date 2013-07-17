@@ -51,13 +51,14 @@ void main()
    printf("Please select mode:\n---------------------------\n");
    printf("1:Accelerometer&gyro\n");
    printf("2:LinearCCD\n");
+   printf("3:Flash Memory\n");
    printf("4:Encoder testing\n");
    printf("6:Motor control test\n");
    printf("7:SystemLoop Test\n");
    
    delayms(300);
-   g_char_mode = '7';                 // Hard code mode = system loop
-   //g_char_mode = uart_getchar(UART3);
+   //g_char_mode = '7';                 // Hard code mode = system loop
+   g_char_mode = uart_getchar(UART3);
  
      switch (g_char_mode){
       case '0':
@@ -105,6 +106,27 @@ void main()
         while(1)
         { 
             //ccd_sampling(1); // Longer SI CCD Sampling
+        }
+     break;
+     case '3':
+        uart_sendStr(UART3,"The mode now is 3:Flash Memory\n");
+        Flash_init();
+        printf("Flash Memory init ok\n");
+        printf("writing the u32 : 3125 to memory 1\n");
+        store_u32_to_flashmem1(3125);
+        printf("writing the u32: 1019 to memory 2\n");
+        store_u32_to_flashmem2(1019);
+        
+        printf("Now reading from memory\n");
+        printf("Memory 1:%d\n",get_u32_from_flashmem1());
+        
+        printf("Memory 2:%d\n",get_u32_from_flashmem2());
+        
+        
+       
+        while(1)
+        { 
+            //stops loop to see results
         }
      break;
         

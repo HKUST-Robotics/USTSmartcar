@@ -2118,6 +2118,7 @@
           <state>$PROJ_DIR$\..\..\src\drivers\exti</state>
           <state>$PROJ_DIR$\..\..\src\drivers\delay</state>
           <state>$PROJ_DIR$\..\..\src\drivers\FTM</state>
+          <state>$PROJ_DIR$\..\..\src\drivers\flash</state>
           <state>$PROJ_DIR$\..\..\src\drivers\gpio</state>
           <state>$PROJ_DIR$\..\..\src\drivers\i2c</state>
           <state>$PROJ_DIR$\..\..\src\drivers\linearccd</state>
@@ -2880,6 +2881,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\src\drivers\mcg\Fire_kinetis_MCG_CFG.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\src\drivers\Flash\flash.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\src\drivers\Flash\flash.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\src\drivers\FTM\FTM.c</name>
