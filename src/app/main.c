@@ -25,6 +25,9 @@ volatile int g_u32encoder_rt=0;
 volatile u32 g_u32encoder_lflast=0;
 volatile u32 g_u32encoder_rtlast=0;
 
+u32 balance_gyro_offset=0;
+u32 turn_gyro_offset=0;
+
 volatile int motor_deadzone_left,motor_deadzone_right;
 
 volatile u32 balance_centerpoint_set=0;
@@ -40,9 +43,9 @@ void motor_init(void);
 
 void main()
 {   
-
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our non-flashed bluetooth
+  gpio_init(PORTE,6,GPI,0); // SW2 goes into gyro calibration mode
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
@@ -57,6 +60,35 @@ void main()
    printf("7:SystemLoop Test\n");
    
    delayms(300);
+   if(gpio_get(PORTE,6)==0){
+     
+        adc_init(ADC1,AD5b);
+        adc_init(ADC1,AD7b);
+        
+     printf("We are now in gyro calibration mode, Please keep car stationery and wait till light dies");
+     gpio_init(PORTE,24,GPO,0);
+     gpio_init(PORTE,25,GPO,0);
+     gpio_init(PORTE,26,GPO,0);
+     gpio_init(PORTE,27,GPO,0);
+     
+     delayms(3000);
+     
+     turn_gyro_offset=ad_ave(ADC1,AD5b,ADC_12bit,1000);
+     balance_gyro_offset=ad_ave(ADC1,AD7b,ADC_12bit,1000);
+     
+     store_u32_to_flashmem1(turn_gyro_offset);
+     store_u32_to_flashmem2(balance_gyro_offset);
+     
+     
+     
+     gpio_turn(PORTE,24);
+     gpio_turn(PORTE,25);
+     gpio_turn(PORTE,26);
+     gpio_turn(PORTE,27);
+     
+     while(1){}
+     
+   }
    //g_char_mode = '7';                 // Hard code mode = system loop
    g_char_mode = uart_getchar(UART3);
  
@@ -188,6 +220,9 @@ void main()
         adc_init(ADC1,AD7b);
         adc_init(ADC0,AD14);
         adc_init(ADC1,AD5b);
+        
+        turn_gyro_offset=get_u32_from_flashmem1();
+        balance_gyro_offset=get_u32_from_flashmem2();
         
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         

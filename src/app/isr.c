@@ -32,6 +32,10 @@ int balance_kp = 0;
 int balance_kd = 0;
 #define balance_kd_out_of 10000
 int balance_offset = 0;
+extern u32 balance_gyro_offset;
+extern u32 turn_gyro_offset;
+
+
 /*********** initialize speed PID ************/
 int speed_kp = 0;
 #define speed_kp_out_of 10000
@@ -190,7 +194,7 @@ void pit3_system_loop(void){
     case 1:
                                                 
       control_tilt=(ad_ave(ADC1,AD6b,ADC_12bit,20)-balance_offset); // offset
-      control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-1940;
+      control_omg=ad_ave(ADC1,AD7b,ADC_12bit,20)-balance_gyro_offset;
       motor_command_balance= ((control_tilt)*balance_kp/balance_kp_out_of) - ((control_omg)*balance_kd/balance_kd_out_of);
       
     system_mode=2;
@@ -337,7 +341,7 @@ void pit3_system_loop(void){
           /*** turn***/
           turn_kp = turn_kp_array[0]; 
           turn_kd = turn_kd_array[0]; 
-          turn_offset = turn_offset_array[0];
+          turn_offset = turn_gyro_offset;
           
           /*** vehicle respect to track position ***/
           left_start_length = left_start_length_array[0];
