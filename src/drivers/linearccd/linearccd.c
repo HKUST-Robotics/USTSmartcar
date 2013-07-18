@@ -15,6 +15,7 @@ Edited by John Ching
 
 extern int run_speed_mode;
 extern int dynamic_speed_mode;
+extern int max_available_mode;
 
 /*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
 int left_start_length  = 25;
@@ -205,7 +206,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     right_start_length = current_mid_error_pos + current_1st_right_edge;
     encoder_turn_error = 0;
     if(dynamic_speed_mode == 1){
-      run_speed_mode = 2;
+      run_speed_mode = max_available_mode;
     }
   }
   
@@ -221,7 +222,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     }
     
     if(dynamic_speed_mode == 1){
-      run_speed_mode = 1;
+      run_speed_mode = (max_available_mode - 1);
     }
     
   }
@@ -238,7 +239,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     }
     
     if(dynamic_speed_mode == 1){
-      run_speed_mode = 1;
+      run_speed_mode = (max_available_mode - 1);
     }
   }
   
@@ -255,7 +256,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   if(all_white_smaple_flag == 1){
     current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100); // John added
     if(dynamic_speed_mode == 1){
-      run_speed_mode = 2;
+      run_speed_mode = max_available_mode;
     }
   }
   
@@ -264,7 +265,7 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
   if(all_black_smaple_flag == 1){
     current_mid_error_pos = previous_mid_error_pos;
     if(dynamic_speed_mode == 1){
-      run_speed_mode = 1;
+      run_speed_mode = (max_available_mode - 1);
     }
   }
   

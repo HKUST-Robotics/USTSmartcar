@@ -18,7 +18,7 @@ int speed_ki_array[5]             = {53000         , 53000       , 53000        
 int turn_kp_array[5]              = {75000         , 75000       , 50000        , 31000   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , mode 3 : 98800 mode 1 : 120500
 int turn_kd_array[5]              = {0             , 32500       , 18500        , 11250   , 0}; 
 int turn_offset_array[5]          = {1250          , 1250        , 1250         , 1250    , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
-float atan_multiply_value_array[5]= {0.0069808027  ,0.00698080279, 0.00858080279, 0.015215  , 0};
+float atan_multiply_value_array[5]= {0.0069808027  ,0.00698080279, 0.00858080279, 0.015215, 0};
 int left_start_length_array[5]    = {25            , 31          , 25           , 25      , 0};    
 int right_start_length_array[5]   = {25            , 31          , 25           , 25      , 0};    
 int ccd_mid_pos_array[5]          = {128           , 128         , 128          , 128     , 128};
@@ -285,6 +285,13 @@ void pit3_system_loop(void){
     system_loop_tick++;
         
     if ( system_loop_tick < mode_selection_start_time_end){ /*** Manual speed selection time , < 2000ms ***/
+          
+      
+        if (gpio_get(PORTE, 6) == 0){ // when 1 press
+           dynamic_speed_mode = 1;
+           //gpio_set(PORTE,25,0); 
+        }
+                
         if (gpio_get(PORTE, 8) == 0){ // when 3 press
           if(start_up_press_flag == 0){
             run_speed_mode = run_speed_mode + 1;
@@ -396,7 +403,7 @@ void pit3_system_loop(void){
             atan_multiply_value = atan_multiply_value_array[run_speed_mode];
      }
    }
-   
+   if(dynamic_speed_mode == 0){
         /*** mode notification by LED***/
         if(run_speed_mode == 0){
           gpio_set(PORTE,24,1);
@@ -414,11 +421,36 @@ void pit3_system_loop(void){
           gpio_set(PORTE,24,0);
           gpio_set(PORTE,25,1);
           gpio_set(PORTE,26,0);          
-        } else if (run_speed_mode == 10){
+        } 
+   } else if(dynamic_speed_mode == 1){
+     if(system_already_startup == 0){
+      gpio_set(PORTE,24,1);
+      gpio_set(PORTE,25,1);
+      gpio_set(PORTE,26,1);
+      gpio_set(PORTE,27,1);
+     } else if (system_already_startup == 1){
+        /*** mode notification by LED***/
+        if(run_speed_mode == 0){
           gpio_set(PORTE,24,1);
           gpio_set(PORTE,25,1);
+          gpio_set(PORTE,26,0);
+        } else if (run_speed_mode == 1){
+          gpio_set(PORTE,24,0);
+          gpio_set(PORTE,25,1);
           gpio_set(PORTE,26,1);
-        }
+        } else if (run_speed_mode == 2){
+          gpio_set(PORTE,24,1);
+          gpio_set(PORTE,25,0);
+          gpio_set(PORTE,26,1);          
+        } else if (run_speed_mode == 3){
+          gpio_set(PORTE,24,0);
+          gpio_set(PORTE,25,1);
+          gpio_set(PORTE,26,0);          
+        }   
+     }
+     
+     
+   }
     //printf("run_speed_mode:%d", run_speed_mode);
    
     /*** 20000ms trigger end track detection by light sensor ***/
