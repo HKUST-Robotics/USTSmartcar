@@ -43,9 +43,11 @@ void motor_init(void);
 
 void main()
 {   
+
   uart_init(UART3, 115200); // For our flashed bluetooth
   //uart_init(UART3, 9600); // For our non-flashed bluetooth
   gpio_init(PORTE,6,GPI,0); // SW2 goes into gyro calibration mode
+  
   
   printf("\nWelcome to the SmartCar 2013 Sensor team developement system\n");
   while(1){
@@ -60,10 +62,11 @@ void main()
    printf("7:SystemLoop Test\n");
    
    delayms(300);
+   
    if(gpio_get(PORTE,6)==0){
      
-        adc_init(ADC1,AD5b);
-        adc_init(ADC1,AD7b);
+     adc_init(ADC1,AD5b);
+     adc_init(ADC1,AD7b);
         
      printf("We are now in gyro calibration mode, Please keep car stationery and wait till light dies");
      gpio_init(PORTE,24,GPO,0);
@@ -79,8 +82,6 @@ void main()
      store_u32_to_flashmem1(turn_gyro_offset);
      store_u32_to_flashmem2(balance_gyro_offset);
      
-     
-     
      gpio_turn(PORTE,24);
      gpio_turn(PORTE,25);
      gpio_turn(PORTE,26);
@@ -89,8 +90,9 @@ void main()
      while(1){}
      
    }
-   //g_char_mode = '7';                 // Hard code mode = system loop
-   g_char_mode = uart_getchar(UART3);
+   
+   g_char_mode = '7';                 // Hard code mode = system loop
+   //g_char_mode = uart_getchar(UART3);
  
      switch (g_char_mode){
       case '0':
@@ -140,6 +142,7 @@ void main()
             //ccd_sampling(1); // Longer SI CCD Sampling
         }
      break;
+     
      case '3':
         uart_sendStr(UART3,"The mode now is 3:Flash Memory\n");
         Flash_init();
@@ -221,9 +224,6 @@ void main()
         adc_init(ADC0,AD14);
         adc_init(ADC1,AD5b);
         
-        turn_gyro_offset=get_u32_from_flashmem1();
-        balance_gyro_offset=get_u32_from_flashmem2();
-        
         balance_centerpoint_set=ad_ave(ADC0,AD14,ADC_12bit,10);
         
         motor_init();
@@ -267,7 +267,7 @@ void ccd_all_pin_init(){
    gpio_init(PORTB, 9, GPO, 1);    //PTB9 , Clock / CLK
    gpio_init(PORTB, 10, GPI, 1);   //PTB10, AO(D1)
    
-   gpio_init(PORTE,6,GPI,0); // SW2
+   //gpio_init(PORTE,6,GPI,0); // SW2
    gpio_init(PORTE,8,GPI,0); // SW4
    gpio_init(PORTE,9,GPI,0); // SW5
    

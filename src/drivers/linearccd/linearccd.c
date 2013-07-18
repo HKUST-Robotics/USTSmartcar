@@ -13,12 +13,16 @@ Edited by John Ching
 #include  "linearccd.h"
 #include  "math.h"
 
+extern int run_speed_mode;
+extern int dynamic_speed_mode;
+
 /*** 外內灣 Variable， 數值愈細，愈貼近內灣行 ***/ 
-int left_start_length  = 45;
-int right_start_length = 45;
+int left_start_length  = 25;
+int right_start_length = 25;
 
 /*** 中心位 Variable，愈大愈接近Left edge，愈細愈接近Right edge ***/
-int ccd_mid_pos = 130;         
+int ccd_mid_pos = 128;         
+float atan_multiply_value;
 
 /*********** CCD related counter ************/
 u16 g_u16_ccd_sample_clock=0;
@@ -91,12 +95,6 @@ void ccd_detect_track(char array[]){
    // if CCD receives white (2nd gen)
         array[g_u16_ccd_sample_clock] = 'o';
    }
-  /*
-  u16 i;
-  for(i = 0 ; i < 255; i++){
-    array[i] = 'o';
-  }
-  */
 }
 
 void ccd_SI_failing_edge_condition(){
@@ -206,6 +204,9 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     left_start_length = current_mid_error_pos - current_1st_left_edge;
     right_start_length = current_mid_error_pos + current_1st_right_edge;
     encoder_turn_error = 0;
+    if(dynamic_speed_mode == 1){
+      run_speed_mode = 2;
+    }
   }
   
   /* -|||--------------------------------|||-  
@@ -217,6 +218,10 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     
     if( current_1st_left_edge == 249){
       current_mid_error_pos = 124;
+    }
+    
+    if(dynamic_speed_mode == 1){
+      run_speed_mode = 1;
     }
     
   }
@@ -231,25 +236,40 @@ void ccd_recongize_left_right_edge_and_return_dir_error(char array[]){
     if(current_1st_right_edge == 0){
       current_mid_error_pos = 124;
     }
+    
+    if(dynamic_speed_mode == 1){
+      run_speed_mode = 1;
+    }
   }
   
-   /* ---------------------------------------- (no middle noise) */ 
+  /*
   else if(detect_left_flag == 0 && detect_right_flag == 0){
     //current_mid_error_pos = previous_mid_error_pos;
     current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100); // John added
+    run_speed_mode = 2;
     //printf("\nall white error encoder:%d", current_mid_error_pos);
-    //encoder_turn_error
   }
+  */
+  
+   /* ---------------------------------------- (no middle noise) Cross road*/ 
+  if(all_white_smaple_flag == 1){
+    current_mid_error_pos = ccd_mid_pos+(encoder_turn_error*35/100); // John added
+    if(dynamic_speed_mode == 1){
+      run_speed_mode = 2;
+    }
+  }
+  
   
    /* |||||||||||||||||||||||||||||||||||||||| (all black) */
   if(all_black_smaple_flag == 1){
     current_mid_error_pos = previous_mid_error_pos;
-    //printf("\n*** CURRENT mid_error_pos has been replaced by PREVIOUS mid_error_pos ***");
+    if(dynamic_speed_mode == 1){
+      run_speed_mode = 1;
+    }
   }
   
   current_dir_error = (current_mid_error_pos - ccd_mid_pos);
-  current_dir_arc_value_error = atan(current_dir_error*(0.013))*1000;
- 
+  current_dir_arc_value_error = atan(current_dir_error*(atan_multiply_value))*1000;
   
   //printf("\nprevious_mid_error_pos is : %d", previous_mid_error_pos);
   
