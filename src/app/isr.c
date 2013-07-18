@@ -15,8 +15,8 @@ int balance_kd_array[5]           = {99160         , 107560      , 119160       
 int balance_offset_array[5]       = {1205          , 1205        , 1205         , 1205    , 0};
 int speed_kp_array[5]             = {297000        , 297000      , 297000       , 297000  , 0};
 int speed_ki_array[5]             = {53000         , 53000       , 53000        , 53000   , 0};  // mode 0 : 49500, mode 3 : 60000
-int turn_kp_array[5]              = {120500        , 92500       , 40000        , 57500   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , mode 3 : 98800 mode 1 : 120500
-int turn_kd_array[5]              = {100000        , 32500       , 450          , 50      , 0}; 
+int turn_kp_array[5]              = {75000        , 92500       , 40000        , 57500   , 0};  // 愈細 = 遲入灣 ; 愈大 = 早入灣 , mode 3 : 98800 mode 1 : 120500
+int turn_kd_array[5]              = {0        , 32500       , 450          , 50      , 0}; 
 int turn_offset_array[5]          = {1250          , 1250        , 1250         , 1300    , 0};  // 愈細 = 中心線靠右 ; 愈大 = 中心線靠左  
 float atan_multiply_value_array[5]= {0.0069808027  ,0.00698080279, 0.00718080279, 0.013    , 0};
 int left_start_length_array[5]    = {25            , 31          , 25           , 25      , 0};    
